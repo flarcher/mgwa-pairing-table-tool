@@ -45,6 +45,8 @@ public class AppWindow extends Application {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(label);
 		fileChooser.showOpenDialog(stage);
+		// TODO
+		return null;
 	}
 
     @Override
