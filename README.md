@@ -2,14 +2,13 @@
 
 Helps at pairing armies on tables using rules of the **European Tabletop Championship**.
 
-## Dependencies
-
-It needs a *Java Runtime Environment* version 11+.
+Is written for the **MGWA association**.
 
 ## Usage
 
-* Go to the `target` folder
-* Call either `start.sh` from Linux or MacOS, or `start.bat` from Windows.
+1. Make sure you have a *Java Runtime Environment* version 11+ installed
+1. Unzip the released archive
+1. Call either `start.sh` or `start.bat` from Linux/MacOS or Windows respectively
 
 ## Contributing
 
@@ -17,13 +16,19 @@ In order to build the project, you will need:
 * A [JDK](https://jdk.java.net/) version 11 or more
 * [Apache Maven](https://maven.apache.org/) version 3.6.0 or more
 
-Here is the command for the build:
+Here is the command for a minimal build:
 
     mvn clean install
 
-Then, in order to run the application:
+Then, in order to run the application (without packaging the project):
 
     cd gui && mvn javafx:run
+
+For a run from the project's package:
+
+1. Run `mvn package` in order to generate the package
+2. Go to the `target` folder (the package is currently this folder)
+3. Call either `start.sh` from Linux/Mac-OS, or `start.bat` from Windows.
 
 ## License
 
