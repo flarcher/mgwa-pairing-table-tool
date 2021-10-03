@@ -82,8 +82,8 @@
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>Moves-at-root-directory</id>
-                        <phase>install</phase>
+                        <id>moves-in-root-directory</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>run</goal>
                         </goals>
