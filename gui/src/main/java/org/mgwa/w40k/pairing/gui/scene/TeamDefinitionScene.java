@@ -10,9 +10,12 @@ import javafx.scene.control.*;
 import javafx.scene.text.Text;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Optional;
 
 public class TeamDefinitionScene extends AbstractMainScene {
+
+	private static final String NO_FILE_TEXT = "(no file selected)";
 
 	public TeamDefinitionScene(Runnable next, Stage stage) {
 		super(3);
@@ -28,6 +31,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 	private final Text nameLabel = NodeFactory.createText("Team's name");
 	private final Text tableTokenLabel = NodeFactory.createText("Table token");
 	private final FileChooser fileChooser = new FileChooser();
+	private final Text fileName = NodeFactory.createText(NO_FILE_TEXT);
 
 	@Override
 	protected void buildScene(AppState state) {
@@ -58,12 +62,16 @@ public class TeamDefinitionScene extends AbstractMainScene {
 			(ObservableValue<? extends Toggle> ov,
 			 Toggle old_toggle, Toggle new_toggle) -> { 	});*/
 
+		newRow();
 		fileChooser.setTitle("Select your matrix file");
 		Button fileSelectButton = NodeFactory.createButton("Select your matrix file", e -> {
 				File file = fileChooser.showOpenDialog(stage);
-				state.setMatrixFilePath(Optional.ofNullable(file).map(File::toPath).orElse(null));
+				Optional<Path> path = Optional.ofNullable(file).map(File::toPath);
+				state.setMatrixFilePath(path.orElse(null));
+				fileName.setText(path.map(Path::toString).orElse(NO_FILE_TEXT));
 			});
-		addNode(fileSelectButton, getRowIndex(), 1, 1, 1, HPos.CENTER);
+		addNode(fileSelectButton, getRowIndex(), 0, 1, 1, HPos.LEFT);
+		addNode(fileName, getRowIndex(), 1, 1, 2, HPos.LEFT);
 		newRow();
 
 		Button nextButton = NodeFactory.createButton("Next", e -> {
