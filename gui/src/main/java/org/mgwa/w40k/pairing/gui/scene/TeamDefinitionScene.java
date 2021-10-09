@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -31,6 +32,10 @@ public class TeamDefinitionScene extends AbstractMainScene {
 	private final FileChooser fileChooser = new FileChooser();
 	private final Text fileName = NodeFactory.createText(NO_FILE_TEXT);
 
+	private static String filePath(Optional<Path> path) {
+		return path.map(Path::toString).orElse(NO_FILE_TEXT);
+	}
+
 	@Override
 	protected void buildScene(AppState state, Stage stage) {
 
@@ -43,6 +48,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		youHaveTheToken.setSelected(state.youHaveTheTableToken());
 		youHaveTheToken.setAlignment(Pos.CENTER);
 		//youHaveTheToken.setMinWidth(100.0);
+		yourTeamName.setText(state.getRowTeamName());
 		addRow(HPos.CENTER,
 			NodeFactory.createLabel("Your team:", yourTeamName),
 			yourTeamName, youHaveTheToken);
@@ -52,6 +58,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		theyHaveTheToken.setSelected(! state.youHaveTheTableToken());
 		theyHaveTheToken.setAlignment(Pos.CENTER);
 		//theyHaveTheToken.setMinWidth(100.0);
+		otherTeamName.setText(state.getColTeamName());
 		addRow(HPos.CENTER,
 			NodeFactory.createLabel("Other team:", otherTeamName),
 			otherTeamName, theyHaveTheToken);
@@ -63,12 +70,13 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		newRow();
 		fileChooser.setTitle("Select your matrix file");
 		Button fileSelectButton = NodeFactory.createButton("Select your matrix file", e -> {
-				File file = fileChooser.showOpenDialog(stage);
+				@Nullable File file = fileChooser.showOpenDialog(stage);
 				Optional<Path> path = Optional.ofNullable(file).map(File::toPath);
 				state.setMatrixFilePath(path.orElse(null));
-				fileName.setText(path.map(Path::toString).orElse(NO_FILE_TEXT));
+				fileName.setText(filePath(path));
 			});
 		addNode(fileSelectButton, getRowIndex(), 0, 1, 1, HPos.LEFT);
+		fileName.setText(filePath(state.getMatrixFilePath()));
 		addNode(fileName, getRowIndex(), 1, 1, 2, HPos.LEFT);
 		newRow();
 

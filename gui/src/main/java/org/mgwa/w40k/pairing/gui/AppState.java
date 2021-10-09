@@ -2,6 +2,7 @@ package org.mgwa.w40k.pairing.gui;
 
 import javax.annotation.Nullable;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -9,8 +10,8 @@ import java.util.Optional;
  */
 public class AppState {
 
-	private String rowTeamName;
-	private String colTeamName;
+	private String rowTeamName = "";
+	private String colTeamName = "";
 	private boolean youHaveTheTableToken = true;
 	private Optional<Path> matrixFilePath = Optional.empty();
 
@@ -21,7 +22,7 @@ public class AppState {
 	}
 
 	public void setRowTeamName(String rowTeamName) {
-		this.rowTeamName = rowTeamName;
+		this.rowTeamName = Objects.requireNonNull(rowTeamName);
 	}
 
 	public String getColTeamName() {
@@ -29,7 +30,7 @@ public class AppState {
 	}
 
 	public void setColTeamName(String colTeamName) {
-		this.colTeamName = colTeamName;
+		this.colTeamName = Objects.requireNonNull(colTeamName);
 	}
 
 	public boolean youHaveTheTableToken() {
