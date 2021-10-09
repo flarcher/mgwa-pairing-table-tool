@@ -17,13 +17,11 @@ public class TeamDefinitionScene extends AbstractMainScene {
 
 	private static final String NO_FILE_TEXT = "(no file selected)";
 
-	public TeamDefinitionScene(Runnable next, Stage stage) {
+	public TeamDefinitionScene(Runnable next) {
 		super(3);
 		this.next = next;
-		this.stage = stage;
 	}
 
-	private final Stage stage;
 	private final Runnable next;
 	private final TextField yourTeamName = new TextField();
 	private final TextField otherTeamName = new TextField();
@@ -34,7 +32,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 	private final Text fileName = NodeFactory.createText(NO_FILE_TEXT);
 
 	@Override
-	protected void buildScene(AppState state) {
+	protected void buildScene(AppState state, Stage stage) {
 
 		addNode(nameLabel, getRowIndex(), 1, 1, 1, HPos.CENTER);
 		addNode(tableTokenLabel, getRowIndex(), 2, 1, 1, HPos.CENTER);

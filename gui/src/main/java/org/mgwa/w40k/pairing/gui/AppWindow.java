@@ -23,7 +23,7 @@ public class AppWindow extends Application {
 
 	private void goToScene(SceneDefinition newScene) {
 		Objects.requireNonNull(stage);
-		stage.setScene(newScene.getScene(state));
+		stage.setScene(newScene.getScene(state, stage));
 		stage.show();
 	}
 
@@ -41,10 +41,7 @@ public class AppWindow extends Application {
     @Override
     public void start(Stage stage) {
 		this.stage = stage;
-		SceneDefinition teamNamesScene = new TeamDefinitionScene(
-				() -> goToScene(getInfoScene()),
-				stage);
-		goToScene(teamNamesScene);
+		goToScene(new TeamDefinitionScene(() -> goToScene(getInfoScene())));
     }
 
 }
