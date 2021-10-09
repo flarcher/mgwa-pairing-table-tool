@@ -1,15 +1,18 @@
 package org.mgwa.w40k.pairing.gui;
 
+import javax.annotation.Nullable;
+import java.nio.file.Path;
+import java.util.Optional;
+
 /**
  * A mutable class that describes the application state.
  */
-public enum AppState {
-
-	INSTANCE;
+public class AppState {
 
 	private String rowTeamName;
 	private String colTeamName;
 	private boolean youHaveTheTableToken = true;
+	private Optional<Path> matrixFilePath = Optional.empty();
 
 	//-- getters and setters
 
@@ -35,5 +38,13 @@ public enum AppState {
 
 	public void setYouHaveTheTableToken(boolean youHaveTheTableToken) {
 		this.youHaveTheTableToken = youHaveTheTableToken;
+	}
+
+	public void setMatrixFilePath(@Nullable Path path) {
+		this.matrixFilePath = Optional.ofNullable(path);
+	}
+
+	public Optional<Path> getMatrixFilePath() {
+		return this.matrixFilePath;
 	}
 }
