@@ -7,11 +7,24 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import java.util.Objects;
+import java.util.Optional;
 
+/**
+ * <h1>JavaFX application main class.</h1>
+ *
+ * <p>This class describes the main logic around the screen and the application.</p>
+ *
+ * <p>Here is the method calls sequence for the start of the application:</p>
+ * <ol>
+ *     <li>At first the {@link #main(String[])} static method is called from the Java main method {@link Main#main(String[])}</li>
+ *     <li>Then through the {@link #launch(String...)} method of the JavaFX abstract class...</li>
+ *     <li>Our method {@link #start(Stage)} gets finally called</li>
+ * </ol>
+ */
 public class AppWindow extends Application {
 
 	/**
-	 * Needed in order to avoid a RuntimeException
+	 * See the {@link Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
 	 */
 	public static void main(String[] args) {
 		launch();
@@ -21,6 +34,10 @@ public class AppWindow extends Application {
 
 	private Stage stage;
 
+	/**
+	 * Switch the scene displayed.
+	 * @param newScene The new scene.
+	 */
 	private void goToScene(SceneDefinition newScene) {
 		Objects.requireNonNull(stage);
 		stage.setScene(newScene.getScene(state, stage));
