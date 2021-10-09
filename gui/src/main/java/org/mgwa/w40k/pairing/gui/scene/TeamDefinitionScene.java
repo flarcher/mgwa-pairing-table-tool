@@ -1,5 +1,7 @@
 package org.mgwa.w40k.pairing.gui.scene;
 
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.mgwa.w40k.pairing.gui.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
 import javafx.geometry.HPos;
@@ -7,19 +9,25 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 
+import java.io.File;
+import java.util.Optional;
+
 public class TeamDefinitionScene extends AbstractMainScene {
 
-	public TeamDefinitionScene(Runnable next) {
+	public TeamDefinitionScene(Runnable next, Stage stage) {
 		super(3);
 		this.next = next;
+		this.stage = stage;
 	}
 
+	private final Stage stage;
 	private final Runnable next;
 	private final TextField yourTeamName = new TextField();
 	private final TextField otherTeamName = new TextField();
 	private final ToggleGroup tokenOwnership = new ToggleGroup();
 	private final Text nameLabel = NodeFactory.createText("Team's name");
 	private final Text tableTokenLabel = NodeFactory.createText("Table token");
+	private final FileChooser fileChooser = new FileChooser();
 
 	@Override
 	protected void buildScene(AppState state) {
@@ -50,47 +58,21 @@ public class TeamDefinitionScene extends AbstractMainScene {
 			(ObservableValue<? extends Toggle> ov,
 			 Toggle old_toggle, Toggle new_toggle) -> { 	});*/
 
-		Button button = NodeFactory.createButton("Define armies", e -> {
+		fileChooser.setTitle("Select your matrix file");
+		Button fileSelectButton = NodeFactory.createButton("Select your matrix file", e -> {
+				File file = fileChooser.showOpenDialog(stage);
+				state.setMatrixFilePath(Optional.ofNullable(file).map(File::toPath).orElse(null));
+			});
+		addNode(fileSelectButton, getRowIndex(), 1, 1, 1, HPos.CENTER);
+		newRow();
+
+		Button nextButton = NodeFactory.createButton("Next", e -> {
 				state.setRowTeamName(yourTeamName.getText());
 				state.setColTeamName(otherTeamName.getText());
 				state.setYouHaveTheTableToken(tokenOwnership.getSelectedToggle() == youHaveTheToken);
 				next.run();
 			}  );
-		addNode(button, getRowIndex(), 1, 1, 2, HPos.RIGHT);
+		addNode(nextButton, getRowIndex(), 1, 1, 2, HPos.RIGHT);
 	}
-
-	/*
-	//Creating a GridPane container
-	GridPane grid = new GridPane();
-grid.setPadding(new Insets(10, 10, 10, 10));
-grid.setVgap(5);
-grid.setHgap(5);
-	//Defining the Name text field
-	final TextField name = new TextField();
-name.setPromptText("Enter your first name.");
-name.setPrefColumnCount(10);
-name.getText();
-GridPane.setConstraints(name, 0, 0);
-grid.getChildren().add(name);
-	//Defining the Last Name text field
-	final TextField lastName = new TextField();
-lastName.setPromptText("Enter your last name.");
-GridPane.setConstraints(lastName, 0, 1);
-grid.getChildren().add(lastName);
-	//Defining the Comment text field
-	final TextField comment = new TextField();
-comment.setPrefColumnCount(15);
-comment.setPromptText("Enter your comment.");
-GridPane.setConstraints(comment, 0, 2);
-grid.getChildren().add(comment);
-	//Defining the Submit button
-	Button submit = new Button("Submit");
-GridPane.setConstraints(submit, 1, 0);
-grid.getChildren().add(submit);
-	//Defining the Clear button
-	Button clear = new Button("Clear");
-GridPane.setConstraints(clear, 1, 1);
-grid.getChildren().add(clear);
-	 */
 
 }
