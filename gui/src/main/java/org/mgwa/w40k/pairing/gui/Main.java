@@ -1,5 +1,13 @@
 package org.mgwa.w40k.pairing.gui;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
 /**
  * Dedicated class as the main program entrypoint.
  * 
@@ -7,10 +15,10 @@ package org.mgwa.w40k.pairing.gui;
  */
 public final class Main {
 
-    private Main() {}
+	private Main() {}
 
     public static void main(String[] args) {
-        AppWindow.main(new String[0]);
+        AppWindow.main();
     }
 
 }

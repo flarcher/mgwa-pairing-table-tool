@@ -1,5 +1,8 @@
 package org.mgwa.w40k.pairing.gui;
 
+import org.mgwa.w40k.pairing.matrix.Matrix;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -14,6 +17,7 @@ public class AppState {
 	private String colTeamName = "";
 	private boolean youHaveTheTableToken = true;
 	private Optional<Path> matrixFilePath = Optional.empty();
+	private Optional<Matrix> scoreMatrix = Optional.empty();
 
 	//-- getters and setters
 
@@ -47,5 +51,13 @@ public class AppState {
 
 	public Optional<Path> getMatrixFilePath() {
 		return this.matrixFilePath;
+	}
+
+	public void setMatrix(@Nonnull  Matrix matrix) {
+		this.scoreMatrix = Optional.of(matrix);
+	}
+
+	public Optional<Matrix> getMatrix() {
+		return this.scoreMatrix;
 	}
 }
