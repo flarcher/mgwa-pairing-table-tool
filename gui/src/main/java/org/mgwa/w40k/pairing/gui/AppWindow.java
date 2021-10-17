@@ -1,13 +1,16 @@
 package org.mgwa.w40k.pairing.gui;
 
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.mgwa.w40k.pairing.LoggerSupplier;
 import org.mgwa.w40k.pairing.gui.scene.InfoScene;
 import org.mgwa.w40k.pairing.gui.scene.SceneDefinition;
 import org.mgwa.w40k.pairing.gui.scene.TeamDefinitionScene;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.stage.Stage;
+
+import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <h1>JavaFX application main class.</h1>
@@ -31,6 +34,7 @@ public class AppWindow extends Application {
 	}
 
 	private final AppState state = new AppState();
+	private final Logger logger = LoggerSupplier.INSTANCE.getLogger();
 
 	private Stage stage;
 
