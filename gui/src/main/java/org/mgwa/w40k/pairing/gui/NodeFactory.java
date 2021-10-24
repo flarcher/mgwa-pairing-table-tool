@@ -8,10 +8,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.converter.IntegerStringConverter;
+import org.mgwa.w40k.pairing.matrix.Score;
 
 import java.io.InputStream;
 import java.util.stream.IntStream;
@@ -98,4 +102,29 @@ public final class NodeFactory {
 				.forEach(c -> grid.getColumnConstraints().add(c));
 		return grid;
 	}
+
+	private static final IntegerStringConverter SCORE_STRING_CONVERTER = new IntegerStringConverter();
+
+	public static TextField createScoreField(int initialValue) {
+		TextField field = new TextField();
+		field.setTextFormatter(new TextFormatter<>(
+				SCORE_STRING_CONVERTER,
+				10,
+				change -> {
+					String newValue = change.getControlNewText();
+					if (!newValue.isEmpty()) {
+						Integer score = SCORE_STRING_CONVERTER.fromString(newValue);
+						if (score != null) {
+							if (score >= Score.MIN_VALUE && score <= Score.MAX_VALUE) {
+								return change;
+							}
+						}
+					}
+					return null;
+				}
+		));
+		field.setText(SCORE_STRING_CONVERTER.toString(initialValue));
+		return field;
+	}
+
 }
