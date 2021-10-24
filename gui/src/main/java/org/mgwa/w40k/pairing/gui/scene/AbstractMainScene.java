@@ -1,5 +1,6 @@
 package org.mgwa.w40k.pairing.gui.scene;
 
+import javafx.stage.Stage;
 import org.mgwa.w40k.pairing.gui.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
 import javafx.geometry.HPos;
@@ -43,15 +44,15 @@ abstract class AbstractMainScene implements SceneDefinition {
 	protected final int getRowIndex() { return rowIndex; }
 	protected final int newRow() { return  ++rowIndex; }
 
-	protected abstract void buildScene(AppState state);
+	protected abstract void buildScene(AppState state, Stage stage);
 
 	@Override
-	public final Scene getScene(AppState state) {
+	public final Scene getScene(AppState state, Stage stage) {
 		Text headerLabel = NodeFactory.createHeaderLabel();
 		addNode(headerLabel, getRowIndex(), 0, 1, columnCount, HPos.LEFT);
 		newRow();
 
-		buildScene(state);
+		buildScene(state, stage);
 		newRow();
 
 		Text footerLabel = NodeFactory.createFooterLabel();

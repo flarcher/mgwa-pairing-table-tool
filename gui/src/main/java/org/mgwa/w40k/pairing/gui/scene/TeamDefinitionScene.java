@@ -1,5 +1,7 @@
 package org.mgwa.w40k.pairing.gui.scene;
 
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.mgwa.w40k.pairing.gui.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
 import javafx.geometry.HPos;
@@ -7,7 +9,14 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
 
+import javax.annotation.Nullable;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
+
 public class TeamDefinitionScene extends AbstractMainScene {
+
+	private static final String NO_FILE_TEXT = "(no file selected)";
 
 	public TeamDefinitionScene(Runnable next) {
 		super(3);
@@ -20,9 +29,15 @@ public class TeamDefinitionScene extends AbstractMainScene {
 	private final ToggleGroup tokenOwnership = new ToggleGroup();
 	private final Text nameLabel = NodeFactory.createText("Team's name");
 	private final Text tableTokenLabel = NodeFactory.createText("Table token");
+	private final FileChooser fileChooser = new FileChooser();
+	private final Text fileName = NodeFactory.createText(NO_FILE_TEXT);
+
+	private static String filePath(Optional<Path> path) {
+		return path.map(Path::toString).orElse(NO_FILE_TEXT);
+	}
 
 	@Override
-	protected void buildScene(AppState state) {
+	protected void buildScene(AppState state, Stage stage) {
 
 		addNode(nameLabel, getRowIndex(), 1, 1, 1, HPos.CENTER);
 		addNode(tableTokenLabel, getRowIndex(), 2, 1, 1, HPos.CENTER);
@@ -33,6 +48,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		youHaveTheToken.setSelected(state.youHaveTheTableToken());
 		youHaveTheToken.setAlignment(Pos.CENTER);
 		//youHaveTheToken.setMinWidth(100.0);
+		yourTeamName.setText(state.getRowTeamName());
 		addRow(HPos.CENTER,
 			NodeFactory.createLabel("Your team:", yourTeamName),
 			yourTeamName, youHaveTheToken);
@@ -42,6 +58,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		theyHaveTheToken.setSelected(! state.youHaveTheTableToken());
 		theyHaveTheToken.setAlignment(Pos.CENTER);
 		//theyHaveTheToken.setMinWidth(100.0);
+		otherTeamName.setText(state.getColTeamName());
 		addRow(HPos.CENTER,
 			NodeFactory.createLabel("Other team:", otherTeamName),
 			otherTeamName, theyHaveTheToken);
@@ -50,47 +67,26 @@ public class TeamDefinitionScene extends AbstractMainScene {
 			(ObservableValue<? extends Toggle> ov,
 			 Toggle old_toggle, Toggle new_toggle) -> { 	});*/
 
-		Button button = NodeFactory.createButton("Define armies", e -> {
+		newRow();
+		fileChooser.setTitle("Select your matrix file");
+		Button fileSelectButton = NodeFactory.createButton("Select your matrix file", e -> {
+				@Nullable File file = fileChooser.showOpenDialog(stage);
+				Optional<Path> path = Optional.ofNullable(file).map(File::toPath);
+				state.setMatrixFilePath(path.orElse(null));
+				fileName.setText(filePath(path));
+			});
+		addNode(fileSelectButton, getRowIndex(), 0, 1, 1, HPos.LEFT);
+		fileName.setText(filePath(state.getMatrixFilePath()));
+		addNode(fileName, getRowIndex(), 1, 1, 2, HPos.LEFT);
+		newRow();
+
+		Button nextButton = NodeFactory.createButton("Next", e -> {
 				state.setRowTeamName(yourTeamName.getText());
 				state.setColTeamName(otherTeamName.getText());
 				state.setYouHaveTheTableToken(tokenOwnership.getSelectedToggle() == youHaveTheToken);
 				next.run();
 			}  );
-		addNode(button, getRowIndex(), 1, 1, 2, HPos.RIGHT);
+		addNode(nextButton, getRowIndex(), 1, 1, 2, HPos.RIGHT);
 	}
-
-	/*
-	//Creating a GridPane container
-	GridPane grid = new GridPane();
-grid.setPadding(new Insets(10, 10, 10, 10));
-grid.setVgap(5);
-grid.setHgap(5);
-	//Defining the Name text field
-	final TextField name = new TextField();
-name.setPromptText("Enter your first name.");
-name.setPrefColumnCount(10);
-name.getText();
-GridPane.setConstraints(name, 0, 0);
-grid.getChildren().add(name);
-	//Defining the Last Name text field
-	final TextField lastName = new TextField();
-lastName.setPromptText("Enter your last name.");
-GridPane.setConstraints(lastName, 0, 1);
-grid.getChildren().add(lastName);
-	//Defining the Comment text field
-	final TextField comment = new TextField();
-comment.setPrefColumnCount(15);
-comment.setPromptText("Enter your comment.");
-GridPane.setConstraints(comment, 0, 2);
-grid.getChildren().add(comment);
-	//Defining the Submit button
-	Button submit = new Button("Submit");
-GridPane.setConstraints(submit, 1, 0);
-grid.getChildren().add(submit);
-	//Defining the Clear button
-	Button clear = new Button("Clear");
-GridPane.setConstraints(clear, 1, 1);
-grid.getChildren().add(clear);
-	 */
 
 }
