@@ -1,5 +1,6 @@
 package org.mgwa.w40k.pairing.gui.scene;
 
+import javafx.stage.Stage;
 import org.mgwa.w40k.pairing.gui.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
 import javafx.scene.Scene;
@@ -16,7 +17,7 @@ public class InfoScene implements SceneDefinition {
 	private final String label;
 
 	@Override
-	public Scene getScene(AppState state) {
+	public Scene getScene(AppState state, Stage stage) {
 		GridPane pane = NodeFactory.createGrid(1);
 		pane.addRow(0, NodeFactory.createText(label));
 		pane.addRow(1, NodeFactory.createButton("OK", e -> next.run()));
