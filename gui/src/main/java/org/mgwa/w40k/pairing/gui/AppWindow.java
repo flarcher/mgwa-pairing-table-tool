@@ -2,7 +2,7 @@ package org.mgwa.w40k.pairing.gui;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.mgwa.w40k.pairing.LoggerSupplier;
+import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.gui.scene.InfoScene;
 import org.mgwa.w40k.pairing.gui.scene.MatrixSetupScene;
 import org.mgwa.w40k.pairing.gui.scene.SceneDefinition;

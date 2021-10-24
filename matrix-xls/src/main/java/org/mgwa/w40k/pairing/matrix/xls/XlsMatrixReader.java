@@ -9,11 +9,13 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class XlsMatrixReader implements MatrixReader {
 
@@ -51,6 +53,7 @@ public class XlsMatrixReader implements MatrixReader {
 
 	private final XSSFWorkbook document;
 	private final static int MAX_ORIGIN_SEARCH_CELL_DISTANCE = 10;
+	private final static Logger LOGGER = LoggerSupplier.INSTANCE.getLogger();
 
 	private static boolean notEmptyCell(XSSFCell cell) {
 		return cell != null && cell.getCellType() != CellType.BLANK;
@@ -126,6 +129,7 @@ public class XlsMatrixReader implements MatrixReader {
 					return Optional.of(Integer.parseUnsignedInt(strValue));
 				}
 				catch (NumberFormatException e) {
+					LOGGER.warning(() -> String.format("Unable to read cell value %s as a score", strValue));
 					return Optional.empty();
 					/*throw new IllegalArgumentException(String.format("Impossible to read score from cell @%s:%s from %s",
 							cell.getRowIndex(), cell.getColumnIndex(), strValue), e);*/
@@ -133,6 +137,7 @@ public class XlsMatrixReader implements MatrixReader {
 			case NUMERIC:
 				return Optional.of(Double.valueOf(cell.getNumericCellValue()).intValue());
 			default:
+				LOGGER.warning(() -> String.format("Unable to handle type of cell at row:%d and column:%d", cell.getRowIndex(), cell.getColumnIndex()));
 				return Optional.empty();
 				/*throw new IllegalArgumentException(String.format("Impossible to read score from cell @%s:%s",
 						cell.getRowIndex(), cell.getColumnIndex()));*/
