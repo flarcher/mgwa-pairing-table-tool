@@ -1,4 +1,4 @@
-package org.mgwa.w40k.pairing;
+package org.mgwa.w40k.pairing.util;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,9 +16,9 @@ import java.util.logging.Logger;
  */
 public enum LoggerSupplier implements Supplier<Logger> {
 
-	INSTANCE("MGWA_");
+	INSTANCE("MGWA_", "org.mgwa.w40k.pairing")
 
-	private static final String LOGGERS_NAME = "org.mgwa.w40k.pairing";
+	;
 
 	private static <T> T exitOnError(Exception exception) {
 		exception.printStackTrace(System.err);
@@ -38,8 +38,8 @@ public enum LoggerSupplier implements Supplier<Logger> {
 		}
 	}
 
-	private static Logger createFileLogger(Path filePath) {
-		Logger logger = Logger.getLogger(LOGGERS_NAME);
+	private static Logger createFileLogger(Path filePath, String name) {
+		Logger logger = Logger.getLogger(name);
 		logger.setLevel(Level.FINEST);
 		try {
 			logger.addHandler(new FileHandler(filePath.toString(), 2000, 1));
@@ -50,11 +50,13 @@ public enum LoggerSupplier implements Supplier<Logger> {
 		}
 	}
 
-	LoggerSupplier(String filePrefix) {
+	LoggerSupplier(String filePrefix, String name) {
+		this.name = Objects.requireNonNull(name);
 		this.logFilePath = getLogFilePath(filePrefix);
-		this.logger = createFileLogger(logFilePath);
+		this.logger = createFileLogger(logFilePath, name);
 	}
 
+	private final String name;
 	private final Path logFilePath;
 	private final Logger logger;
 

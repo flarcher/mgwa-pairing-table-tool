@@ -2,7 +2,7 @@ package org.mgwa.w40k.pairing.gui;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import org.mgwa.w40k.pairing.LoggerSupplier;
+import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.gui.scene.InfoScene;
 import org.mgwa.w40k.pairing.gui.scene.MatrixSetupScene;
 import org.mgwa.w40k.pairing.gui.scene.SceneDefinition;
@@ -52,7 +52,10 @@ public class AppWindow extends Application {
 		stage.show();
 	}
 
+	//--- Scenes
+
 	private TeamDefinitionScene teamDefinition;
+	private MatrixSetupScene matrixSetup;
 
     @Override
     public void start(Stage stage) {
@@ -71,8 +74,8 @@ public class AppWindow extends Application {
 
 	private void toMatrixDisplay() {
 
-		final Matrix matrix;
 		if (!state.getMatrix().isPresent()) {
+			Matrix matrix;
 			if (state.getMatrixFilePath().isPresent()) {
 				Path path = state.getMatrixFilePath().get();
 				try (MatrixReader matrixReader = XlsMatrixReader.fromFile(path.toFile())) {
@@ -89,10 +92,10 @@ public class AppWindow extends Application {
 			}
 			state.setMatrix(matrix);
 		}
-		else {
-			matrix = state.getMatrix().get();
-		}
 
-		goToScene(new MatrixSetupScene(matrix));
+		if (matrixSetup == null) {
+			matrixSetup = new MatrixSetupScene();
+		}
+		goToScene(matrixSetup);
 	}
 }
