@@ -22,7 +22,9 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>start.bat</include>
+                    <include>debug.bat</include>
                     <include>start.sh</include>
+                    <include>debug.sh</include>
                 </includes>
                 <filtering>true</filtering>
                 <targetPath>${project.build.directory}</targetPath>
@@ -93,7 +95,9 @@
                                     <filelist dir="${project.build.directory}">
                                         <file name="${project.build.finalName}.jar"/>
                                         <file name="start.bat"/>
+                                        <file name="debug.bat"/>
                                         <file name="start.sh"/>
+                                        <file name="debug.sh"/>
                                     </filelist>
                                 </move>
                                 <chmod file="${dist.directory}/start.sh" perm="u+x"/>

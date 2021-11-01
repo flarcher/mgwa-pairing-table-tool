@@ -19,16 +19,34 @@ public class Score {
 	}
 
 	public static final int NO_VALUE = -1;
+	public static final int MIN_VALUE = 0;
+	public static final int MAX_VALUE = 20;
+	static {
+		assert MIN_VALUE < MAX_VALUE;
+		assert NO_VALUE < MIN_VALUE || NO_VALUE > MAX_VALUE;
+	}
 
 	private int sum;
 	private int count;
 
 	public Score addValue(int value) {
-		if (value < 0 || value > 20) {
+		if (value < MIN_VALUE || value > MAX_VALUE) {
 			throw new IllegalArgumentException("Bad score value " + value);
 		}
 		sum += value;
 		count++;
+		return this;
+	}
+
+	public Score reset() {
+		this.sum = 0;
+		this.count = 0;
+		return this;
+	}
+
+	public Score setValue(int value) {
+		this.sum = value;
+		this.count = 0;
 		return this;
 	}
 

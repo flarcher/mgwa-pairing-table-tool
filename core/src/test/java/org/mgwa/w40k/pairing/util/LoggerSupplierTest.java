@@ -1,7 +1,8 @@
-package org.mgwa.w40k.pairing;
+package org.mgwa.w40k.pairing.util;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import java.io.IOException;
 import java.nio.file.Files;
