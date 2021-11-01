@@ -3,18 +3,19 @@ package org.mgwa.w40k.pairing.matrix.xls;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
-import org.mgwa.w40k.pairing.matrix.Score;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.mgwa.w40k.pairing.matrix.ScoreParser;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class XlsMatrixReader implements MatrixReader {
@@ -121,40 +122,51 @@ public class XlsMatrixReader implements MatrixReader {
 		return matrix;
 	}
 
-	private static Optional<Integer> readInteger(XSSFCell cell) {
+	private static Optional<String> readString(XSSFCell cell) {
+		if (!notEmptyCell(cell)) {
+			return Optional.empty();
+		}
 		switch (cell.getCellType()) {
 			case STRING:
-				String strValue = cell.getStringCellValue();
-				try {
-					return Optional.of(Integer.parseUnsignedInt(strValue));
-				}
-				catch (NumberFormatException e) {
-					LOGGER.warning(() -> String.format("Unable to read cell value %s as a score", strValue));
-					return Optional.empty();
-					/*throw new IllegalArgumentException(String.format("Impossible to read score from cell @%s:%s from %s",
-							cell.getRowIndex(), cell.getColumnIndex(), strValue), e);*/
-				}
+				String value = cell.getStringCellValue();
+				//LOGGER.info(() -> String.format("Reading string cell %s at %d:%d", value, cell.getRowIndex(), cell.getColumnIndex()));
+				return Optional.of(value);
 			case NUMERIC:
-				return Optional.of(Double.valueOf(cell.getNumericCellValue()).intValue());
+				value = Integer.toString((int) cell.getNumericCellValue());
+				//LOGGER.info(() -> String.format("Reading numeric cell %s at %d:%d", value, cell.getRowIndex(), cell.getColumnIndex()));
+				return Optional.of(value);
 			default:
-				LOGGER.warning(() -> String.format("Unable to handle type of cell at row:%d and column:%d", cell.getRowIndex(), cell.getColumnIndex()));
+				LOGGER.warning(() -> String.format("Unable to handle type of cell at %d:%d", cell.getRowIndex(), cell.getColumnIndex()));
 				return Optional.empty();
-				/*throw new IllegalArgumentException(String.format("Impossible to read score from cell @%s:%s",
-						cell.getRowIndex(), cell.getColumnIndex()));*/
 		}
 	}
+
+	private final ScoreParser scoreParser = new ScoreParser();
 
 	private void fillMatrix(Matrix matrix, XSSFCell origin) {
 		XSSFCell cell;
 		int size = matrix.getSize();
+		AtomicBoolean hasError = new AtomicBoolean(false);
 		for (int row = 0; row < size; row++) {
 			for (int column = 0; column < size; column++) {
 				cell = origin.getSheet()
-						.getRow(origin.getRowIndex() + row)
-						.getCell(origin.getColumnIndex() + column);
-				Score score = readInteger(cell).map(Score::new).orElseGet(Score::new);
-				matrix.setScore(row, column, score);
+					.getRow(origin.getRowIndex() + row)
+					.getCell(origin.getColumnIndex() + column);
+				final int finalRow = row;
+				final int finalCol = column;
+				readString(cell)
+					.map(scoreParser)
+					.ifPresentOrElse(
+						s -> matrix.setScore(finalRow, finalCol, s),
+						() -> {
+							hasError.set(true);
+							LOGGER.severe(String.format("Invalid cell at %d:%d", finalRow, finalCol));
+						}
+					);
 			}
+		}
+		if (hasError.get()) {
+			LOGGER.severe("Error(s) during reading of the input");
 		}
 	}
 
