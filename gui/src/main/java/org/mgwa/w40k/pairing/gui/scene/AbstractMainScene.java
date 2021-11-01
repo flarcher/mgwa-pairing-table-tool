@@ -14,8 +14,8 @@ import javafx.scene.text.Text;
  */
 abstract class AbstractMainScene implements SceneDefinition {
 
-	private static final int SCENE_WIDTH = 800;
-	private static final int SCENE_HEIGHT = 600;
+	protected static final int SCENE_WIDTH = 800;
+	protected static final int SCENE_HEIGHT = 600;
 
 	public AbstractMainScene(int columnCount) {
 		this.columnCount = columnCount;
