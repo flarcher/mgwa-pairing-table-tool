@@ -75,7 +75,7 @@ public class MatrixSetupScene extends AbstractMainScene {
 					hbox.setMaxWidth(nodeWidth);
 					hbox.setAlignment(Pos.CENTER);
 					GridPane.setHalignment(hbox, HPos.CENTER);
-					grid.add(hbox, i + 1, j + 1, 1, 1);
+					grid.add(hbox, j + 1, i + 1, 1, 1); // Column, Row, span, span
 					minScoreField.textProperty().addListener((obs, oldValue, newValue) -> {
 						logger.finer(String.format("new minimum score : from %s to %s at %d:%d", oldValue, newValue, rowIndex, columnIndex));
 						score.updateMinValue(Integer.parseUnsignedInt(newValue));
