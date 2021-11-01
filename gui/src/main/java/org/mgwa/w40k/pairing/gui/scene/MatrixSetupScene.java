@@ -3,8 +3,10 @@ package org.mgwa.w40k.pairing.gui.scene;
 import javafx.geometry.HPos;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.apache.poi.ss.formula.functions.T;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.gui.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
@@ -54,22 +56,27 @@ public class MatrixSetupScene extends AbstractMainScene {
 					Optional<Score> scoreOpt = matrix.getScore(i, j);
 					if (!scoreOpt.isPresent()) {
 						logger.warning(String.format("No score at %s:%d", rowIndex, columnIndex));
-						score = new Score();
+						score = Score.newDefault();
 						matrix.setScore(i, j, score);
 					}
 					else {
 						score = scoreOpt.get();
-						logger.finer(String.format("Using score %d at %d:%d", score.getValue(), rowIndex, columnIndex));
+						logger.finer(String.format("Using score %s at %d:%d", score, rowIndex, columnIndex));
 					}
-					int scoreValue = scoreOpt
-							.map(Score::getValue)
-							.orElse(10);
-					TextField scoreField = NodeFactory.createScoreField(scoreValue);
-					GridPane.setHalignment(scoreField, HPos.CENTER);
-					grid.add(scoreField, i + 1, j + 1, 1, 1);
-					scoreField.textProperty().addListener((obs, oldValue, newValue) -> {
-						logger.finer(String.format("new score : from %d to %d at %d:%d", oldValue, newValue, rowIndex, columnIndex));
-						score.setValue(Integer.parseUnsignedInt(newValue));
+
+					TextField minScoreField = NodeFactory.createScoreField(score.getMinValue());
+					TextField maxScoreField = NodeFactory.createScoreField(score.getMaxValue());
+					Text scoreSeparator = new Text(" - ");
+					HBox hbox = new HBox(minScoreField, scoreSeparator, maxScoreField);
+					GridPane.setHalignment(hbox, HPos.CENTER);
+					grid.add(hbox, i + 1, j + 1, 1, 1);
+					minScoreField.textProperty().addListener((obs, oldValue, newValue) -> {
+						logger.finer(String.format("new minimum score : from %s to %s at %d:%d", oldValue, newValue, rowIndex, columnIndex));
+						score.updateMinValue(Integer.parseUnsignedInt(newValue));
+					});
+					maxScoreField.textProperty().addListener((obs, oldValue, newValue) -> {
+						logger.finer(String.format("new maximum score : from %s to %s at %d:%d", oldValue, newValue, rowIndex, columnIndex));
+						score.updateMaxValue(Integer.parseUnsignedInt(newValue));
 					});
 				}
 			});

@@ -109,7 +109,7 @@ public final class NodeFactory {
 		TextField field = new TextField();
 		field.setTextFormatter(new TextFormatter<>(
 				SCORE_STRING_CONVERTER,
-				10,
+				Score.DEFAULT_VALUE,
 				change -> {
 					String newValue = change.getControlNewText();
 					if (!newValue.isEmpty()) {
