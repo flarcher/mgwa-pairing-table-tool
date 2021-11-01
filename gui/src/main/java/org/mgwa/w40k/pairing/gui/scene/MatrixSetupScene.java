@@ -1,12 +1,12 @@
 package org.mgwa.w40k.pairing.gui.scene;
 
 import javafx.geometry.HPos;
+import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.apache.poi.ss.formula.functions.T;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.gui.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
@@ -36,16 +36,19 @@ public class MatrixSetupScene extends AbstractMainScene {
 		List<Army> rowArmies = matrix.getArmies(true);
 		List<Army> colArmies = matrix.getArmies(false);
 		GridPane grid = NodeFactory.createGrid(matrix.getSize() + 1);
+		int nodeWidth = SCENE_WIDTH / (matrix.getSize() + 1);
 		IntStream.range(0, matrix.getSize())
 			.forEach(i -> {
 
 				String colArmyName = colArmies.get(i).getName();
 				Text text = NodeFactory.createText(colArmyName);
+				text.maxWidth(nodeWidth);
 				GridPane.setHalignment(text, HPos.CENTER);
 				grid.add(text, i + 1, 0, 1, 1);
 
 				String rowArmyName = rowArmies.get(i).getName();
 				text = NodeFactory.createText(rowArmyName);
+				text.maxWidth(nodeWidth);
 				GridPane.setHalignment(text, HPos.CENTER);
 				grid.add(text, 0, i + 1, 1, 1);
 
@@ -68,6 +71,9 @@ public class MatrixSetupScene extends AbstractMainScene {
 					TextField maxScoreField = NodeFactory.createScoreField(score.getMaxValue());
 					Text scoreSeparator = new Text(" - ");
 					HBox hbox = new HBox(minScoreField, scoreSeparator, maxScoreField);
+					hbox.setPrefWidth(nodeWidth);
+					hbox.setMaxWidth(nodeWidth);
+					hbox.setAlignment(Pos.CENTER);
 					GridPane.setHalignment(hbox, HPos.CENTER);
 					grid.add(hbox, i + 1, j + 1, 1, 1);
 					minScoreField.textProperty().addListener((obs, oldValue, newValue) -> {

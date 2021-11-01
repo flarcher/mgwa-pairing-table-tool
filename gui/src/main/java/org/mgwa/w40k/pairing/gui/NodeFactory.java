@@ -124,6 +124,9 @@ public final class NodeFactory {
 				}
 		));
 		field.setText(SCORE_STRING_CONVERTER.toString(initialValue));
+		field.setAlignment(Pos.CENTER_RIGHT);
+		field.setPrefWidth(30);
+		field.setMaxWidth(30);
 		return field;
 	}
 
