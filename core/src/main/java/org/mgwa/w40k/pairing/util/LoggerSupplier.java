@@ -72,4 +72,8 @@ public enum LoggerSupplier implements Supplier<Logger> {
 	public Path getLogFilePath() {
 		return logFilePath;
 	}
+
+	public String getName() {
+		return name;
+	}
 }
