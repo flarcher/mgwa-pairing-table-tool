@@ -10,7 +10,11 @@ import java.util.function.Consumer;
 public class Score implements Consumer<Score> {
 
 	public static Score newDefault() {
-		return new Score(MIN_VALUE, MAX_VALUE);
+		return of(MIN_VALUE, MAX_VALUE);
+	}
+
+	public static Score of(int min, int max) {
+		return new Score(min, max);
 	}
 
 	private static void checkValueBound(int value) {
@@ -19,7 +23,7 @@ public class Score implements Consumer<Score> {
 		}
 	}
 
-	public Score(int min, int max) {
+	private Score(int min, int max) {
 		checkValueBound(min);
 		checkValueBound(max);
 		this.min = min;

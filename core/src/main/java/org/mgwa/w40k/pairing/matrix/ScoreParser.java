@@ -13,13 +13,13 @@ public class ScoreParser implements Function<String, Score> {
 
     private static final Pattern PATTERN = Pattern.compile("^(\\d+)[-_ ](\\d+)$");
     private static final Map<String, Supplier<Score>> SPECIAL_SCORES = Map.of(
-        "0", () -> new Score(0, 4),
-        "5", () -> new Score(5, 8),
-        "10", () -> new Score(9, 11),
-        "15", () -> new Score(12, 15),
-        "20", () -> new Score(16, 20),
+        "0", () -> Score.of(0, 4),
+        "5", () -> Score.of(5, 8),
+        "10", () -> Score.of(9, 11),
+        "15", () -> Score.of(12, 15),
+        "20", () -> Score.of(16, 20),
         "G", Score::newDefault,
-        "-", () -> new Score(Score.MEDIUM_SCORE_VALUE, Score.MEDIUM_SCORE_VALUE));
+        "-", () -> Score.of(Score.MEDIUM_SCORE_VALUE, Score.MEDIUM_SCORE_VALUE));
 
     public ScoreParser() {}
 
@@ -46,7 +46,7 @@ public class ScoreParser implements Function<String, Score> {
             String minStr = matcher.group(1);
             String maxStr = matcher.group(2);
             try {
-                return new Score(
+                return Score.of(
                     Integer.parseInt(minStr),
                     Integer.parseInt(maxStr));
             }
