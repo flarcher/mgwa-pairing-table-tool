@@ -70,9 +70,11 @@ public class Score implements Consumer<Score> {
 		checkValueBound(newMinValue);
 		int oldMin = this.min;
 		int oldMax = this.max;
-		this.min = newMinValue;
 		if (this.max < newMinValue) {
 			this.max = newMinValue;
+		}
+		else {
+			this.min = newMinValue;
 		}
 		updateSum(oldMin, oldMax);
 		return this;
@@ -86,17 +88,20 @@ public class Score implements Consumer<Score> {
 		checkValueBound(newMaxValue);
 		int oldMin = this.min;
 		int oldMax = this.max;
-		this.max = newMaxValue;
 		if (this.min > newMaxValue) {
 			this.min = newMaxValue;
+		}
+		else {
+			this.max = newMaxValue;
 		}
 		updateSum(oldMin, oldMax);
 		return this;
 	}
 
-	public int getAverage() {
-		return this.sum / (2 * this.count);
+	public float getAverage() {
+		return ((float) this.sum) / (2 * this.count);
 	}
+
 	public int getCount() {
 		return count;
 	}
