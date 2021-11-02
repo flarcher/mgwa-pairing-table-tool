@@ -32,12 +32,13 @@ public class AppWindow extends Application {
 
 	/**
 	 * See the {@link Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
+	 * It will eventually call the {@link #start(Stage)} method.
 	 */
 	public static void main() {
 		launch();
 	}
 
-	private final AppState state = new AppState();
+	private final AppState state = AppState.INSTANCE;
 	private final Logger logger = LoggerSupplier.INSTANCE.getLogger();
 
 	private Stage stage;
