@@ -9,7 +9,7 @@ public class ScoreParserTest {
 
     private void assertSingleCountScore(Score score) {
         Assert.assertEquals(1, score.getCount());
-        Assert.assertEquals((score.getMaxValue() + score.getMinValue()) / 2, score.getAverage());
+        Assert.assertEquals(((float) (score.getMaxValue() + score.getMinValue())) / 2, score.getAverage(), 0.1);
     }
 
     private void assertDefaultScore(Score score) {
