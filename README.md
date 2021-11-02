@@ -7,8 +7,12 @@ Is written for the **MGWA association**.
 ## Usage
 
 1. Make sure you have a *Java Runtime Environment* version 11+ installed
-1. Unzip the released archive
-1. Call either `start.sh` or `start.bat` from Linux/MacOS or Windows respectively
+2. Unzip the released archive
+3. Call either `start.sh` or `start.bat` from Linux/MacOS or Windows respectively
+
+About the start scripts:
+
+* Optionally, you may provide the path to the matrix Excel file (containing estimated scores of pairings) as the first argument of the script. 
 
 ## Contributing
 
