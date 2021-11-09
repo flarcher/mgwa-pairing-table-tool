@@ -33,6 +33,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>font.ttf</include>
+                    <include>labels*.properties</include>
                 </includes>
                 <filtering>false</filtering>
             </resource>
@@ -123,6 +124,11 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>15-ea+5</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
