@@ -10,9 +10,10 @@ Is written for the **MGWA association**.
 2. Unzip the released archive
 3. Call either `start.sh` or `start.bat` from Linux/MacOS or Windows respectively
 
-About the start scripts:
+Inputs:
 
 * Optionally, you may provide the path to the matrix Excel file (containing estimated scores of pairings) as the first argument of the script. 
+* The environment variable `LANG` defines the used locale for displayed texts.
 
 ## Contributing
 

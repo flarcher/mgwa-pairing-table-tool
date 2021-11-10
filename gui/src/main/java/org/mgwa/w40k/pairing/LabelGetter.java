@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-public final class LabelGetter {
+public final class LabelGetter implements Function<String, String> {
 
     static class LocaleParser implements Function<String, Locale> {
 
@@ -80,4 +80,8 @@ public final class LabelGetter {
         return bundle.getString(key);
     }
 
+    @Override
+    public String apply(String s) {
+        return getLabel(s);
+    }
 }
