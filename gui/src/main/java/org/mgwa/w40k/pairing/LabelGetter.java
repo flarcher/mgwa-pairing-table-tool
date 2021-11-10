@@ -1,11 +1,11 @@
 package org.mgwa.w40k.pairing;
 
+import org.mgwa.w40k.pairing.util.LoggerSupplier;
+
 import javax.annotation.Nonnull;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 public final class LabelGetter {
 
@@ -29,30 +29,51 @@ public final class LabelGetter {
 
     private static final LocaleParser LOCALE_PARSER = new LocaleParser();
 
+    static final List<Locale> SUPPORTED_LOCALES = List.of(
+            new Locale("en"),
+            new Locale("fr"));
+    static final Locale DEFAULT_LOCALE = SUPPORTED_LOCALES.get(0);
+
+    private static final Logger LOGGER = LoggerSupplier.INSTANCE.getLogger();
+
     private static Locale fetchLocale() {
         return Optional.ofNullable(System.getenv("LANG"))
                 .map(LOCALE_PARSER)
                 .orElseGet(() -> Locale.getDefault(Locale.Category.DISPLAY));
     }
 
+    private static ResourceBundle getBundle(Locale locale) {
+        return ResourceBundle.getBundle("labels", locale);
+    }
+
     public static LabelGetter create() {
-        return new LabelGetter(fetchLocale());
+        return create(fetchLocale());
     }
 
     public static LabelGetter create(Locale locale) {
-        return new LabelGetter(Objects.requireNonNull(locale));
+        Objects.requireNonNull(locale);
+        ResourceBundle bundle;
+        if (SUPPORTED_LOCALES.stream()
+                .map(Locale::getLanguage)
+                .noneMatch(l -> l.equals(locale.getLanguage()))) {
+            bundle = getBundle(DEFAULT_LOCALE);
+            LOGGER.warning(String.format("Wanted locale %s not supported: using default locale %s", locale, bundle.getLocale()));
+        }
+        else {
+            bundle = getBundle(locale);
+            LOGGER.info(String.format("Using supported locale %s", locale));
+        }
+        return new LabelGetter(bundle);
     }
 
-    private LabelGetter(@Nonnull Locale locale) {
-        this.bundle = ResourceBundle.getBundle("labels", locale);
-        this.inputLocale = locale;
+    private LabelGetter(@Nonnull ResourceBundle bundle) {
+        this.bundle = bundle;
     }
 
     private final ResourceBundle bundle;
-    private final Locale inputLocale;
 
     public Locale getLocale() {
-        return this.inputLocale;
+        return bundle.getLocale();
     }
 
     public String getLabel(String key) {
