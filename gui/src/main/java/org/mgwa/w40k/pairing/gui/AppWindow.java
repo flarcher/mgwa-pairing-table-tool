@@ -2,6 +2,7 @@ package org.mgwa.w40k.pairing.gui;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import org.mgwa.w40k.pairing.LabelGetter;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.gui.scene.InfoScene;
 import org.mgwa.w40k.pairing.gui.scene.MatrixSetupScene;
@@ -40,6 +41,7 @@ public class AppWindow extends Application {
 
 	private final AppState state = AppState.INSTANCE;
 	private final Logger logger = LoggerSupplier.INSTANCE.getLogger();
+	private final LabelGetter labelGetter = LabelGetter.create();
 
 	private Stage stage;
 
@@ -68,7 +70,7 @@ public class AppWindow extends Application {
 	private void displayError(String msg, SceneDefinition sceneTarget) {
 		goToScene(new InfoScene(
 			() -> goToScene(sceneTarget),
-			msg));
+			msg, labelGetter.getLabel("ok")));
 	}
 
 	private static final int DEFAULT_ARMY_COUNT = 3;
@@ -84,7 +86,7 @@ public class AppWindow extends Application {
 					logger.info(String.format("Using matrix of size %s", matrix.getSize()));
 				} catch (Exception e) {
 					logger.log(Level.SEVERE, "Impossible to read file", e);
-					displayError(String.format("Unable to read file %s", path), teamDefinition);
+					displayError(String.format("%s %s", labelGetter.getLabel("can-not-read-file"), path), teamDefinition);
 					return;
 				}
 			} else {
