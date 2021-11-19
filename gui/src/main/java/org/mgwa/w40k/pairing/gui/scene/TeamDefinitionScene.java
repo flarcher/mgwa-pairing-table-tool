@@ -13,27 +13,29 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class TeamDefinitionScene extends AbstractMainScene {
 
-	private static final String NO_FILE_TEXT = "(no file selected)";
-
-	public TeamDefinitionScene(Runnable next) {
-		super(3);
+	public TeamDefinitionScene(Function<String, String> labelGetter, Runnable next) {
+		super(labelGetter, 3);
 		this.next = next;
+		this.fileName = NodeFactory.createText(labelGetter.apply("no.file.selected"));
+		this.nameLabel = NodeFactory.createText(labelGetter.apply("team.name"));
+		this.tableTokenLabel = NodeFactory.createText(labelGetter.apply("table.token"));
 	}
 
 	private final Runnable next;
 	private final TextField yourTeamName = new TextField();
 	private final TextField otherTeamName = new TextField();
 	private final ToggleGroup tokenOwnership = new ToggleGroup();
-	private final Text nameLabel = NodeFactory.createText("Team's name");
-	private final Text tableTokenLabel = NodeFactory.createText("Table token");
+	private final Text nameLabel;
+	private final Text tableTokenLabel;
 	private final FileChooser fileChooser = new FileChooser();
-	private final Text fileName = NodeFactory.createText(NO_FILE_TEXT);
+	private final Text fileName;
 
-	private static String filePath(Optional<Path> path) {
-		return path.map(Path::toString).orElse(NO_FILE_TEXT);
+	private String filePath(Optional<Path> path) {
+		return path.map(Path::toString).orElse(labelGetter.apply("no.file.selected"));
 	}
 
 	@Override
@@ -50,7 +52,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		//youHaveTheToken.setMinWidth(100.0);
 		yourTeamName.setText(state.getRowTeamName());
 		addRow(HPos.CENTER,
-			NodeFactory.createLabel("Your team:", yourTeamName),
+			NodeFactory.createLabel(labelGetter.apply("team.yours"), yourTeamName),
 			yourTeamName, youHaveTheToken);
 
 		RadioButton theyHaveTheToken = new RadioButton();
@@ -60,7 +62,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		//theyHaveTheToken.setMinWidth(100.0);
 		otherTeamName.setText(state.getColTeamName());
 		addRow(HPos.CENTER,
-			NodeFactory.createLabel("Other team:", otherTeamName),
+			NodeFactory.createLabel(labelGetter.apply("team.other"), otherTeamName),
 			otherTeamName, theyHaveTheToken);
 
 		/*tokenOwnership.selectedToggleProperty().addListener(
@@ -68,8 +70,9 @@ public class TeamDefinitionScene extends AbstractMainScene {
 			 Toggle old_toggle, Toggle new_toggle) -> { 	});*/
 
 		newRow();
-		fileChooser.setTitle("Select your matrix file");
-		Button fileSelectButton = NodeFactory.createButton("Select your matrix file", e -> {
+		String selectYourFile = labelGetter.apply("select.matrix.file");
+		fileChooser.setTitle(selectYourFile);
+		Button fileSelectButton = NodeFactory.createButton(selectYourFile, e -> {
 				@Nullable File file = fileChooser.showOpenDialog(stage);
 				Optional<Path> path = Optional.ofNullable(file).map(File::toPath);
 				state.setMatrixFilePath(path.orElse(null));
@@ -80,7 +83,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		addNode(fileName, getRowIndex(), 1, 1, 2, HPos.LEFT);
 		newRow();
 
-		Button nextButton = NodeFactory.createButton("Next", e -> {
+		Button nextButton = NodeFactory.createButton(labelGetter.apply("next"), e -> {
 				state.setRowTeamName(yourTeamName.getText());
 				state.setColTeamName(otherTeamName.getText());
 				state.setYouHaveTheTableToken(tokenOwnership.getSelectedToggle() == youHaveTheToken);

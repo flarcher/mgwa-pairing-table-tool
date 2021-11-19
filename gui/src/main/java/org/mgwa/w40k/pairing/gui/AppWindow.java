@@ -68,7 +68,7 @@ public class AppWindow extends Application {
     @Override
     public void start(Stage stage) {
 		this.stage = stage;
-		teamDefinition = new TeamDefinitionScene(this::toMatrixDisplay);
+		teamDefinition = new TeamDefinitionScene(labelGetter, this::toMatrixDisplay);
 		goToScene(teamDefinition);
     }
 
@@ -102,7 +102,7 @@ public class AppWindow extends Application {
 		}
 
 		if (matrixSetup == null) {
-			matrixSetup = new MatrixSetupScene();
+			matrixSetup = new MatrixSetupScene(labelGetter);
 		}
 		goToScene(matrixSetup);
 	}
