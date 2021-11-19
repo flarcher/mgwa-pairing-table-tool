@@ -11,9 +11,7 @@ import java.util.Optional;
 /**
  * A mutable class that describes the application state.
  */
-public enum AppState {
-
-	INSTANCE; // Classic enum-based singleton pattern
+public class AppState {
 
 	private String rowTeamName = "";
 	private String colTeamName = "";

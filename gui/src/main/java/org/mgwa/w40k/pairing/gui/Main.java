@@ -41,11 +41,14 @@ public final class Main {
 
     public static void main(String[] args) {
 
+        // Get the application state
+        AppState state = AppWindow.getState();
+
         // Reading the optional file path in arguments
         Optional.of(args)
             .filter(arguments -> arguments.length > 0)
             .map(arguments -> getMatrixPath(arguments[0]))
-            .ifPresent(AppState.INSTANCE::setMatrixFilePath);
+            .ifPresent(state::setMatrixFilePath);
 
         // Launching the user interface
         AppWindow.main();
