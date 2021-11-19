@@ -31,6 +31,12 @@ import java.util.logging.Logger;
  */
 public class AppWindow extends Application {
 
+	private static final AppState state = new AppState();
+
+	public static AppState getState() {
+		return state;
+	}
+
 	/**
 	 * See the {@link Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
 	 * It will eventually call the {@link #start(Stage)} method.
@@ -39,7 +45,6 @@ public class AppWindow extends Application {
 		launch();
 	}
 
-	private final AppState state = AppState.INSTANCE;
 	private final Logger logger = LoggerSupplier.INSTANCE.getLogger();
 	private final LabelGetter labelGetter = LabelGetter.create();
 
