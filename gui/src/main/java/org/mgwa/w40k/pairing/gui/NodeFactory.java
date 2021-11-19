@@ -58,17 +58,17 @@ public final class NodeFactory {
 		return label;
 	}
 
-	public static Text createHeaderLabel() {
+	public static Text createHeaderLabel(String content) {
 		Text label = new Text();
 		label.setFont(FONT_HEADER);
-		label.setText("A W40k E.T.C. Table-Pairing-Tool");
+		label.setText(content);
 		return label;
 	}
 
-	public static Text createFooterLabel() {
+	public static Text createFooterLabel(String content) {
 		Text label = new Text();
 		label.setFont(FONT_FOOTER);
-		label.setText("© MGWA non-profit organization");
+		label.setText(content);
 		return label;
 	}
 

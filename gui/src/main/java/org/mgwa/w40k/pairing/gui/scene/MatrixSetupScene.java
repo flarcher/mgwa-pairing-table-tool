@@ -16,6 +16,7 @@ import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
@@ -24,8 +25,8 @@ import java.util.stream.IntStream;
  */
 public class MatrixSetupScene extends AbstractMainScene {
 
-	public MatrixSetupScene() {
-		super(1);
+	public MatrixSetupScene(Function<String, String> labelGetter) {
+		super(labelGetter, 1);
 	}
 
 	@Override
