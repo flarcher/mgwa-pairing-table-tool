@@ -3,11 +3,8 @@ package org.mgwa.w40k.pairing.gui;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.mgwa.w40k.pairing.LabelGetter;
+import org.mgwa.w40k.pairing.gui.scene.*;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
-import org.mgwa.w40k.pairing.gui.scene.InfoScene;
-import org.mgwa.w40k.pairing.gui.scene.MatrixSetupScene;
-import org.mgwa.w40k.pairing.gui.scene.SceneDefinition;
-import org.mgwa.w40k.pairing.gui.scene.TeamDefinitionScene;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
 import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixReader;
@@ -80,20 +77,28 @@ public class AppWindow extends Application {
 
 	private static final int DEFAULT_ARMY_COUNT = 3;
 
+	private Matrix loadMatrixFile(Path path) {
+		// Waiting loading the file
+		try (MatrixReader matrixReader = XlsMatrixReader.fromFile(path.toFile())) {
+			Matrix matrix = matrixReader.get();
+			logger.info(String.format("Using matrix of size %s", matrix.getSize()));
+			return matrix;
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Impossible to read file", e);
+			displayError(String.format("%s %s", labelGetter.getLabel("can-not-read-file"), path), teamDefinition);
+			return null;
+		}
+	}
+
 	private void toMatrixDisplay() {
 
 		if (!state.getMatrix().isPresent()) {
 			Matrix matrix;
 			if (state.getMatrixFilePath().isPresent()) {
 				Path path = state.getMatrixFilePath().get();
-				try (MatrixReader matrixReader = XlsMatrixReader.fromFile(path.toFile())) {
-					matrix = matrixReader.get();
-					logger.info(String.format("Using matrix of size %s", matrix.getSize()));
-				} catch (Exception e) {
-					logger.log(Level.SEVERE, "Impossible to read file", e);
-					displayError(String.format("%s %s", labelGetter.getLabel("can-not-read-file"), path), teamDefinition);
-					return;
-				}
+				// Waiting loading the file
+				goToScene(new WaitingScene(String.format("Loading file %s", path)));
+				matrix = loadMatrixFile(path);
 			} else {
 				logger.info("Using empty matrix");
 				matrix = new Matrix(DEFAULT_ARMY_COUNT);
@@ -101,6 +106,7 @@ public class AppWindow extends Application {
 			state.setMatrix(matrix);
 		}
 
+		// Ending the loading
 		if (matrixSetup == null) {
 			matrixSetup = new MatrixSetupScene(labelGetter);
 		}
