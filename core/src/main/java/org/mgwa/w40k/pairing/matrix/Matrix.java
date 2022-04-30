@@ -43,6 +43,21 @@ public class Matrix {
 		return this;
 	}
 
+	/**
+	 * @return {@code true} if all scores are defined.
+	 */
+	public boolean isComplete() {
+		int size = getSize();
+		for (int i=0; i < size; i++) {
+			for (int j=0; j < size; j++) {
+				if (scores[i][j] == null) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	@Override
 	public String toString() {
 		return "Matrix{" +

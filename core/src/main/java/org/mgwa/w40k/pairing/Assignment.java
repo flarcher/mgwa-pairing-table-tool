@@ -233,6 +233,36 @@ public class Assignment implements Cloneable {
 		return builder.build();
 	}
 
+	public int getUnassignedTableCount() {
+		return (int) IntStream.range(0, getTableCount()).filter(this::isAssigned).count();
+	}
+
+	/**
+	 * @return Possibles pairs to be done based on unassigned tables.
+	 */
+	public Collection<Pair> possiblePairs() {
+		int[] assignedTables = IntStream.range(0, getTableCount())
+				.filter(this::isAssigned)
+				.toArray();
+		Set<Integer> assignedRows = new HashSet<>(assignedTables.length);
+		Set<Integer> assignedCols = new HashSet<>(assignedTables.length);
+		IntStream.of(assignedTables).forEach(i -> {
+			assignedRows.add(getRowArmyIndex(i));
+			assignedCols.add(getColArmyIndex(i));
+		});
+		List<Integer> unassignedRows = new ArrayList<>(getTableCount() - assignedTables.length);
+		List<Integer> unassignedCols = new ArrayList<>(getTableCount() - assignedTables.length);
+		for (int i = 0; i < getTableCount() /* == Armies count */; i++) {
+			if (!assignedRows.contains(i)) {
+				unassignedRows.add(i);
+			}
+			if (!assignedCols.contains(i)) {
+				unassignedCols.add(i);
+			}
+		}
+		return Pair.possiblePairs(unassignedRows, unassignedCols);
+	}
+
 	@Override
 	public Assignment clone() {
 		return new Assignment(rowArmyIndexes.clone(), colArmyIndexes.clone());
