@@ -234,7 +234,9 @@ public class Assignment implements Cloneable {
 	}
 
 	public int getUnassignedTableCount() {
-		return (int) IntStream.range(0, getTableCount()).filter(this::isAssigned).count();
+		return (int) IntStream.range(0, getTableCount())
+				.filter(t -> !isAssigned(t))
+				.count();
 	}
 
 	/**

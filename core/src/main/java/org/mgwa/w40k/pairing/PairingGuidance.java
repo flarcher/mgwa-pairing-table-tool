@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -17,13 +18,23 @@ public final class PairingGuidance {
 	private static final int DEFAULT_SCORE = 0;
 
 	public PairingGuidance(@Nonnull Matrix matrix) {
+		this(matrix, Optional.empty());
+	}
+
+	public PairingGuidance(@Nonnull Matrix matrix, Consumer<String> debug) {
+		this(matrix, Optional.of(debug));
+	}
+
+	private PairingGuidance(@Nonnull Matrix matrix, Optional<Consumer<String>> debugger) {
 		this.matrix = Objects.requireNonNull(matrix);
 		if (!matrix.isComplete()) {
 			throw new IllegalArgumentException("Some score is missing in the matrix");
 		}
+		this.debugger = debugger;
 	}
 
 	private final Matrix matrix;
+	private final Optional<Consumer<String>> debugger;
 
     public static class ScoredPair implements
 			Comparable<ScoredPair>,
@@ -45,12 +56,17 @@ public final class PairingGuidance {
             return score;
         }
 
-        private ScoredPair setScore(int score) {
+		public ScoredPair setScore(int score) {
             this.score = score;
 			return this;
         }
 
-        @Override
+		@Override
+		public String toString() {
+			return String.format("[%d,%d]=%d", pair.getRow(), pair.getColumn(), score);
+		}
+
+		@Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -68,7 +84,7 @@ public final class PairingGuidance {
             return SCORED_PAIR_COMPARATOR.compare(this, o);
         }
 
-		private ScoredPair addScore(int add) {
+		public ScoredPair addScore(int add) {
 			score += add;
 			return this;
 		}
@@ -93,10 +109,11 @@ public final class PairingGuidance {
 			// Then, the pairs are the same: thus, we can compare the score
             .thenComparingInt(sp -> sp.score);
 
-	public static Predicate<Pair> afterAssignmentOf(Pair pair) {
-		return p -> p.getColumn() != pair.getColumn()
-		         && p.getRow()    != pair.getRow();
-	}
+	private static final Comparator<ScoredPair> SCORE_COMPARATOR = Comparator
+			.comparingInt(ScoredPair::getScore)
+			// Then, make sure that it is not equal for different pairs
+			.thenComparingInt(sp -> sp.pair.getRow())
+			.thenComparingInt(sp -> sp.pair.getColumn());
 
     /**
      * @param scoreReading Policy about the reading of the score.
@@ -118,6 +135,14 @@ public final class PairingGuidance {
 				assignment.getUnassignedTableCount());
     }
 
+	private void debug(String template, Object... args) {
+		debug(() -> String.format(template, args));
+	}
+
+	private void debug(Supplier<String> msg) {
+		debugger.ifPresent(debugger -> debugger.accept(msg.get()));
+	}
+
     /**
      * @param scoreReading Policy about the reading of the score.
      * @param possiblePairs All possible pairs to sort.
@@ -132,15 +157,20 @@ public final class PairingGuidance {
             ForecastMethod method,
 			int remainingIteration) {
 
-		SortedSet<ScoredPair> result = new TreeSet<>(SCORED_PAIR_COMPARATOR);
+		//String pairs = possiblePairs.stream().map(Object::toString).collect(Collectors.joining(","));
+		debug("Start with %d pairs, %d depth, %s scoring, %s method",
+				possiblePairs.size(), remainingIteration, scoreReading, method);
+		SortedSet<ScoredPair> result = new TreeSet<>(SCORE_COMPARATOR);
 		possiblePairs.stream()
 			.filter(nextPairFilter)
 			.forEach(nextPair -> {
-				Predicate<Pair> pairFilter = afterAssignmentOf(nextPair);
+				debug("- (%d) %s => ?", remainingIteration, nextPair);
+				Predicate<Pair> pairFilter = Pair
+						.afterAssignmentOf(nextPair)
+						.or(Predicate.isEqual(nextPair));
 				int score = getScore(scoreReading, possiblePairs, pairFilter, method, remainingIteration);
-				ScoredPair scoredPair = new ScoredPair(nextPair);
-				scoredPair.setScore(score);
-				result.add(scoredPair);
+				debug("- (%d) %s => %d", remainingIteration, nextPair, score);
+				result.add(new ScoredPair(nextPair).setScore(score));
 			});
         return result;
     }
@@ -168,20 +198,17 @@ public final class PairingGuidance {
 				Pair lastPair = possiblePairs.stream()
 						.filter(pairFilter).findAny().orElseThrow(
 								() -> new IllegalStateException("Remains 1 iteration but 0 pair"));
-				int lastPairScore = getScore(scoreReading, lastPair);
-				return method.getFinalizer(remainingIteration).apply(lastPairScore);
+				int score = getScore(scoreReading, lastPair);
+				debug("--- (1) %s => %d", lastPair, score);
+				return score;
 			}
-			default:
-				// See below
+			default: {
+				List<ScoredPair> scoredPairs = getScoredPairs(scoreReading,
+						possiblePairs, pairFilter,
+						method, remainingIteration);
+				return reduceScore(scoredPairs, method);
+			}
 		}
-
-		List<ScoredPair> scoredPairs = getScoredPairs(scoreReading,
-			possiblePairs, pairFilter,
-			method, remainingIteration);
-		int methodScore = scoredPairs.stream()
-			.map(ScoredPair::getScore)
-			.reduce(0, method.getScoreReducer());
-		return method.getFinalizer(remainingIteration).apply(methodScore);
 	}
 
 	private List<ScoredPair> getScoredPairs(ScoreReading scoreReading,
@@ -192,16 +219,21 @@ public final class PairingGuidance {
 			.filter(pairFilter)
 			.map(pair -> {
 				int score = getScore(scoreReading, pair);
-				Predicate<Pair> nextPairsPredicate = pairFilter.and(afterAssignmentOf(pair));
+				Predicate<Pair> nextPairsPredicate = pairFilter.and(Pair.afterAssignmentOf(pair));
+				// Recursive call
 				List<ScoredPair> nextScoredPairs = getScoredPairs(scoreReading,
 						possiblePairs, nextPairsPredicate, method, remainingIteration - 1);
-				score += nextScoredPairs.stream()
-						.map(ScoredPair::getScore)
-						.reduce(DEFAULT_SCORE, method.getScoreReducer());
+				score += reduceScore(nextScoredPairs, method);
+				debug("-- (%d) %s => %d", remainingIteration, pair, score);
 				return new ScoredPair(pair).setScore(score);
 			})
-			.sorted(SCORED_PAIR_COMPARATOR)
+			.sorted(SCORE_COMPARATOR)
 			.collect(Collectors.toList());
 	}
 
+	private static int reduceScore(List<ScoredPair> scoredPairs, ForecastMethod method) {
+		return scoredPairs.stream()
+				.map(ScoredPair::getScore)
+				.reduce(method.getIdentityScore(), method.getScoreReducer());
+	}
 }

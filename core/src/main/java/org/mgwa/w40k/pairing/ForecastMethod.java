@@ -13,32 +13,35 @@ public enum ForecastMethod {
 	 */
 	LUCKY_BUT_RISKY {
 		@Override
+		public Integer getIdentityScore() {
+			return 0;
+		}
+
+		@Override
 		public BinaryOperator<Integer> getScoreReducer() {
 			return Math::max;
 		}
 
-		@Override
-		public Function<Integer, Integer> getFinalizer(int pairCount) {
-			return Function.identity();
-		}
 	},
 	/**
 	 * Uses the pairing that maximizes the average of scores.
 	 */
 	AVERAGE {
 		@Override
-		public BinaryOperator<Integer> getScoreReducer() {
-			return Integer::sum;
+		public Integer getIdentityScore() {
+			return 0;
 		}
 
 		@Override
-		public Function<Integer, Integer> getFinalizer(int pairCount) {
-			return score -> score / pairCount;
+		public BinaryOperator<Integer> getScoreReducer() {
+			return (l, r) -> (l + r) / 2;
 		}
+
 	},
 
 	;
 
+	public abstract Integer getIdentityScore();
 	public abstract BinaryOperator<Integer> getScoreReducer();
-	public abstract Function<Integer, Integer> getFinalizer(int pairCount);
+
 }

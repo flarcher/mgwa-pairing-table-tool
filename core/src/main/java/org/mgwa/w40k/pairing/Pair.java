@@ -2,6 +2,7 @@ package org.mgwa.w40k.pairing;
 
 import javax.annotation.concurrent.Immutable;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Immutable pairing.
@@ -40,10 +41,7 @@ public class Pair {
 
     @Override
     public String toString() {
-        return "Pair{" +
-                "row=" + row +
-                ", column=" + column +
-                '}';
+        return "["+row+","+column+"]";
     }
 
     public static int possiblePairsCount(int size) {
@@ -70,4 +68,19 @@ public class Pair {
         }
         return result;
     }
+
+	//--- Usual predicates about pairs
+
+	public static Predicate<Pair> afterAssignmentOf(Pair pair) {
+		return p -> p.getColumn() != pair.getColumn()
+		         && p.getRow()    != pair.getRow();
+	}
+
+	public static Predicate<Pair> isWithRow(int rowToAssign) {
+		return p -> p.getRow() == rowToAssign;
+	}
+
+	public static Predicate<Pair> isWithColumn(int columnToAssign) {
+		return p -> p.getColumn() == columnToAssign;
+	}
 }
