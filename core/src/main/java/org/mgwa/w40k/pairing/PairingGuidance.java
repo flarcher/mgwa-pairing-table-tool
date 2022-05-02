@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Contains the algorithm that suggest the best pairing.
@@ -36,30 +35,30 @@ public final class PairingGuidance {
 	private final Matrix matrix;
 	private final Optional<Consumer<String>> debugger;
 
-    public static class ScoredPair implements
+	public static class ScoredPair implements
 			Comparable<ScoredPair>,
 			Consumer<ScoredPair> {
 
-        private ScoredPair(@Nonnull Pair pair) {
-            this.pair = Objects.requireNonNull(pair);
-            this.score = 0;
-        }
+		private ScoredPair(@Nonnull Pair pair) {
+			this.pair = Objects.requireNonNull(pair);
+			this.score = 0;
+		}
 
-        private final Pair pair;
-        private int score = 0;
+		private final Pair pair;
+		private int score = 0;
 
-        public Pair getPair() {
-            return pair;
-        }
+		public Pair getPair() {
+			return pair;
+		}
 
-        public int getScore() {
-            return score;
-        }
+		public int getScore() {
+			return score;
+		}
 
 		public ScoredPair setScore(int score) {
-            this.score = score;
+			this.score = score;
 			return this;
-        }
+		}
 
 		@Override
 		public String toString() {
@@ -67,22 +66,22 @@ public final class PairingGuidance {
 		}
 
 		@Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ScoredPair that = (ScoredPair) o;
-            return SCORED_PAIR_COMPARATOR.compare(this, that) == 0;
-        }
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			ScoredPair that = (ScoredPair) o;
+			return SCORED_PAIR_COMPARATOR.compare(this, that) == 0;
+		}
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(pair, score);
-        }
+		@Override
+		public int hashCode() {
+			return Objects.hash(pair, score);
+		}
 
-        @Override
-        public int compareTo(ScoredPair o) {
-            return SCORED_PAIR_COMPARATOR.compare(this, o);
-        }
+		@Override
+		public int compareTo(ScoredPair o) {
+			return SCORED_PAIR_COMPARATOR.compare(this, o);
+		}
 
 		public ScoredPair addScore(int add) {
 			score += add;
@@ -103,11 +102,11 @@ public final class PairingGuidance {
 		}
 	}
 
-    private static final Comparator<ScoredPair> SCORED_PAIR_COMPARATOR = Comparator.<ScoredPair>
-            comparingInt(sp -> sp.pair.getRow())
-            .thenComparingInt(sp -> sp.pair.getColumn())
+	private static final Comparator<ScoredPair> SCORED_PAIR_COMPARATOR = Comparator.<ScoredPair>
+			comparingInt(sp -> sp.pair.getRow())
+			.thenComparingInt(sp -> sp.pair.getColumn())
 			// Then, the pairs are the same: thus, we can compare the score
-            .thenComparingInt(sp -> sp.score);
+			.thenComparingInt(sp -> sp.score);
 
 	private static final Comparator<ScoredPair> SCORE_COMPARATOR = Comparator
 			.comparingInt(ScoredPair::getScore) // Score is compared at first
@@ -116,25 +115,25 @@ public final class PairingGuidance {
 			.thenComparingInt(sp -> sp.pair.getRow())
 			.thenComparingInt(sp -> sp.pair.getColumn());
 
-    /**
-     * @param scoreReading Policy about the reading of the score.
-     * @param assignment Current tables assignment.
-     * @param nextPairFilter Filters for next pairs.
-     * @param method How the future paths will be considered.
-     * @return A sorted suggestion for the next pair to be considered.
-     */
-    public SortedSet<ScoredPair> suggestPairing(
-            ScoreReading scoreReading,
-            Assignment assignment,
-            Predicate<Pair> nextPairFilter,
-            ForecastMethod method) {
+	/**
+	 * @param scoreReading Policy about the reading of the score.
+	 * @param assignment Current tables assignment.
+	 * @param nextPairFilter Filters for next pairs.
+	 * @param method How the future paths will be considered.
+	 * @return A sorted suggestion for the next pair to be considered.
+	 */
+	public SortedSet<ScoredPair> suggestPairing(
+			ScoreReading scoreReading,
+			Assignment assignment,
+			Predicate<Pair> nextPairFilter,
+			ForecastMethod method) {
 
-        return suggestPairing(scoreReading,
+		return suggestPairing(scoreReading,
 				assignment.possiblePairs(),
 				nextPairFilter,
 				method,
 				assignment.getUnassignedTableCount());
-    }
+	}
 
 	private void debug(String template, Object... args) {
 		debug(() -> String.format(template, args));
@@ -144,18 +143,18 @@ public final class PairingGuidance {
 		debugger.ifPresent(debugger -> debugger.accept(msg.get()));
 	}
 
-    /**
-     * @param scoreReading Policy about the reading of the score.
-     * @param possiblePairs All possible pairs to sort.
-     * @param nextPairFilter Filters for next possible pairs.
-     * @param method How the future paths will be considered.
-     * @return A sorted suggestion for the next pair to be considered.
-     */
-    public SortedSet<ScoredPair> suggestPairing(
-            ScoreReading scoreReading,
-            Collection<Pair> possiblePairs,
-            Predicate<Pair> nextPairFilter,
-            ForecastMethod method,
+	/**
+	 * @param scoreReading Policy about the reading of the score.
+	 * @param possiblePairs All possible pairs to sort.
+	 * @param nextPairFilter Filters for next possible pairs.
+	 * @param method How the future paths will be considered.
+	 * @return A sorted suggestion for the next pair to be considered.
+	 */
+	public SortedSet<ScoredPair> suggestPairing(
+			ScoreReading scoreReading,
+			Collection<Pair> possiblePairs,
+			Predicate<Pair> nextPairFilter,
+			ForecastMethod method,
 			int remainingIteration) {
 
 		//String pairs = possiblePairs.stream().map(Object::toString).collect(Collectors.joining(","));
@@ -178,8 +177,8 @@ public final class PairingGuidance {
 				debug("- %s => %d", nextPair, score);
 				result.add(new ScoredPair(nextPair).setScore(score));
 			});
-        return result;
-    }
+		return result;
+	}
 
 	private int getScore(ScoreReading scoreReading, Pair pair) {
 		Optional<Score> score = matrix.getScore(pair.getRow(), pair.getColumn());
