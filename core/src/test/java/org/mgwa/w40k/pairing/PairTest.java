@@ -33,10 +33,10 @@ public class PairTest {
         List<Integer> cols = Arrays.asList(3, 5);
         Collection<Pair> pairs = Pair.possiblePairs(rows, cols);
         Assert.assertEquals(4, pairs.size());
-        Assert.assertTrue(pairs.contains(new Pair(2,3)));
-        Assert.assertTrue(pairs.contains(new Pair(2,5)));
-        Assert.assertTrue(pairs.contains(new Pair(4,3)));
-        Assert.assertTrue(pairs.contains(new Pair(4,5)));
+        Assert.assertTrue(pairs.contains(Pair.of(2,3)));
+        Assert.assertTrue(pairs.contains(Pair.of(2,5)));
+        Assert.assertTrue(pairs.contains(Pair.of(4,3)));
+        Assert.assertTrue(pairs.contains(Pair.of(4,5)));
     }
 
     @Test
@@ -46,15 +46,15 @@ public class PairTest {
         Collection<Pair> pairs = Pair.possiblePairs(rows, cols);
         //pairs.forEach(p -> System.out.println(p));
         Assert.assertEquals(9, pairs.size());
-        Assert.assertTrue(pairs.contains(new Pair(2,3)));
-        Assert.assertTrue(pairs.contains(new Pair(2,5)));
-        Assert.assertTrue(pairs.contains(new Pair(2,7)));
-        Assert.assertTrue(pairs.contains(new Pair(4,3)));
-        Assert.assertTrue(pairs.contains(new Pair(4,5)));
-        Assert.assertTrue(pairs.contains(new Pair(4,7)));
-        Assert.assertTrue(pairs.contains(new Pair(6,3)));
-        Assert.assertTrue(pairs.contains(new Pair(6,5)));
-        Assert.assertTrue(pairs.contains(new Pair(6,7)));
+        Assert.assertTrue(pairs.contains(Pair.of(2,3)));
+        Assert.assertTrue(pairs.contains(Pair.of(2,5)));
+        Assert.assertTrue(pairs.contains(Pair.of(2,7)));
+        Assert.assertTrue(pairs.contains(Pair.of(4,3)));
+        Assert.assertTrue(pairs.contains(Pair.of(4,5)));
+        Assert.assertTrue(pairs.contains(Pair.of(4,7)));
+        Assert.assertTrue(pairs.contains(Pair.of(6,3)));
+        Assert.assertTrue(pairs.contains(Pair.of(6,5)));
+        Assert.assertTrue(pairs.contains(Pair.of(6,7)));
     }
 
 }

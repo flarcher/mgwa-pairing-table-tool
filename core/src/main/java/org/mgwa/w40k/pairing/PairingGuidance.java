@@ -110,7 +110,8 @@ public final class PairingGuidance {
             .thenComparingInt(sp -> sp.score);
 
 	private static final Comparator<ScoredPair> SCORE_COMPARATOR = Comparator
-			.comparingInt(ScoredPair::getScore)
+			.comparingInt(ScoredPair::getScore) // Score is compared at first
+			.reversed() // Descending order
 			// Then, make sure that it is not equal for different pairs
 			.thenComparingInt(sp -> sp.pair.getRow())
 			.thenComparingInt(sp -> sp.pair.getColumn());
@@ -164,12 +165,17 @@ public final class PairingGuidance {
 		possiblePairs.stream()
 			.filter(nextPairFilter)
 			.forEach(nextPair -> {
-				debug("- (%d) %s => ?", remainingIteration, nextPair);
+				debug("- %s => ?", nextPair);
+				Set<Pair> assignedPairs = new HashSet<>(remainingIteration);
 				Predicate<Pair> pairFilter = Pair
 						.afterAssignmentOf(nextPair)
-						.or(Predicate.isEqual(nextPair));
-				int score = getScore(scoreReading, possiblePairs, pairFilter, method, remainingIteration);
-				debug("- (%d) %s => %d", remainingIteration, nextPair, score);
+						.or(Predicate.isEqual(nextPair))
+						.and(Predicate.not(assignedPairs::contains));
+				int score = getScore(scoreReading, possiblePairs, pairFilter, method, assignedPairs, remainingIteration);
+				if (method.toBeDivided()) {
+					score /= remainingIteration;
+				}
+				debug("- %s => %d", nextPair, score);
 				result.add(new ScoredPair(nextPair).setScore(score));
 			});
         return result;
@@ -187,6 +193,7 @@ public final class PairingGuidance {
 		Collection<Pair> possiblePairs,
 		Predicate<Pair> pairFilter,
 		ForecastMethod method,
+		Set<Pair> assignedPairs,
 		int remainingIteration) {
 
 		// First, consider trivial cases
@@ -196,44 +203,30 @@ public final class PairingGuidance {
 			case 1: {
 				// TODO: check that there is at most one pair
 				Pair lastPair = possiblePairs.stream()
-						.filter(pairFilter).findAny().orElseThrow(
-								() -> new IllegalStateException("Remains 1 iteration but 0 pair"));
+					.filter(pairFilter).findAny().orElseThrow(
+						() -> new IllegalStateException("Remains 1 iteration but 0 pair"));
 				int score = getScore(scoreReading, lastPair);
+				assignedPairs.add(lastPair);
 				debug("--- (1) %s => %d", lastPair, score);
 				return score;
 			}
 			default: {
-				List<ScoredPair> scoredPairs = getScoredPairs(scoreReading,
-						possiblePairs, pairFilter,
-						method, remainingIteration);
-				return reduceScore(scoredPairs, method);
+				return possiblePairs.stream()
+					.filter(pairFilter)
+					.map(pair -> {
+						int score = getScore(scoreReading, pair);
+						assignedPairs.add(pair);
+						Predicate<Pair> nextPairsPredicate = pairFilter.and(Pair.afterAssignmentOf(pair));
+						debug("-- (%d) %s => %d + ?", remainingIteration, pair, score);
+						//-- Recursive call
+						score += getScore(scoreReading,
+								possiblePairs, nextPairsPredicate, method, assignedPairs, remainingIteration - 1);
+						//--
+						debug("-- (%d) %s => %d", remainingIteration, pair, score);
+						return score;
+					})
+					.reduce(method.getIdentityScore(), method.getScoreReducer());
 			}
 		}
-	}
-
-	private List<ScoredPair> getScoredPairs(ScoreReading scoreReading,
-		Collection<Pair> possiblePairs, Predicate<Pair> pairFilter,
-		ForecastMethod method, int remainingIteration) {
-
-		return possiblePairs.stream()
-			.filter(pairFilter)
-			.map(pair -> {
-				int score = getScore(scoreReading, pair);
-				Predicate<Pair> nextPairsPredicate = pairFilter.and(Pair.afterAssignmentOf(pair));
-				// Recursive call
-				List<ScoredPair> nextScoredPairs = getScoredPairs(scoreReading,
-						possiblePairs, nextPairsPredicate, method, remainingIteration - 1);
-				score += reduceScore(nextScoredPairs, method);
-				debug("-- (%d) %s => %d", remainingIteration, pair, score);
-				return new ScoredPair(pair).setScore(score);
-			})
-			.sorted(SCORE_COMPARATOR)
-			.collect(Collectors.toList());
-	}
-
-	private static int reduceScore(List<ScoredPair> scoredPairs, ForecastMethod method) {
-		return scoredPairs.stream()
-				.map(ScoredPair::getScore)
-				.reduce(method.getIdentityScore(), method.getScoreReducer());
 	}
 }
