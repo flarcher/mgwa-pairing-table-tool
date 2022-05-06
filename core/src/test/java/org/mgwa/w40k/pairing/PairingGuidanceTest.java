@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.Score;
-import static org.mgwa.w40k.pairing.PairingGuidance.ScoredPair;
 
 import java.util.Iterator;
 import java.util.SortedSet;
@@ -69,6 +68,16 @@ public class PairingGuidanceTest {
 			counter.incrementAndGet();
 		});
 		Assert.assertEquals(count, counter.get());
+	}
+
+	@Test
+	public void testOfZero() {
+		PairingGuidance pg = new PairingGuidance(new Matrix(0), System.out::println);
+		Assignment assignment = Assignment.createEmpty(0);
+		Predicate<Pair> predicate = p -> true;
+		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(
+				ScoreReading.CONFIDENT, assignment, predicate, ForecastMethod.LUCKY_BUT_RISKY);
+		Assert.assertTrue(scoredPairs.isEmpty());
 	}
 
 	@Test
