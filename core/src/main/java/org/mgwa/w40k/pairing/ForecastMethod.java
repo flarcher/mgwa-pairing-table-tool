@@ -1,7 +1,6 @@
 package org.mgwa.w40k.pairing;
 
 import java.util.function.BinaryOperator;
-import java.util.function.Function;
 
 /**
  * Defines how to anticipate next pairings
@@ -22,10 +21,6 @@ public enum ForecastMethod {
 			return Math::max;
 		}
 
-		@Override
-		public boolean toBeDivided() {
-			return true;
-		}
 	},
 	/**
 	 * Uses the pairing that maximizes the average of scores.
@@ -38,13 +33,9 @@ public enum ForecastMethod {
 
 		@Override
 		public BinaryOperator<Integer> getScoreReducer() {
-			return (l, r) -> (l + r) / 2;
+			return Integer::sum;
 		}
 
-		@Override
-		public boolean toBeDivided() {
-			return false;
-		}
 	},
 
 	;
@@ -52,5 +43,4 @@ public enum ForecastMethod {
 	public abstract Integer getIdentityScore();
 	public abstract BinaryOperator<Integer> getScoreReducer();
 
-	public abstract boolean toBeDivided();
 }
