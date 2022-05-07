@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Contains the algorithm that suggest the best pairing.
@@ -34,7 +35,6 @@ public final class PairingGuidance {
 
 	private final Matrix matrix;
 	private final Optional<Consumer<String>> debugger;
-
 
 	private void debug(String template, Object... args) {
         debug(() -> String.format(template, args));
@@ -104,18 +104,85 @@ public final class PairingGuidance {
 		debug("Start with %d pairs, %d depth, %s scoring, %s method",
 				possiblePairs.size(), remainingIteration, scoreReading, method);
 		SortedSet<ScoredPair> result = new TreeSet<>(SCORE_COMPARATOR);
+		PairingState state = new PairingState(remainingIteration);
 		possiblePairs.stream()
 			.filter(nextPairFilter)
 			.forEach(nextPair -> {
-				int score = getScore(scoreReading, nextPair);
-				debug("- %s => %d + ?", nextPair, score);
-				PairingState state = new PairingState(remainingIteration).assign(nextPair);
-				score += getScore(scoreReading, possiblePairs, method, state); // here use the method
-				score /= (1 /* this assignment */ + state.getCloneCount());
-				debug("- %s => %d", nextPair, score);
-				result.add(new ScoredPair(nextPair).setScore(score));
+				int firstScore = getScore(scoreReading, nextPair);
+				debug("- %s => %d + ?", nextPair, firstScore);
+				PairingState newState = state.cloneIt().assign(nextPair);
+				Stream<Set<Pair>> possiblePaths = getPossiblePaths(possiblePairs, newState);
+				int totalScore = possiblePaths
+					.map(path -> {
+						int pathScore = getScore(scoreReading, path);
+						debug(() -> String.format("-- %s => %d",
+								path.stream().map(Objects::toString).collect(Collectors.joining("")),
+								pathScore));
+						return firstScore + pathScore;
+					})
+					.reduce(method.getIdentityScore(), method.getScoreReducer());
+				totalScore /= remainingIteration;
+				debug("- %s => %d", nextPair, totalScore);
+				result.add(new ScoredPair(nextPair).setScore(totalScore));
 			});
 		return Collections.unmodifiableSortedSet(result);
+	}
+
+	public static Stream<Set<Pair>> getPossiblePaths(Collection<Pair> possiblePairs, PairingState state) {
+		switch (state.getAssignLeftCount()) {
+			case 0:
+				return Stream.empty();
+			case 1: {
+				Pair lastPair = getOneAndOnly(possiblePairs.stream().filter(state));
+				Set<Pair> set = new HashSet<>(state.getSize());
+				set.add(lastPair);
+				return Stream.of(set);
+			}
+			case 2: {
+				return getAllPossiblePaths(possiblePairs, state);
+			}
+			default: {
+				Stream.Builder<Set<Pair>> resultBuilder = Stream.builder();
+				possiblePairs.stream()
+					.filter(state)
+					.forEach(startPair -> {
+						PairingState newState = state.cloneIt().assign(startPair);
+						List<Collection<Pair>> possiblePaths = getAllPossiblePaths(possiblePairs, newState).collect(Collectors.toList());
+						possiblePaths.stream()
+							//.filter(c -> possiblePaths.stream().noneMatch(c::containsAll))
+							.map(c -> {
+								Set<Pair> newSet = new HashSet<>(c);
+								newSet.add(startPair);
+								return newSet;
+							})
+							.forEach(resultBuilder::add);
+					});
+				// TODO: add filter: 36 au lieu de 9 à cause de l'ordre ?
+				return resultBuilder.build();
+			}
+		}
+	}
+
+	private static Stream<Set<Pair>> getAllPossiblePaths(Collection<Pair> possiblePairs, PairingState state) {
+		Stream.Builder<Set<Pair>> resultBuilder = Stream.builder();
+		possiblePairs.stream()
+				.filter(state)
+				.forEach(startPair -> {
+					PairingState newState = state.cloneIt().assign(startPair);
+					List<Collection<Pair>> possiblePaths = getPossiblePaths(possiblePairs, newState).collect(Collectors.toList());
+					possiblePaths.stream()
+							.map(c -> {
+								Set<Pair> newSet = new HashSet<>(c);
+								newSet.add(startPair);
+								return newSet;
+							})
+							.forEach(resultBuilder::add);
+				});
+		return resultBuilder.build();
+	}
+
+	private int getScore(ScoreReading scoreReading, Collection<Pair> pairs) {
+		return pairs.stream().map(p -> getScore(scoreReading, p)).reduce(0, Integer::sum);
 	}
 
 	private int getScore(ScoreReading scoreReading, Pair pair) {
@@ -125,6 +192,7 @@ public final class PairingGuidance {
 				String.format("No score at %d-%d", pair.getRow(), pair.getColumn()))));
 	}
 
+	/*
 	private int getScore(
 		ScoreReading scoreReading,
 		Collection<Pair> possiblePairs,
@@ -137,14 +205,7 @@ public final class PairingGuidance {
 				debug("---- (0) ø");
 				throw new IllegalStateException("Remains 0 iteration?");
 			case 1: {
-				Iterator<Pair> iterator = possiblePairs.stream().filter(state).iterator();
-				if (!iterator.hasNext()) {
-					throw new IllegalStateException("Remains 1 iteration but 0 pair");
-				}
-				Pair lastPair = iterator.next();
-				if (iterator.hasNext()) {
-					throw new IllegalStateException("Remains 1 iteration but several pairs");
-				}
+				Pair lastPair = getOneAndOnly(possiblePairs.stream().filter(state));
 				int score = getScore(scoreReading, lastPair);
 				//state.assign(lastPair); // Not needed
 				debug("--- (1) %s => %d", lastPair, score);
@@ -167,4 +228,18 @@ public final class PairingGuidance {
 			}
 		}
 	}
+	*/
+
+	private static <T> T getOneAndOnly(Stream<T> stream) {
+		Iterator<T> iterator = stream.iterator();
+		if (!iterator.hasNext()) {
+			throw new IllegalStateException("0 item");
+		}
+		T item = iterator.next();
+		if (iterator.hasNext()) {
+			throw new IllegalStateException("Several items");
+		}
+		return item;
+	}
+
 }

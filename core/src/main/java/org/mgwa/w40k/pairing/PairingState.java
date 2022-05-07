@@ -16,20 +16,21 @@ class PairingState implements Predicate<Pair>, Cloneable {
 	private PairingState(BitSet rowsSet, BitSet colsSet, int count) {
 		assignedRows = rowsSet;
 		assignedColumns = colsSet;
+		size = count;
 		remainingAssignment = count;
 	}
 
 	private final BitSet assignedRows;
 	private final BitSet assignedColumns;
+	private final int size;
 	private int remainingAssignment;
-	private int cloneCount = 0;
+
+	public int getSize() {
+		return  size;
+	}
 
 	public int getAssignLeftCount() {
 		return remainingAssignment;
-	}
-
-	public int getCloneCount() {
-		return cloneCount;
 	}
 
 	PairingState assign(Pair pair) {
@@ -53,7 +54,6 @@ class PairingState implements Predicate<Pair>, Cloneable {
 	}
 
 	protected PairingState cloneIt() {
-		cloneCount++;
 		return new PairingState(
 				(BitSet) assignedRows.clone(),
 				(BitSet) assignedColumns.clone(),
