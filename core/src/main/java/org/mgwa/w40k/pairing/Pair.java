@@ -10,20 +10,26 @@ import java.util.function.Predicate;
 @Immutable
 public class Pair {
 
+    private static short MAX_VALUE = 1 << 14;
+
     public static Pair of(int row, int column) {
-        if (row < 0 || column < 0) {
+        return of((short) row, (short) column);
+    }
+
+    public static Pair of(short row, short column) {
+        if (row < 0 || column < 0 || row >= MAX_VALUE || column >= MAX_VALUE) {
             throw new IllegalArgumentException("Illegal row/column index");
         }
         return new Pair(row, column);
     }
 
-    private Pair(int row, int column) {
+    private Pair(short row, short column) {
         this.row = row;
         this.column = column;
     }
 
-    private final int row;
-    private final int column;
+    private final short row;
+    private final short column;
 
     public int getRow() {
         return row;
@@ -43,7 +49,7 @@ public class Pair {
 
     @Override
     public int hashCode() {
-        return Objects.hash(row, column);
+        return row & (column << 15);
     }
 
     @Override
@@ -70,7 +76,7 @@ public class Pair {
         Collection<Pair> result = new ArrayList<>(possiblePairsCount(rows.size()));
         for (int row : rows) {
             for (int col : columns) {
-                result.add(new Pair(row, col));
+                result.add(new Pair((short) row, (short) col));
             }
         }
         return result;
