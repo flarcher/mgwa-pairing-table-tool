@@ -5,62 +5,93 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Utility class about the discovery of possible pairing paths.
+ * Class about the discovery of possible pairing paths.
  */
-final class PairingPath {
+class PairingPath {
 
-	private PairingPath() { } // Utility class
+	PairingPath(Collection<Pair> pairs) {
+		this.orderedPath = pairs.stream()
+			.mapToInt(Pair::uniqueValue)
+			.sorted()
+			.toArray();
+		this.pairs = pairs;
+	}
 
+	PairingPath(Pair pair) {
+		this.orderedPath = new int[]{ pair.uniqueValue() };
+		this.pairs = Collections.singletonList(pair);
+	}
 
-	public static Stream<Set<Pair>> getPossiblePaths(Collection<Pair> possiblePairs, PairingState state) {
+	private int[] orderedPath;
+	private final Collection<Pair> pairs;
+
+	public Collection<Pair> getPairs() {
+		return pairs;
+	}
+
+	int[] getSortedValues() {
+		return orderedPath;
+	}
+
+	PairingPath addPair(Pair pair) {
+		pairs.add(pair);
+		int[] newValues = Arrays.copyOf(orderedPath, pairs.size());
+		newValues[pairs.size() - 1] = pair.uniqueValue();
+		Arrays.sort(newValues);
+		orderedPath = newValues;
+		return this;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		PairingPath that = (PairingPath) o;
+		return Arrays.equals(orderedPath, that.orderedPath);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(orderedPath);
+	}
+
+	@Override
+	public String toString() {
+		return pairs.stream().map(Object::toString).collect(Collectors.joining("-"));
+	}
+
+	static Collection<PairingPath> getPossiblePaths(Collection<Pair> possiblePairs, PairingState state) {
 		switch (state.getAssignLeftCount()) {
 			case 0:
-				return Stream.empty();
+				return Collections.emptyList();
 			case 1: {
 				Pair lastPair = getOneAndOnly(possiblePairs.stream().filter(state));
-				Set<Pair> set = new HashSet<>(state.getSize());
-				set.add(lastPair);
-				return Stream.of(set);
+				ArrayList<Pair> pairs = new ArrayList<>(state.getSize());
+				pairs.add(lastPair);
+				return Collections.singletonList(new PairingPath(pairs));
 			}
 			case 2: {
-				return getAllPossiblePaths(possiblePairs, state);
+				return getAllPossiblePaths(possiblePairs, state)
+					.collect(Collectors.toList()); // A list is enough (no redundancy)
 			}
-			default: {
-				Stream.Builder<Set<Pair>> resultBuilder = Stream.builder();
-				possiblePairs.stream()
-					.filter(state)
-					.forEach(startPair -> {
-						PairingState newState = state.cloneIt().assign(startPair);
-						List<Collection<Pair>> possiblePaths = getAllPossiblePaths(possiblePairs, newState).collect(Collectors.toList());
-						possiblePaths.stream()
-							//.filter(c -> possiblePaths.stream().noneMatch(c::containsAll))
-							.map(c -> {
-								Set<Pair> newSet = new HashSet<>(c);
-								newSet.add(startPair);
-								return newSet;
-							})
-							.forEach(resultBuilder::add);
-					});
-				// TODO: add filter: 36 au lieu de 9 à cause de l'ordre ?
-				return resultBuilder.build();
+			default: { // > 2
+				return getAllPossiblePaths(possiblePairs, state)
+					.collect(Collectors.toSet()); // A set is needed for filtering of redundant paths
 			}
 		}
 	}
-	private static Stream<Set<Pair>> getAllPossiblePaths(Collection<Pair> possiblePairs, PairingState state) {
-		Stream.Builder<Set<Pair>> resultBuilder = Stream.builder();
+
+	private static Stream<PairingPath> getAllPossiblePaths(Collection<Pair> possiblePairs, PairingState state) {
+		Stream.Builder<PairingPath> resultBuilder = Stream.builder();
 		possiblePairs.stream()
-				.filter(state)
-				.forEach(startPair -> {
-					PairingState newState = state.cloneIt().assign(startPair);
-					List<Collection<Pair>> possiblePaths = getPossiblePaths(possiblePairs, newState).collect(Collectors.toList());
-					possiblePaths.stream()
-							.map(c -> {
-								Set<Pair> newSet = new HashSet<>(c);
-								newSet.add(startPair);
-								return newSet;
-							})
-							.forEach(resultBuilder::add);
-				});
+			.filter(state)
+			.forEach(startPair -> {
+				PairingState newState = state.cloneIt().assign(startPair);
+				getPossiblePaths(possiblePairs, newState)
+					.stream()
+					.map(path -> path.addPair(startPair))
+					.forEach(resultBuilder::add);
+			});
 		return resultBuilder.build();
 	}
 
