@@ -99,7 +99,6 @@ public final class PairingGuidance {
 				// See below
 		}
 
-		//String pairs = possiblePairs.stream().map(Object::toString).collect(Collectors.joining(","));
 		debug("Start with %d pairs, %d depth, %s scoring, %s method",
 				possiblePairs.size(), remainingIteration, scoreReading, method);
 		SortedSet<ScoredPair> result = new TreeSet<>(SCORE_COMPARATOR);
