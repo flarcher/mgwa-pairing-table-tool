@@ -8,7 +8,7 @@ import java.util.function.Predicate;
  * Immutable pairing.
  */
 @Immutable
-public class Pair {
+public class Pair implements Comparable<Pair> {
 
     private static short MAX_VALUE = 1 << 14;
 
@@ -39,6 +39,15 @@ public class Pair {
         return column;
     }
 
+    int uniqueValue() {
+        return row | (column << 15);
+    }
+
+    @Override
+    public int compareTo(Pair pair) {
+        return Integer.compare(uniqueValue(), pair.uniqueValue());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -49,7 +58,7 @@ public class Pair {
 
     @Override
     public int hashCode() {
-        return row & (column << 15);
+        return uniqueValue();
     }
 
     @Override

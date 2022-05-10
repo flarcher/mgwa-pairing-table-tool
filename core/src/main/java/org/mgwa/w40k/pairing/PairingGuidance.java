@@ -110,13 +110,11 @@ public final class PairingGuidance {
 				int firstScore = getScore(scoreReading, nextPair);
 				debug("- %s => %d + ?", nextPair, firstScore);
 				PairingState newState = state.cloneIt().assign(nextPair);
-				Stream<Set<Pair>> possiblePaths = PairingPath.getPossiblePaths(possiblePairs, newState);
-				int totalScore = possiblePaths
+				Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(possiblePairs, newState);
+				int totalScore = possiblePaths.stream()
 					.map(path -> {
-						int pathScore = getScore(scoreReading, path);
-						debug(() -> String.format("-- %s => %d",
-								path.stream().map(Objects::toString).collect(Collectors.joining("")),
-								pathScore));
+						int pathScore = getScore(scoreReading, path.getPairs());
+						debug(() -> String.format("-- %s => %d", path, pathScore));
 						return firstScore + pathScore;
 					})
 					.reduce(method.getIdentityScore(), method.getScoreReducer());
