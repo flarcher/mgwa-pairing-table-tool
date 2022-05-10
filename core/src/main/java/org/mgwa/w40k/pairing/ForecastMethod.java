@@ -33,7 +33,7 @@ public enum ForecastMethod {
 
 		@Override
 		public BinaryOperator<Integer> getScoreReducer() {
-			return Integer::sum;
+			return (l, r) -> (l + r) / 2;
 		}
 
 	},
