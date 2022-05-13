@@ -62,7 +62,7 @@ class PairingPath {
 		return pairs.stream().map(Object::toString).collect(Collectors.joining("-"));
 	}
 
-	static Collection<PairingPath> getPossiblePaths(Collection<Pair> possiblePairs, PairingState state) {
+	static Collection<PairingPath> getPossiblePaths(Collection<Pair> possiblePairs, PairingState state, boolean filterRedundantPath) {
 		switch (state.getAssignLeftCount()) {
 			case 0:
 				return Collections.emptyList();
@@ -77,8 +77,10 @@ class PairingPath {
 					.collect(Collectors.toList()); // A list is enough (no redundancy)
 			}
 			default: { // > 2
-				return getAllPossiblePaths(possiblePairs, state)
-					.collect(Collectors.toSet()); // A set is needed for filtering of redundant paths
+				Stream<PairingPath> allPossiblePaths = getAllPossiblePaths(possiblePairs, state);
+				return filterRedundantPath
+					? allPossiblePaths.collect(Collectors.toSet()) // A set is needed for filtering of redundant paths
+					: allPossiblePaths.collect(Collectors.toList()); // Returning several path of same pair in different orders
 			}
 		}
 	}
@@ -89,7 +91,7 @@ class PairingPath {
 			.filter(state)
 			.forEach(startPair -> {
 				PairingState newState = state.cloneIt().assign(startPair);
-				getPossiblePaths(possiblePairs, newState)
+				getPossiblePaths(possiblePairs, newState, false)
 					.stream()
 					.map(path -> path.addPair(startPair))
 					.forEach(resultBuilder::add);
