@@ -72,61 +72,68 @@ public class PairingGuidanceTest {
 
 	@Test
 	public void testOfZero() {
-		PairingGuidance pg = new PairingGuidance(new Matrix(0), System.out::println);
+		PairingGuidance pg = new PairingGuidance(new Matrix(0), System.out::println)
+				.setScoreReading(ScoreReading.CONFIDENT)
+				.setNextPairFilter(p -> true)
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(0);
-		Predicate<Pair> predicate = p -> true;
-		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(
-				ScoreReading.CONFIDENT, assignment, predicate, ForecastMethod.LUCKY_BUT_RISKY);
+		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
 		Assert.assertTrue(scoredPairs.isEmpty());
 	}
 
 	@Test
 	public void testOf1_confident() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of1(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of1(), System.out::println)
+				.setScoreReading(ScoreReading.CONFIDENT)
+				.setNextPairFilter(p -> true)
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(1);
-		Predicate<Pair> predicate = p -> true;
 		// Confident
-		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(
-				ScoreReading.CONFIDENT, assignment, predicate, ForecastMethod.LUCKY_BUT_RISKY);
-		checkScoredPairs(scoredPairs, predicate, 1);
+		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+		checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 1);
 		Assert.assertEquals(1, scoredPairs.size());
 		Assert.assertEquals(20, scoredPairs.iterator().next().getScore());
 	}
 
 	@Test
 	public void testOf1_pessimistic() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of1(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of1(), System.out::println)
+				.setScoreReading(ScoreReading.PESSIMISTIC)
+				.setNextPairFilter(p -> true)
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(1);
-		Predicate<Pair> predicate = p -> true;
 		// Confident
-		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(
-				ScoreReading.PESSIMISTIC, assignment, predicate, ForecastMethod.LUCKY_BUT_RISKY);
-		checkScoredPairs(scoredPairs, predicate, 1);
+		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+		checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 1);
 		Assert.assertEquals(1, scoredPairs.size());
 		Assert.assertEquals(0, scoredPairs.iterator().next().getScore());
 	}
 
 	@Test
 	public void testOf1_mitigated() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of1(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of1(), System.out::println)
+				.setScoreReading(ScoreReading.MITIGATED)
+				.setNextPairFilter(p -> true)
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(1);
-		Predicate<Pair> predicate = p -> true;
 		// Confident
-		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(
-				ScoreReading.MITIGATED, assignment, predicate, ForecastMethod.LUCKY_BUT_RISKY);
-		checkScoredPairs(scoredPairs, predicate, 1);
+		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+		checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 1);
 		Assert.assertEquals(1, scoredPairs.size());
 		Assert.assertEquals(10, scoredPairs.iterator().next().getScore());
 	}
 
 	@Test
 	public void testOf2_confident() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of2(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of2(), System.out::println)
+				.setScoreReading(ScoreReading.CONFIDENT)
+				.setNextPairFilter(Pair.isWithRow(0))
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(2);
-		Predicate<Pair> predicate = Pair.isWithRow(0);
 		for (ForecastMethod method : ForecastMethod.values()) {
-			SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(ScoreReading.CONFIDENT, assignment, predicate, method);
-			checkScoredPairs(scoredPairs, predicate, 2);
+			pg.setForecastMethod(method);
+			SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+			checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 2);
 			Iterator<ScoredPair> iterator = scoredPairs.iterator();
 			ScoredPair topPair = iterator.next();
 			Assert.assertEquals(15, topPair.getScore());
@@ -139,12 +146,15 @@ public class PairingGuidanceTest {
 
 	@Test
 	public void testOf2_mitigated() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of2(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of2(), System.out::println)
+				.setScoreReading(ScoreReading.MITIGATED)
+				.setNextPairFilter(Pair.isWithRow(0))
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(2);
-		Predicate<Pair> predicate = Pair.isWithRow(0);
 		for (ForecastMethod method : ForecastMethod.values()) {
-			SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(ScoreReading.MITIGATED, assignment, predicate, method);
-			checkScoredPairs(scoredPairs, predicate, 2);
+			pg.setForecastMethod(method);
+			SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+			checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 2);
 			Iterator<ScoredPair> iterator = scoredPairs.iterator();
 			ScoredPair topPair = iterator.next();
 			Assert.assertEquals(12, topPair.getScore());
@@ -157,12 +167,15 @@ public class PairingGuidanceTest {
 
 	@Test
 	public void testOf2_pessimistic() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of2(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of2(), System.out::println)
+				.setScoreReading(ScoreReading.PESSIMISTIC)
+				.setNextPairFilter(Pair.isWithRow(0))
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(2);
-		Predicate<Pair> predicate = Pair.isWithRow(0);
 		for (ForecastMethod method : ForecastMethod.values()) {
-			SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(ScoreReading.PESSIMISTIC, assignment, predicate, method);
-			checkScoredPairs(scoredPairs, predicate, 2);
+			pg.setForecastMethod(method);
+			SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+			checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 2);
 			Iterator<ScoredPair> iterator = scoredPairs.iterator();
 			ScoredPair topPair = iterator.next();
 			Assert.assertEquals(10, topPair.getScore());
@@ -178,12 +191,13 @@ public class PairingGuidanceTest {
 	 */
 	@Test
 	public void testOf3_confident_luckyForecast() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of3(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of3(), System.out::println)
+				.setScoreReading(ScoreReading.CONFIDENT)
+				.setNextPairFilter(Pair.isWithRow(0))
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
 		Assignment assignment = Assignment.createEmpty(3);
-		Predicate<Pair> predicate = Pair.isWithRow(0);
-		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(
-			ScoreReading.CONFIDENT, assignment, predicate, ForecastMethod.LUCKY_BUT_RISKY);
-		checkScoredPairs(scoredPairs, predicate, 3);
+		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+		checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 3);
 		Iterator<ScoredPair> iterator = scoredPairs.iterator();
 		ScoredPair topPair = iterator.next();
 		Assert.assertEquals(15, topPair.getScore());
@@ -201,12 +215,13 @@ public class PairingGuidanceTest {
 	 */
 	@Test
 	public void testOf3_confident_averageForecast() {
-		PairingGuidance pg = new PairingGuidance(createMatrix_of3(), System.out::println);
+		PairingGuidance pg = new PairingGuidance(createMatrix_of3(), System.out::println)
+				.setScoreReading(ScoreReading.CONFIDENT)
+				.setNextPairFilter(Pair.isWithRow(0))
+				.setForecastMethod(ForecastMethod.AVERAGE);
 		Assignment assignment = Assignment.createEmpty(3);
-		Predicate<Pair> predicate = Pair.isWithRow(0);
-		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(
-				ScoreReading.CONFIDENT, assignment, predicate, ForecastMethod.AVERAGE);
-		checkScoredPairs(scoredPairs, predicate, 3);
+		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
+		checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 3);
 		Iterator<ScoredPair> iterator = scoredPairs.iterator();
 		ScoredPair topPair = iterator.next();
 		Assert.assertEquals(16, topPair.getScore());

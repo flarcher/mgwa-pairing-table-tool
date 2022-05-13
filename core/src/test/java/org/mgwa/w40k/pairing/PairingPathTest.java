@@ -38,7 +38,7 @@ public class PairingPathTest {
 	private void testPossiblePath(int indexCount, int expectedPathCount) {
 		List<Integer> indexes = IntStream.range(0, indexCount).boxed().collect(Collectors.toList());
 		Collection<Pair> pairs = Pair.possiblePairs(indexes, indexes);
-		Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(pairs, new PairingState(indexCount));
+		Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(pairs, new PairingState(indexCount), true);
 		System.out.println(possiblePaths.stream()
 				.map(Objects::toString)
 				.collect(Collectors.joining("|")));

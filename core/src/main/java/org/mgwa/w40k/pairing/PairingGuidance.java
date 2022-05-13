@@ -8,8 +8,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Contains the algorithm that suggest the best pairing.
@@ -32,7 +30,57 @@ public final class PairingGuidance {
 		this.debugger = debugger;
 	}
 
+	// Inputs and parameters
 	private final Matrix matrix;
+	/** Policy about the reading of the score */
+	private ScoreReading scoreReading = ScoreReading.MITIGATED;
+	/** How the future paths will be considered */
+	private ForecastMethod forecastMethod = ForecastMethod.AVERAGE;
+	private boolean filterRedundantPath = true;
+	/** Filter for next pairs */
+	private Predicate<Pair> nextPairFilter = p -> true;
+
+	public Matrix getMatrix() {
+		return matrix;
+	}
+
+	public ScoreReading getScoreReading() {
+		return scoreReading;
+	}
+
+	public PairingGuidance setScoreReading(ScoreReading scoreReading) {
+		this.scoreReading = Objects.requireNonNull(scoreReading);
+		return this;
+	}
+
+	public ForecastMethod getForecastMethod() {
+		return forecastMethod;
+	}
+
+	public PairingGuidance setForecastMethod(ForecastMethod forecastMethod) {
+		this.forecastMethod = Objects.requireNonNull(forecastMethod);
+		return this;
+	}
+
+	public boolean isFilterRedundantPath() {
+		return filterRedundantPath;
+	}
+
+	public PairingGuidance setFilterRedundantPath(boolean filterRedundantPath) {
+		this.filterRedundantPath = filterRedundantPath;
+		return this;
+	}
+
+	public Predicate<Pair> getNextPairFilter() {
+		return nextPairFilter;
+	}
+
+	public PairingGuidance setNextPairFilter(Predicate<Pair> nextPairFilter) {
+		this.nextPairFilter = Objects.requireNonNull(nextPairFilter);
+		return this;
+	}
+
+	// Logging
 	private final Optional<Consumer<String>> debugger;
 
 	private void debug(String template, Object... args) {
@@ -43,6 +91,7 @@ public final class PairingGuidance {
         debugger.ifPresent(debugger -> debugger.accept(msg.get()));
     }
 
+	// Algorithm
 	private static final Comparator<ScoredPair> SCORE_COMPARATOR = Comparator
 			.comparingInt(ScoredPair::getScore) // Score is compared at first
 			.reversed() // Descending order
@@ -51,37 +100,20 @@ public final class PairingGuidance {
 			.thenComparingInt(sp -> sp.getPair().getColumn());
 
 	/**
-	 * @param scoreReading Policy about the reading of the score.
 	 * @param assignment Current tables assignment.
-	 * @param nextPairFilter Filters for next pairs.
-	 * @param method How the future paths will be considered.
 	 * @return A sorted suggestion for the next pair to be considered.
 	 */
-	public SortedSet<ScoredPair> suggestPairing(
-			ScoreReading scoreReading,
-			Assignment assignment,
-			Predicate<Pair> nextPairFilter,
-			ForecastMethod method) {
-
-		return suggestPairing(scoreReading,
-				assignment.possiblePairs(),
-				nextPairFilter,
-				method,
-				assignment.getUnassignedTableCount());
+	public SortedSet<ScoredPair> suggestPairing(Assignment assignment) {
+		return suggestPairing(assignment.possiblePairs(), assignment.getUnassignedTableCount());
 	}
 
 	/**
-	 * @param scoreReading Policy about the reading of the score.
 	 * @param possiblePairs All possible pairs to sort.
-	 * @param nextPairFilter Filters for next possible pairs.
-	 * @param method How the future paths will be considered.
+	 * @param remainingIteration Remaining assignment count.
 	 * @return A sorted suggestion for the next pair to be considered.
 	 */
 	public SortedSet<ScoredPair> suggestPairing(
-			ScoreReading scoreReading,
 			Collection<Pair> possiblePairs,
-			Predicate<Pair> nextPairFilter,
-			ForecastMethod method,
 			int remainingIteration) {
 
 		switch (remainingIteration) {
@@ -100,7 +132,7 @@ public final class PairingGuidance {
 		}
 
 		debug("Start with %d pairs, %d depth, %s scoring, %s method",
-				possiblePairs.size(), remainingIteration, scoreReading, method);
+				possiblePairs.size(), remainingIteration, scoreReading, forecastMethod);
 		SortedSet<ScoredPair> result = new TreeSet<>(SCORE_COMPARATOR);
 		PairingState state = new PairingState(remainingIteration);
 		possiblePairs.stream()
@@ -110,22 +142,33 @@ public final class PairingGuidance {
 				debug("- %s => %d + ?", nextPair, firstScore);
 				PairingState newState = state.cloneIt().assign(nextPair);
 				Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(possiblePairs, newState, filterRedundantPath);
-				int totalScore = possiblePaths.stream()
-					.map(path -> {
-						int pathScore = getScore(scoreReading, path.getPairs());
-						debug(() -> String.format("-- %s => %d", path, pathScore));
-						return firstScore + pathScore;
-					})
-					.reduce(method.getIdentityScore(), method.getScoreReducer());
-				totalScore /= remainingIteration;
-				debug("- %s => %d", nextPair, totalScore);
-				result.add(new ScoredPair(nextPair).setScore(totalScore));
+				int reducedScore = getReducedScore(possiblePaths, remainingIteration, firstScore);
+				int finalScore = forecastMethod.getFinalizer(reducedScore, remainingIteration);
+				finalScore /= remainingIteration;
+				debug("- %s => %d", nextPair, finalScore);
+				result.add(new ScoredPair(nextPair).setScore(finalScore));
 			});
 		return Collections.unmodifiableSortedSet(result);
 	}
 
-	private int getScore(ScoreReading scoreReading, Collection<Pair> pairs) {
-		return pairs.stream().map(p -> getScore(scoreReading, p)).reduce(0, Integer::sum);
+	private int getReducedScore(Collection<PairingPath> possiblePaths, int remainingIteration, int add) {
+		switch (remainingIteration) {
+			case 0:
+				return Score.DEFAULT_VALUE;
+			case 1:
+				// TODO
+		}
+		int reducedScore = possiblePaths.stream()
+			.map(path -> {
+				// TODO: make recursive call
+				int pathScore = path.getPairs().stream()
+					.map(p -> getScore(scoreReading, p))
+					.reduce(0, Integer::sum);
+				debug(() -> String.format("-- %s => %d", path, pathScore));
+				return add + pathScore;
+			})
+			.reduce(forecastMethod.getIdentityScore(), forecastMethod.getScoreReducer());
+		return reducedScore;
 	}
 
 	private int getScore(ScoreReading scoreReading, Pair pair) {
@@ -134,43 +177,5 @@ public final class PairingGuidance {
 			() -> new IllegalStateException(
 				String.format("No score at %d-%d", pair.getRow(), pair.getColumn()))));
 	}
-
-	/*
-	private int getScore(
-		ScoreReading scoreReading,
-		Collection<Pair> possiblePairs,
-		ForecastMethod method,
-		PairingState state) {
-
-		// First, consider trivial cases
-		switch (state.getAssignLeftCount()) {
-			case 0:
-				debug("---- (0) ø");
-				throw new IllegalStateException("Remains 0 iteration?");
-			case 1: {
-				Pair lastPair = getOneAndOnly(possiblePairs.stream().filter(state));
-				int score = getScore(scoreReading, lastPair);
-				//state.assign(lastPair); // Not needed
-				debug("--- (1) %s => %d", lastPair, score);
-				return score;
-			}
-			default: {
-				return possiblePairs.stream()
-					.filter(state)
-					.map(pair -> {
-						int score = getScore(scoreReading, pair);
-						PairingState newState = state.cloneIt().assign(pair);
-						debug("-- (%d) %s => %d + ?", state.getAssignLeftCount(), pair, score);
-						//-- Recursive call
-						score += getScore(scoreReading, possiblePairs, method, newState); // here use the method
-						//--
-						debug("-- (%d) %s => %d", state.getAssignLeftCount(), pair, score);
-						return score;
-					})
-					.reduce(0, Integer::sum);
-			}
-		}
-	}
-	*/
 
 }
