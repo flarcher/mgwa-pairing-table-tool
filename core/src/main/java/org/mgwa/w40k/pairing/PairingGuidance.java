@@ -109,7 +109,7 @@ public final class PairingGuidance {
 				int firstScore = getScore(scoreReading, nextPair);
 				debug("- %s => %d + ?", nextPair, firstScore);
 				PairingState newState = state.cloneIt().assign(nextPair);
-				Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(possiblePairs, newState);
+				Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(possiblePairs, newState, filterRedundantPath);
 				int totalScore = possiblePaths.stream()
 					.map(path -> {
 						int pathScore = getScore(scoreReading, path.getPairs());
