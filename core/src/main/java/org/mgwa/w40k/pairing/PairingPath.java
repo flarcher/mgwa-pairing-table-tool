@@ -1,5 +1,7 @@
 package org.mgwa.w40k.pairing;
 
+import org.mgwa.w40k.pairing.util.CollectionUtils;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,7 +67,7 @@ class PairingPath {
 			case 0:
 				return Collections.emptyList();
 			case 1: {
-				Pair lastPair = getOneAndOnly(possiblePairs.stream().filter(state));
+				Pair lastPair = CollectionUtils.getOneAndOnly(possiblePairs.stream().filter(state));
 				ArrayList<Pair> pairs = new ArrayList<>(state.getSize());
 				pairs.add(lastPair);
 				return Collections.singletonList(new PairingPath(pairs));
@@ -93,18 +95,6 @@ class PairingPath {
 					.forEach(resultBuilder::add);
 			});
 		return resultBuilder.build();
-	}
-
-	private static <T> T getOneAndOnly(Stream<T> stream) {
-		Iterator<T> iterator = stream.iterator();
-		if (!iterator.hasNext()) {
-			throw new IllegalStateException("0 item");
-		}
-		T item = iterator.next();
-		if (iterator.hasNext()) {
-			throw new IllegalStateException("Several items");
-		}
-		return item;
 	}
 
 }
