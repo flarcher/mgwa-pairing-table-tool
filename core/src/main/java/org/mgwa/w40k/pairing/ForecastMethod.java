@@ -23,7 +23,7 @@ public enum ForecastMethod {
 		}
 
 		@Override
-		public int getFinalizer(int reducedScore, int depth) {
+		public int getFinalizer(int reducedScore, int count) {
 			return reducedScore;
 		}
 	},
@@ -42,8 +42,8 @@ public enum ForecastMethod {
 		}
 
 		@Override
-		public int getFinalizer(int reducedScore, int depth) {
-			return reducedScore / depth;
+		public int getFinalizer(int reducedScore, int count) {
+			return reducedScore / count;
 		}
 	},
 
@@ -51,5 +51,5 @@ public enum ForecastMethod {
 
 	public abstract Integer getIdentityScore();
 	public abstract BinaryOperator<Integer> getScoreReducer();
-	public abstract int getFinalizer(int reducedScore, int depth);
+	public abstract int getFinalizer(int reducedScore, int count);
 }

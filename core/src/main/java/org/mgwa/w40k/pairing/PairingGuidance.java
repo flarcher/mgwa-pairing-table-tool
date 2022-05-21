@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Contains the algorithm that suggest the best pairing.
@@ -123,7 +124,7 @@ public final class PairingGuidance {
 				SortedSet<ScoredPair> result = new TreeSet<>(SCORE_COMPARATOR);
 				possiblePairs.stream()
 						.filter(nextPairFilter)
-						.map(p -> new ScoredPair(p).setScore(getScore(scoreReading, p)))
+						.map(p -> new ScoredPair(p).setScore(getScore(p)))
 						.forEach(result::add);
 				return Collections.unmodifiableSortedSet(result);
 			}
@@ -138,40 +139,36 @@ public final class PairingGuidance {
 		possiblePairs.stream()
 			.filter(nextPairFilter)
 			.forEach(nextPair -> {
-				int firstScore = getScore(scoreReading, nextPair);
-				debug("- %s => %d + ?", nextPair, firstScore);
+				debug("- %s => ?", nextPair);
 				PairingState newState = state.cloneIt().assign(nextPair);
 				Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(possiblePairs, newState, filterRedundantPath);
-				int reducedScore = getReducedScore(possiblePaths, remainingIteration, firstScore);
-				int finalScore = forecastMethod.getFinalizer(reducedScore, remainingIteration);
-				finalScore /= remainingIteration;
-				debug("- %s => %d", nextPair, finalScore);
+				//debug("- %s =>\n%s", nextPair, possiblePaths.stream().map(Object::toString).collect(Collectors.joining("\n")));
+				possiblePaths.forEach(path -> path.addPair(nextPair));
+				int reducedScore = getReducedScore(possiblePaths);
+				int finalScore = forecastMethod.getFinalizer(reducedScore, possiblePaths.size());
+				debug("- %s => %d (%d)", nextPair, finalScore, reducedScore);
 				result.add(new ScoredPair(nextPair).setScore(finalScore));
 			});
 		return Collections.unmodifiableSortedSet(result);
 	}
 
-	private int getReducedScore(Collection<PairingPath> possiblePaths, int remainingIteration, int add) {
-		switch (remainingIteration) {
-			case 0:
-				return Score.DEFAULT_VALUE;
-			case 1:
-				// TODO
-		}
+	private int getReducedScore(Collection<PairingPath> possiblePaths) {
 		int reducedScore = possiblePaths.stream()
 			.map(path -> {
-				// TODO: make recursive call
-				int pathScore = path.getPairs().stream()
-					.map(p -> getScore(scoreReading, p))
-					.reduce(0, Integer::sum);
+				int pathScore = getScore(path);
 				debug(() -> String.format("-- %s => %d", path, pathScore));
-				return add + pathScore;
+				return pathScore;
 			})
 			.reduce(forecastMethod.getIdentityScore(), forecastMethod.getScoreReducer());
 		return reducedScore;
 	}
 
-	private int getScore(ScoreReading scoreReading, Pair pair) {
+	private int getScore(PairingPath path) {
+		int sum = path.getPairs().stream().map(this::getScore).reduce(0, Integer::sum);
+		return sum / path.length();
+	}
+
+	private int getScore(Pair pair) {
 		Optional<Score> score = matrix.getScore(pair.getRow(), pair.getColumn());
 		return scoreReading.readScore(score.orElseThrow(
 			() -> new IllegalStateException(
