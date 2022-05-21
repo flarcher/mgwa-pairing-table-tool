@@ -44,6 +44,10 @@ class PairingPath {
 		return this;
 	}
 
+	public int length() {
+		return orderedPath.length;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -65,12 +69,14 @@ class PairingPath {
 	static Collection<PairingPath> getPossiblePaths(Collection<Pair> possiblePairs, PairingState state, boolean filterRedundantPath) {
 		switch (state.getAssignLeftCount()) {
 			case 0:
-				return Collections.emptyList();
+				return new ArrayList<>(0);
 			case 1: {
 				Pair lastPair = CollectionUtils.getOneAndOnly(possiblePairs.stream().filter(state));
 				ArrayList<Pair> pairs = new ArrayList<>(state.getSize());
 				pairs.add(lastPair);
-				return Collections.singletonList(new PairingPath(pairs));
+				ArrayList<PairingPath> result = new ArrayList<>(1);
+				result.add(new PairingPath(pairs));
+				return result;
 			}
 			case 2: {
 				return getAllPossiblePaths(possiblePairs, state)

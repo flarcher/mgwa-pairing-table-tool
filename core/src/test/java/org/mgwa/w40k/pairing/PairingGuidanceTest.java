@@ -194,7 +194,8 @@ public class PairingGuidanceTest {
 		PairingGuidance pg = new PairingGuidance(createMatrix_of3(), System.out::println)
 				.setScoreReading(ScoreReading.CONFIDENT)
 				.setNextPairFilter(Pair.isWithRow(0))
-				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);
+				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY)
+				.setFilterRedundantPath(true);
 		Assignment assignment = Assignment.createEmpty(3);
 		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
 		checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 3);
@@ -218,19 +219,20 @@ public class PairingGuidanceTest {
 		PairingGuidance pg = new PairingGuidance(createMatrix_of3(), System.out::println)
 				.setScoreReading(ScoreReading.CONFIDENT)
 				.setNextPairFilter(Pair.isWithRow(0))
-				.setForecastMethod(ForecastMethod.AVERAGE);
+				.setForecastMethod(ForecastMethod.AVERAGE)
+				.setFilterRedundantPath(true);
 		Assignment assignment = Assignment.createEmpty(3);
 		SortedSet<ScoredPair> scoredPairs = pg.suggestPairing(assignment);
 		checkScoredPairs(scoredPairs, pg.getNextPairFilter(), 3);
 		Iterator<ScoredPair> iterator = scoredPairs.iterator();
 		ScoredPair topPair = iterator.next();
-		Assert.assertEquals(16, topPair.getScore());
+		Assert.assertEquals(12, topPair.getScore());
+		Assert.assertEquals(Pair.of(0, 1), topPair.getPair());
+		topPair = iterator.next();
+		Assert.assertEquals(12, topPair.getScore());
 		Assert.assertEquals(Pair.of(0, 2), topPair.getPair());
 		topPair = iterator.next();
-		Assert.assertEquals(15, topPair.getScore());
+		Assert.assertEquals(11, topPair.getScore());
 		Assert.assertEquals(Pair.of(0, 0), topPair.getPair());
-		topPair = iterator.next();
-		Assert.assertEquals(15, topPair.getScore());
-		Assert.assertEquals(Pair.of(0, 1), topPair.getPair());
 	}
 }
