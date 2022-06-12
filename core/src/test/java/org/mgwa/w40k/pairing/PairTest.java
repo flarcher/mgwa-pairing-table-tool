@@ -57,4 +57,9 @@ public class PairTest {
         Assert.assertTrue(pairs.contains(Pair.of(6,7)));
     }
 
+	@Test
+	public void testPairUniqueValue() {
+		Assert.assertEquals(32770, Pair.of(2,1).uniqueValue());
+		Assert.assertEquals(65537, Pair.of(1,2).uniqueValue());
+	}
 }

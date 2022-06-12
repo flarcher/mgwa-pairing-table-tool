@@ -23,8 +23,8 @@ public enum ForecastMethod {
 		}
 
 		@Override
-		public boolean toBeDivided() {
-			return true;
+		public int getFinalizer(int reducedScore, int count) {
+			return reducedScore;
 		}
 	},
 	/**
@@ -38,12 +38,12 @@ public enum ForecastMethod {
 
 		@Override
 		public BinaryOperator<Integer> getScoreReducer() {
-			return (l, r) -> (l + r) / 2;
+			return Integer::sum;
 		}
 
 		@Override
-		public boolean toBeDivided() {
-			return false;
+		public int getFinalizer(int reducedScore, int count) {
+			return reducedScore / count;
 		}
 	},
 
@@ -51,6 +51,5 @@ public enum ForecastMethod {
 
 	public abstract Integer getIdentityScore();
 	public abstract BinaryOperator<Integer> getScoreReducer();
-
-	public abstract boolean toBeDivided();
+	public abstract int getFinalizer(int reducedScore, int count);
 }

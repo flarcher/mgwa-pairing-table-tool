@@ -8,13 +8,12 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Contains the algorithm that suggest the best pairing.
  */
 public final class PairingGuidance {
-
-	private static final int DEFAULT_SCORE = 0;
 
 	public PairingGuidance(@Nonnull Matrix matrix) {
 		this(matrix, Optional.empty());
@@ -32,200 +31,148 @@ public final class PairingGuidance {
 		this.debugger = debugger;
 	}
 
+	// Inputs and parameters
 	private final Matrix matrix;
-	private final Optional<Consumer<String>> debugger;
+	/** Policy about the reading of the score */
+	private ScoreReading scoreReading = ScoreReading.MITIGATED;
+	/** How the future paths will be considered */
+	private ForecastMethod forecastMethod = ForecastMethod.AVERAGE;
+	private boolean filterRedundantPath = true;
+	/** Filter for next pairs */
+	private Predicate<Pair> nextPairFilter = p -> true;
 
-	public static class ScoredPair implements
-			Comparable<ScoredPair>,
-			Consumer<ScoredPair> {
-
-		private ScoredPair(@Nonnull Pair pair) {
-			this.pair = Objects.requireNonNull(pair);
-			this.score = 0;
-		}
-
-		private final Pair pair;
-		private int score = 0;
-
-		public Pair getPair() {
-			return pair;
-		}
-
-		public int getScore() {
-			return score;
-		}
-
-		public ScoredPair setScore(int score) {
-			this.score = score;
-			return this;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("[%d,%d]=%d", pair.getRow(), pair.getColumn(), score);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			ScoredPair that = (ScoredPair) o;
-			return SCORED_PAIR_COMPARATOR.compare(this, that) == 0;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(pair, score);
-		}
-
-		@Override
-		public int compareTo(ScoredPair o) {
-			return SCORED_PAIR_COMPARATOR.compare(this, o);
-		}
-
-		public ScoredPair addScore(int add) {
-			score += add;
-			return this;
-		}
-
-		private boolean addScore(ScoredPair scoredPair) {
-			if (scoredPair.getPair().equals(pair)) {
-				addScore(scoredPair.score);
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public void accept(ScoredPair scoredPair) {
-			addScore(scoredPair);
-		}
+	public Matrix getMatrix() {
+		return matrix;
 	}
 
-	private static final Comparator<ScoredPair> SCORED_PAIR_COMPARATOR = Comparator.<ScoredPair>
-			comparingInt(sp -> sp.pair.getRow())
-			.thenComparingInt(sp -> sp.pair.getColumn())
-			// Then, the pairs are the same: thus, we can compare the score
-			.thenComparingInt(sp -> sp.score);
+	public ScoreReading getScoreReading() {
+		return scoreReading;
+	}
 
+	public PairingGuidance setScoreReading(ScoreReading scoreReading) {
+		this.scoreReading = Objects.requireNonNull(scoreReading);
+		return this;
+	}
+
+	public ForecastMethod getForecastMethod() {
+		return forecastMethod;
+	}
+
+	public PairingGuidance setForecastMethod(ForecastMethod forecastMethod) {
+		this.forecastMethod = Objects.requireNonNull(forecastMethod);
+		return this;
+	}
+
+	public boolean isFilterRedundantPath() {
+		return filterRedundantPath;
+	}
+
+	public PairingGuidance setFilterRedundantPath(boolean filterRedundantPath) {
+		this.filterRedundantPath = filterRedundantPath;
+		return this;
+	}
+
+	public Predicate<Pair> getNextPairFilter() {
+		return nextPairFilter;
+	}
+
+	public PairingGuidance setNextPairFilter(Predicate<Pair> nextPairFilter) {
+		this.nextPairFilter = Objects.requireNonNull(nextPairFilter);
+		return this;
+	}
+
+	// Logging
+	private final Optional<Consumer<String>> debugger;
+
+	private void debug(String template, Object... args) {
+        debug(() -> String.format(template, args));
+    }
+
+	private void debug(Supplier<String> msg) {
+        debugger.ifPresent(debugger -> debugger.accept(msg.get()));
+    }
+
+	// Algorithm
 	private static final Comparator<ScoredPair> SCORE_COMPARATOR = Comparator
 			.comparingInt(ScoredPair::getScore) // Score is compared at first
 			.reversed() // Descending order
 			// Then, make sure that it is not equal for different pairs
-			.thenComparingInt(sp -> sp.pair.getRow())
-			.thenComparingInt(sp -> sp.pair.getColumn());
+			.thenComparingInt(sp -> sp.getPair().getRow())
+			.thenComparingInt(sp -> sp.getPair().getColumn());
 
 	/**
-	 * @param scoreReading Policy about the reading of the score.
 	 * @param assignment Current tables assignment.
-	 * @param nextPairFilter Filters for next pairs.
-	 * @param method How the future paths will be considered.
 	 * @return A sorted suggestion for the next pair to be considered.
 	 */
-	public SortedSet<ScoredPair> suggestPairing(
-			ScoreReading scoreReading,
-			Assignment assignment,
-			Predicate<Pair> nextPairFilter,
-			ForecastMethod method) {
-
-		return suggestPairing(scoreReading,
-				assignment.possiblePairs(),
-				nextPairFilter,
-				method,
-				assignment.getUnassignedTableCount());
-	}
-
-	private void debug(String template, Object... args) {
-		debug(() -> String.format(template, args));
-	}
-
-	private void debug(Supplier<String> msg) {
-		debugger.ifPresent(debugger -> debugger.accept(msg.get()));
+	public SortedSet<ScoredPair> suggestPairing(Assignment assignment) {
+		return suggestPairing(assignment.possiblePairs(), assignment.getUnassignedTableCount());
 	}
 
 	/**
-	 * @param scoreReading Policy about the reading of the score.
 	 * @param possiblePairs All possible pairs to sort.
-	 * @param nextPairFilter Filters for next possible pairs.
-	 * @param method How the future paths will be considered.
+	 * @param remainingIteration Remaining assignment count.
 	 * @return A sorted suggestion for the next pair to be considered.
 	 */
 	public SortedSet<ScoredPair> suggestPairing(
-			ScoreReading scoreReading,
 			Collection<Pair> possiblePairs,
-			Predicate<Pair> nextPairFilter,
-			ForecastMethod method,
 			int remainingIteration) {
 
-		//String pairs = possiblePairs.stream().map(Object::toString).collect(Collectors.joining(","));
+		switch (remainingIteration) {
+			case 0:
+				return Collections.emptySortedSet();
+			case 1: {
+				SortedSet<ScoredPair> result = new TreeSet<>(SCORE_COMPARATOR);
+				possiblePairs.stream()
+						.filter(nextPairFilter)
+						.map(p -> new ScoredPair(p).setScore(getScore(p)))
+						.forEach(result::add);
+				return Collections.unmodifiableSortedSet(result);
+			}
+			default:
+				// See below
+		}
+
 		debug("Start with %d pairs, %d depth, %s scoring, %s method",
-				possiblePairs.size(), remainingIteration, scoreReading, method);
+				possiblePairs.size(), remainingIteration, scoreReading, forecastMethod);
 		SortedSet<ScoredPair> result = new TreeSet<>(SCORE_COMPARATOR);
+		PairingState state = new PairingState(remainingIteration);
 		possiblePairs.stream()
 			.filter(nextPairFilter)
 			.forEach(nextPair -> {
 				debug("- %s => ?", nextPair);
-				Set<Pair> assignedPairs = new HashSet<>(remainingIteration);
-				Predicate<Pair> pairFilter = Pair
-						.afterAssignmentOf(nextPair)
-						.or(Predicate.isEqual(nextPair))
-						.and(Predicate.not(assignedPairs::contains));
-				int score = getScore(scoreReading, possiblePairs, pairFilter, method, assignedPairs, remainingIteration);
-				if (method.toBeDivided()) {
-					score /= remainingIteration;
-				}
-				debug("- %s => %d", nextPair, score);
-				result.add(new ScoredPair(nextPair).setScore(score));
+				PairingState newState = state.cloneIt().assign(nextPair);
+				Collection<PairingPath> possiblePaths = PairingPath.getPossiblePaths(possiblePairs, newState, filterRedundantPath);
+				//debug("- %s =>\n%s", nextPair, possiblePaths.stream().map(Object::toString).collect(Collectors.joining("\n")));
+				possiblePaths.forEach(path -> path.addPair(nextPair));
+				int reducedScore = getReducedScore(possiblePaths);
+				int finalScore = forecastMethod.getFinalizer(reducedScore, possiblePaths.size());
+				debug("- %s => %d (%d)", nextPair, finalScore, reducedScore);
+				result.add(new ScoredPair(nextPair).setScore(finalScore));
 			});
-		return result;
+		return Collections.unmodifiableSortedSet(result);
 	}
 
-	private int getScore(ScoreReading scoreReading, Pair pair) {
+	private int getReducedScore(Collection<PairingPath> possiblePaths) {
+		int reducedScore = possiblePaths.stream()
+			.map(path -> {
+				int pathScore = getScore(path);
+				debug(() -> String.format("-- %s => %d", path, pathScore));
+				return pathScore;
+			})
+			.reduce(forecastMethod.getIdentityScore(), forecastMethod.getScoreReducer());
+		return reducedScore;
+	}
+
+	private int getScore(PairingPath path) {
+		int sum = path.getPairs().stream().map(this::getScore).reduce(0, Integer::sum);
+		return sum / path.length();
+	}
+
+	private int getScore(Pair pair) {
 		Optional<Score> score = matrix.getScore(pair.getRow(), pair.getColumn());
 		return scoreReading.readScore(score.orElseThrow(
 			() -> new IllegalStateException(
 				String.format("No score at %d-%d", pair.getRow(), pair.getColumn()))));
 	}
 
-	private int getScore(
-		ScoreReading scoreReading,
-		Collection<Pair> possiblePairs,
-		Predicate<Pair> pairFilter,
-		ForecastMethod method,
-		Set<Pair> assignedPairs,
-		int remainingIteration) {
-
-		// First, consider trivial cases
-		switch (remainingIteration) {
-			case 0:
-				return DEFAULT_SCORE;
-			case 1: {
-				// TODO: check that there is at most one pair
-				Pair lastPair = possiblePairs.stream()
-					.filter(pairFilter).findAny().orElseThrow(
-						() -> new IllegalStateException("Remains 1 iteration but 0 pair"));
-				int score = getScore(scoreReading, lastPair);
-				assignedPairs.add(lastPair);
-				debug("--- (1) %s => %d", lastPair, score);
-				return score;
-			}
-			default: {
-				return possiblePairs.stream()
-					.filter(pairFilter)
-					.map(pair -> {
-						int score = getScore(scoreReading, pair);
-						assignedPairs.add(pair);
-						Predicate<Pair> nextPairsPredicate = pairFilter.and(Pair.afterAssignmentOf(pair));
-						debug("-- (%d) %s => %d + ?", remainingIteration, pair, score);
-						//-- Recursive call
-						score += getScore(scoreReading,
-								possiblePairs, nextPairsPredicate, method, assignedPairs, remainingIteration - 1);
-						//--
-						debug("-- (%d) %s => %d", remainingIteration, pair, score);
-						return score;
-					})
-					.reduce(method.getIdentityScore(), method.getScoreReducer());
-			}
-		}
-	}
 }
