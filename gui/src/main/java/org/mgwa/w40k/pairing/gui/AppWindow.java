@@ -2,17 +2,22 @@ package org.mgwa.w40k.pairing.gui;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.LabelGetter;
 import org.mgwa.w40k.pairing.gui.scene.*;
+import org.mgwa.w40k.pairing.matrix.Score;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
 import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixReader;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * <h1>JavaFX application main class.</h1>
@@ -77,6 +82,16 @@ public class AppWindow extends Application {
 
 	private static final int DEFAULT_ARMY_COUNT = 3;
 
+	private Matrix loadMatrixDefault() {
+		List<String> names = IntStream.range(0, state.getArmyCount())
+				.mapToObj(Integer::toString)
+				.collect(Collectors.toList());
+		Matrix matrix = Matrix.createWithoutScores(
+				Army.createArmies(names, true),
+				Army.createArmies(names, false));
+		return matrix.setDefaultScore(Score.newDefault());
+	}
+
 	private Matrix loadMatrixFile(Path path) {
 		// Waiting loading the file
 		try (MatrixReader matrixReader = XlsMatrixReader.fromFile(path.toFile())) {
@@ -101,7 +116,7 @@ public class AppWindow extends Application {
 				matrix = loadMatrixFile(path);
 			} else {
 				logger.info("Using empty matrix");
-				matrix = new Matrix(DEFAULT_ARMY_COUNT);
+				matrix = loadMatrixDefault();
 			}
 			state.setMatrix(matrix);
 		}

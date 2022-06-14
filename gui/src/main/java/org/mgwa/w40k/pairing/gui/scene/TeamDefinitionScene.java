@@ -8,12 +8,14 @@ import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.text.Text;
+import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 public class TeamDefinitionScene extends AbstractMainScene {
 
@@ -33,6 +35,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 	private final Text tableTokenLabel;
 	private final FileChooser fileChooser = new FileChooser();
 	private final Text fileName;
+	private final TextField armyCount = NodeFactory.createIntegerField(AppState.DEFAULT_ARMY_COUNT, 50);
 
 	private String filePath(Optional<Path> path) {
 		return path.map(Path::toString).orElse(labelGetter.apply("no.file.selected"));
@@ -40,6 +43,8 @@ public class TeamDefinitionScene extends AbstractMainScene {
 
 	@Override
 	protected void buildScene(AppState state, Stage stage) {
+
+		Logger logger = LoggerSupplier.INSTANCE.getLogger();
 
 		addNode(nameLabel, getRowIndex(), 1, 1, 1, HPos.CENTER);
 		addNode(tableTokenLabel, getRowIndex(), 2, 1, 1, HPos.CENTER);
@@ -83,6 +88,15 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		addNode(fileName, getRowIndex(), 1, 1, 2, HPos.LEFT);
 		newRow();
 
+		armyCount.textProperty().addListener((obs, oldValue, newValue) -> {
+			logger.finer(String.format("New table count %s->%s", oldValue, newValue));
+			state.setArmyCount(Integer.parseUnsignedInt(newValue));
+		});
+		Label armyCountLabel = NodeFactory.createLabel(labelGetter.apply("table.count"), armyCount);
+		addNode(armyCountLabel, getRowIndex(), 0, 1, 1, HPos.LEFT);
+		addNode(armyCount, getRowIndex(), 1, 1, 1, HPos.LEFT);
+
+		newRow();
 		Button nextButton = NodeFactory.createButton(labelGetter.apply("next"), e -> {
 				state.setRowTeamName(yourTeamName.getText());
 				state.setColTeamName(otherTeamName.getText());

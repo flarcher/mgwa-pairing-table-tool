@@ -8,7 +8,14 @@ import java.util.Optional;
 
 public class Matrix {
 
-	public Matrix(int armyCountInEachSize) {
+	public static Matrix createWithoutScores(List<Army> rowArmies, List<Army> colArmies) {
+		Matrix matrix = new Matrix(rowArmies.size());
+		matrix.setArmies(true, rowArmies);
+		matrix.setArmies(false, colArmies);
+		return matrix;
+	}
+
+	private Matrix(int armyCountInEachSize) {
 		rowArmies = new Army[armyCountInEachSize];
 		colArmies = new Army[armyCountInEachSize];
 		scores = new Score[armyCountInEachSize][armyCountInEachSize];
@@ -40,6 +47,21 @@ public class Matrix {
 			throw new IllegalArgumentException("Unexpected size");
 		}
 		armies.toArray(isRow ? rowArmies : colArmies);
+		return this;
+	}
+
+	public Matrix setDefaultScore(Score score) {
+		if (score == null) {
+			throw new IllegalArgumentException("Null default score");
+		}
+		int size = getSize();
+		for (int i=0; i < size; i++) {
+			for (int j=0; j < size; j++) {
+				if (scores[i][j] == null) {
+					scores[i][j] = score.cloneIt();
+				}
+			}
+		}
 		return this;
 	}
 

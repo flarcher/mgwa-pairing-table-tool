@@ -1,6 +1,7 @@
 package org.mgwa.w40k.pairing.gui;
 
 import org.mgwa.w40k.pairing.matrix.Matrix;
+import org.mgwa.w40k.pairing.matrix.Score;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,11 +14,14 @@ import java.util.Optional;
  */
 public class AppState {
 
+	public static final int DEFAULT_ARMY_COUNT = 4;
+
 	private String rowTeamName = "";
 	private String colTeamName = "";
 	private boolean youHaveTheTableToken = true;
 	private Optional<Path> matrixFilePath = Optional.empty();
 	private Optional<Matrix> scoreMatrix = Optional.empty();
+	private int armyCount = DEFAULT_ARMY_COUNT;
 
 	//-- getters and setters
 
@@ -53,11 +57,20 @@ public class AppState {
 		return this.matrixFilePath;
 	}
 
-	public void setMatrix(@Nonnull  Matrix matrix) {
+	public void setMatrix(@Nonnull Matrix matrix) {
 		this.scoreMatrix = Optional.of(matrix);
+		this.armyCount = matrix.getSize();
 	}
 
 	public Optional<Matrix> getMatrix() {
 		return this.scoreMatrix;
+	}
+
+	public int getArmyCount() {
+		return scoreMatrix.map(Matrix::getSize).orElse(armyCount);
+	}
+
+	public void setArmyCount(int armyCount) {
+		this.armyCount = armyCount;
 	}
 }
