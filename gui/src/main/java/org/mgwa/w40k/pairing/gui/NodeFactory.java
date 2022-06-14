@@ -103,17 +103,40 @@ public final class NodeFactory {
 		return grid;
 	}
 
-	private static final IntegerStringConverter SCORE_STRING_CONVERTER = new IntegerStringConverter();
+	private static final IntegerStringConverter INTEGER_STRING_CONVERTER = new IntegerStringConverter();
+
+	public static TextField createIntegerField(int initialValue, double width) {
+		TextField field = new TextField();
+		field.setTextFormatter(new TextFormatter<>(
+				INTEGER_STRING_CONVERTER,
+				initialValue,
+				change -> {
+					String newValue = change.getControlNewText();
+					if (!newValue.isEmpty()) {
+						Integer number = INTEGER_STRING_CONVERTER.fromString(newValue);
+						if (number != null) {
+							return change;
+						}
+					}
+					return null;
+				}
+		));
+		field.setText(INTEGER_STRING_CONVERTER.toString(initialValue));
+		field.setAlignment(Pos.CENTER_RIGHT);
+		field.setPrefWidth(width);
+		field.setMaxWidth(width);
+		return field;
+	}
 
 	public static TextField createScoreField(int initialValue) {
 		TextField field = new TextField();
 		field.setTextFormatter(new TextFormatter<>(
-				SCORE_STRING_CONVERTER,
+				INTEGER_STRING_CONVERTER,
 				Score.DEFAULT_VALUE,
 				change -> {
 					String newValue = change.getControlNewText();
 					if (!newValue.isEmpty()) {
-						Integer score = SCORE_STRING_CONVERTER.fromString(newValue);
+						Integer score = INTEGER_STRING_CONVERTER.fromString(newValue);
 						if (score != null) {
 							if (score >= Score.MIN_VALUE && score <= Score.MAX_VALUE) {
 								return change;
@@ -123,7 +146,7 @@ public final class NodeFactory {
 					return null;
 				}
 		));
-		field.setText(SCORE_STRING_CONVERTER.toString(initialValue));
+		field.setText(INTEGER_STRING_CONVERTER.toString(initialValue));
 		field.setAlignment(Pos.CENTER_RIGHT);
 		field.setPrefWidth(30);
 		field.setMaxWidth(30);

@@ -17,15 +17,24 @@ import java.util.stream.IntStream;
  */
 public class PairingGuidanceTest {
 
+	private static Matrix createDummy(int size) {
+		List<String> names = IntStream.range(0, size)
+				.mapToObj(Integer::toString)
+				.collect(Collectors.toList());
+		return Matrix.createWithoutScores(
+			Army.createArmies(names, true),
+			Army.createArmies(names, false));
+	}
+
 	private Matrix createMatrix_of1() {
-		Matrix m = new Matrix(1);
+		Matrix m = createDummy(1);
 		m.setScore(0, 0, Score.of(0, 20));
 		Assert.assertTrue(m.isComplete());
 		return m;
 	}
 
 	private Matrix createMatrix_of2() {
-		Matrix m = new Matrix(2);
+		Matrix m = createDummy(2);
 		m.setScore(0, 0, Score.of(0, 20));
 		m.setScore(0, 1, Score.of(20, 20));
 		m.setScore(1, 0, Score.of(0, 10));
@@ -35,7 +44,7 @@ public class PairingGuidanceTest {
 	}
 
 	private Matrix createMatrix_of3() {
-		Matrix m = new Matrix(3);
+		Matrix m = createDummy(3);
 		m.setScore(0, 0, Score.of(0, 20));
 		m.setScore(0, 1, Score.of(20, 20));
 		m.setScore(0, 2, Score.of(10, 20));
@@ -72,7 +81,8 @@ public class PairingGuidanceTest {
 
 	@Test
 	public void testOfZero() {
-		PairingGuidance pg = new PairingGuidance(new Matrix(0), System.out::println)
+		Matrix m = Matrix.createWithoutScores(Collections.emptyList(), Collections.emptyList());
+		PairingGuidance pg = new PairingGuidance(m, System.out::println)
 				.setScoreReading(ScoreReading.CONFIDENT)
 				.setNextPairFilter(p -> true)
 				.setForecastMethod(ForecastMethod.LUCKY_BUT_RISKY);

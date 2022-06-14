@@ -42,13 +42,15 @@ public class MatrixSetupScene extends AbstractMainScene {
 			.forEach(i -> {
 
 				String colArmyName = colArmies.get(i).getName();
-				Text text = NodeFactory.createText(colArmyName);
+				TextField text = new TextField();
+				text.setText(colArmyName);
 				text.maxWidth(nodeWidth);
 				GridPane.setHalignment(text, HPos.CENTER);
 				grid.add(text, i + 1, 0, 1, 1);
 
 				String rowArmyName = rowArmies.get(i).getName();
-				text = NodeFactory.createText(rowArmyName);
+				text = new TextField();
+				text.setText(rowArmyName);
 				text.maxWidth(nodeWidth);
 				GridPane.setHalignment(text, HPos.CENTER);
 				grid.add(text, 0, i + 1, 1, 1);
@@ -89,6 +91,9 @@ public class MatrixSetupScene extends AbstractMainScene {
 			});
 
 		addRow(HPos.CENTER, grid);
+
+		// TODO: Add a previous button
+		// TODO: Add a next button (update the army names !)
 	}
 
 }

@@ -111,10 +111,7 @@ public class XlsMatrixReader implements MatrixReader {
 			throw new IllegalArgumentException("Not same army count on each side?");
 		}
 
-		int armyCount = rowArmies.size();
-		Matrix matrix = new Matrix(armyCount);
-		matrix.setArmies(false, columnArmies);
-		matrix.setArmies(true, rowArmies);
+		Matrix matrix = Matrix.createWithoutScores(rowArmies, columnArmies);
 
 		fillMatrix(matrix,
 			origin.getSheet().getRow(origin.getRowIndex() + 1).getCell(origin.getColumnIndex()));

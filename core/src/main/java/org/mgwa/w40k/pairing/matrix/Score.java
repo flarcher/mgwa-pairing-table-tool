@@ -7,7 +7,7 @@ import java.util.function.Consumer;
  * A matrix score.
  * Between 2 armies, the score must be between 0 and 20.
  */
-public class Score implements Consumer<Score> {
+public class Score implements Consumer<Score>, Cloneable {
 
 	public static Score newDefault() {
 		return of(MIN_VALUE, MAX_VALUE);
@@ -30,6 +30,13 @@ public class Score implements Consumer<Score> {
 		this.max = max;
 		this.sum = min + max;
 		this.count = 1;
+	}
+
+	private Score(Score other) {
+		this.min = other.min;
+		this.max = other.max;
+		this.sum = other.sum;
+		this.count = other.count;
 	}
 
 	public static final int MIN_VALUE = 0;
@@ -122,5 +129,14 @@ public class Score implements Consumer<Score> {
 	@Override
 	public int hashCode() {
 		return Objects.hash(min, max, sum, count);
+	}
+
+	public Score cloneIt() {
+		return new Score(this);
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return cloneIt();
 	}
 }
