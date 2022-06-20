@@ -70,6 +70,16 @@ public class AppState {
 		return scoreMatrix.map(Matrix::getSize).orElse(armyCount);
 	}
 
+	public void forceArmyCountConsistency(Score defaultScore) {
+		if (scoreMatrix.isPresent()) {
+			Matrix currentMatrix = scoreMatrix.get();
+			if (currentMatrix.getSize() != armyCount) {
+				Matrix newMatrix = currentMatrix.withSize(armyCount, defaultScore);
+				scoreMatrix = Optional.of(newMatrix);
+			}
+		}
+	}
+
 	public void setArmyCount(int armyCount) {
 		this.armyCount = armyCount;
 	}

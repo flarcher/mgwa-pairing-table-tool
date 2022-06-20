@@ -125,6 +125,11 @@ public class AppWindow extends Application {
 			}
 			state.setMatrix(matrix);
 		}
+		else {
+			Matrix matrix = state.getMatrix().get();
+			logger.info(String.format("Resizing matrix from %d to %d", matrix.getSize(), state.getArmyCount()));
+			state.forceArmyCountConsistency(Score.newDefault());
+		}
 
 		// Ending the loading
 		if (matrixSetup == null) {
