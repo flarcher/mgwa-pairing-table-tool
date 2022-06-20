@@ -22,20 +22,9 @@ public class TeamDefinitionScene extends AbstractMainScene {
 	public TeamDefinitionScene(Function<String, String> labelGetter, Runnable next) {
 		super(labelGetter, 3);
 		this.next = next;
-		this.fileName = NodeFactory.createText(labelGetter.apply("no.file.selected"));
-		this.nameLabel = NodeFactory.createText(labelGetter.apply("team.name"));
-		this.tableTokenLabel = NodeFactory.createText(labelGetter.apply("table.token"));
 	}
 
 	private final Runnable next;
-	private final TextField yourTeamName = new TextField();
-	private final TextField otherTeamName = new TextField();
-	private final ToggleGroup tokenOwnership = new ToggleGroup();
-	private final Text nameLabel;
-	private final Text tableTokenLabel;
-	private final FileChooser fileChooser = new FileChooser();
-	private final Text fileName;
-	private final TextField armyCount = NodeFactory.createIntegerField(AppState.DEFAULT_ARMY_COUNT, 50);
 
 	private String filePath(Optional<Path> path) {
 		return path.map(Path::toString).orElse(labelGetter.apply("no.file.selected"));
@@ -46,15 +35,19 @@ public class TeamDefinitionScene extends AbstractMainScene {
 
 		Logger logger = LoggerSupplier.INSTANCE.getLogger();
 
+		Text nameLabel = NodeFactory.createText(labelGetter.apply("team.name"));
 		addNode(nameLabel, getRowIndex(), 1, 1, 1, HPos.CENTER);
+		Text tableTokenLabel = NodeFactory.createText(labelGetter.apply("table.token"));
 		addNode(tableTokenLabel, getRowIndex(), 2, 1, 1, HPos.CENTER);
 		newRow();
 
 		RadioButton youHaveTheToken = new RadioButton();
+		ToggleGroup tokenOwnership = new ToggleGroup();
 		youHaveTheToken.setToggleGroup(tokenOwnership);
 		youHaveTheToken.setSelected(state.youHaveTheTableToken());
 		youHaveTheToken.setAlignment(Pos.CENTER);
 		//youHaveTheToken.setMinWidth(100.0);
+		TextField yourTeamName = new TextField();
 		yourTeamName.setText(state.getRowTeamName());
 		addRow(HPos.CENTER,
 			NodeFactory.createLabel(labelGetter.apply("team.yours"), yourTeamName),
@@ -65,6 +58,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		theyHaveTheToken.setSelected(! state.youHaveTheTableToken());
 		theyHaveTheToken.setAlignment(Pos.CENTER);
 		//theyHaveTheToken.setMinWidth(100.0);
+		TextField otherTeamName = new TextField();
 		otherTeamName.setText(state.getColTeamName());
 		addRow(HPos.CENTER,
 			NodeFactory.createLabel(labelGetter.apply("team.other"), otherTeamName),
@@ -75,7 +69,9 @@ public class TeamDefinitionScene extends AbstractMainScene {
 			 Toggle old_toggle, Toggle new_toggle) -> { 	});*/
 
 		newRow();
+		Text fileName = NodeFactory.createText(labelGetter.apply("no.file.selected"));
 		String selectYourFile = labelGetter.apply("select.matrix.file");
+		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(selectYourFile);
 		Button fileSelectButton = NodeFactory.createButton(selectYourFile, e -> {
 				@Nullable File file = fileChooser.showOpenDialog(stage);
@@ -88,6 +84,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		addNode(fileName, getRowIndex(), 1, 1, 2, HPos.LEFT);
 		newRow();
 
+		TextField armyCount = NodeFactory.createIntegerField(AppState.DEFAULT_ARMY_COUNT, 50);
 		armyCount.textProperty().addListener((obs, oldValue, newValue) -> {
 			logger.finer(String.format("New table count %s->%s", oldValue, newValue));
 			state.setArmyCount(Integer.parseUnsignedInt(newValue));

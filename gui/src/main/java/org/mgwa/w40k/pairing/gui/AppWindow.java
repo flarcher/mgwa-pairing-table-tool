@@ -58,6 +58,9 @@ public class AppWindow extends Application {
 	 */
 	private void goToScene(SceneDefinition newScene) {
 		Objects.requireNonNull(stage);
+		if (stage.isShowing()) {
+			stage.close();
+		}
 		stage.setScene(newScene.getScene(state, stage));
 		stage.show();
 	}
@@ -74,13 +77,15 @@ public class AppWindow extends Application {
 		goToScene(teamDefinition);
     }
 
+	private void backToTeamDefinition() {
+		goToScene(teamDefinition);
+	}
+
 	private void displayError(String msg, SceneDefinition sceneTarget) {
 		goToScene(new InfoScene(
 			() -> goToScene(sceneTarget),
 			msg, labelGetter.getLabel("ok")));
 	}
-
-	private static final int DEFAULT_ARMY_COUNT = 3;
 
 	private Matrix loadMatrixDefault() {
 		List<String> names = IntStream.range(0, state.getArmyCount())
@@ -123,8 +128,13 @@ public class AppWindow extends Application {
 
 		// Ending the loading
 		if (matrixSetup == null) {
-			matrixSetup = new MatrixSetupScene(labelGetter);
+			matrixSetup = new MatrixSetupScene(labelGetter, this::backToTeamDefinition, this::nextAssignment);
 		}
 		goToScene(matrixSetup);
+	}
+
+	private void nextAssignment() {
+		logger.info("Ready to Assign!");
+		// TODO
 	}
 }

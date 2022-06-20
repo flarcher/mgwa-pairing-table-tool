@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -21,11 +22,10 @@ abstract class AbstractMainScene implements SceneDefinition {
 
 	public AbstractMainScene(Function<String, String> labelGetter, int columnCount) {
 		this.columnCount = columnCount;
-		this.grid = NodeFactory.createGrid(columnCount);
 		this.labelGetter = labelGetter;
 	}
 
-	private final GridPane grid;
+	private GridPane grid; // Only for convenience (will be re-created with each display)
 	private int rowIndex = 0;
 	private final int columnCount;
 	protected final Function<String, String> labelGetter;
@@ -40,6 +40,7 @@ abstract class AbstractMainScene implements SceneDefinition {
 	}
 
 	protected final void addNode(Node node, int rowNumber, int colNumber, int rowSpan, int colSpan, HPos pos) {
+		Objects.requireNonNull(grid);
 		GridPane.setFillWidth(node, true);
 		GridPane.setHalignment(node, pos);
 		grid.add(node, colNumber, rowNumber, colSpan, rowSpan);
@@ -52,6 +53,7 @@ abstract class AbstractMainScene implements SceneDefinition {
 
 	@Override
 	public final Scene getScene(AppState state, Stage stage) {
+		grid = NodeFactory.createGrid(columnCount);
 		Text headerLabel = NodeFactory.createHeaderLabel(labelGetter.apply("header"));
 		addNode(headerLabel, getRowIndex(), 0, 1, columnCount, HPos.LEFT);
 		newRow();

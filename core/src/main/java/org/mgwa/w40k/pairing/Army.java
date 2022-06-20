@@ -17,6 +17,10 @@ public class Army {
 				.collect(Collectors.toList());
 	}
 
+	public static Army renamed(Army originalArmy, String newName) {
+		return new Army(newName, originalArmy.index, originalArmy.isRow);
+	}
+
 	/**
 	 * Represents a player's army.
 	 * @param name Army name.
