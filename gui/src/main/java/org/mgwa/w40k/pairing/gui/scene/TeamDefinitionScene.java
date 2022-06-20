@@ -84,7 +84,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 		addNode(fileName, getRowIndex(), 1, 1, 2, HPos.LEFT);
 		newRow();
 
-		TextField armyCount = NodeFactory.createIntegerField(AppState.DEFAULT_ARMY_COUNT, 50);
+		TextField armyCount = NodeFactory.createIntegerField(state.getArmyCount(), 50);
 		armyCount.textProperty().addListener((obs, oldValue, newValue) -> {
 			logger.finer(String.format("New table count %s->%s", oldValue, newValue));
 			state.setArmyCount(Integer.parseUnsignedInt(newValue));
@@ -98,6 +98,14 @@ public class TeamDefinitionScene extends AbstractMainScene {
 				state.setRowTeamName(yourTeamName.getText());
 				state.setColTeamName(otherTeamName.getText());
 				state.setYouHaveTheTableToken(tokenOwnership.getSelectedToggle() == youHaveTheToken);
+				String armyCountText = armyCount.getText();
+				try {
+					int count = Integer.parseUnsignedInt(armyCountText);
+					state.setArmyCount(count);
+				}
+				catch (NumberFormatException mfe) {
+					logger.warning(String.format("Malformed army count %s in field", armyCountText));
+				}
 				next.run();
 			}  );
 		addNode(nextButton, getRowIndex(), 1, 1, 2, HPos.RIGHT);

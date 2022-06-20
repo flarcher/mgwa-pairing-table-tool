@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class Matrix {
+public class Matrix implements Cloneable {
 
 	public static Matrix createWithoutScores(List<Army> rowArmies, List<Army> colArmies) {
 		Matrix matrix = new Matrix(rowArmies.size());
@@ -16,9 +16,13 @@ public class Matrix {
 	}
 
 	private Matrix(int armyCountInEachSize) {
-		rowArmies = new Army[armyCountInEachSize];
-		colArmies = new Army[armyCountInEachSize];
-		scores = new Score[armyCountInEachSize][armyCountInEachSize];
+		this(new Army[armyCountInEachSize], new Army[armyCountInEachSize], new Score[armyCountInEachSize][armyCountInEachSize]);
+	}
+
+	private Matrix(Army[] rowArmies, Army[] colArmies, Score[][] scores) {
+		this.rowArmies = rowArmies;
+		this.colArmies = colArmies;
+		this.scores = scores;
 	}
 
 	private final Army[] rowArmies;
@@ -27,6 +31,30 @@ public class Matrix {
 
 	public int getSize() {
 		return scores.length;
+	}
+
+	public Matrix withSize(int newSize, Score defaultScore) {
+		Army[] rowArmies = Arrays.copyOf(this.rowArmies, newSize);
+		Army[] colArmies = Arrays.copyOf(this.rowArmies, newSize);
+		Score[][] scores = new Score[newSize][];
+		int originalSize = getSize();
+		for (int i = 0; i < originalSize; i++) {
+			scores[i] = Arrays.copyOf(this.scores[i], newSize);
+		}
+		if (originalSize < newSize) { // Attempt to avoid later NPEs
+			for (int j = originalSize; j < newSize; j++) {
+				rowArmies[j] = new Army("", j, true);
+				colArmies[j] = new Army("", j, false);
+				scores[j] = new Score[newSize];
+			}
+		}
+		Matrix m = new Matrix(rowArmies, colArmies, scores);
+		if (originalSize < newSize) {
+			return m.setDefaultScore(defaultScore);
+		}
+		else {
+			return m;
+		}
 	}
 
 	public Optional<Score> getScore(int row, int column) {
@@ -78,6 +106,15 @@ public class Matrix {
 			}
 		}
 		return true;
+	}
+
+	public Matrix cloneIt() {
+		return withSize(getSize(), Score.newDefault());
+	}
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return cloneIt();
 	}
 
 	@Override
