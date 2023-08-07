@@ -18,20 +18,12 @@ Inputs:
 ## Contributing
 
 In order to build the project, you will need:
-* A [JDK](https://jdk.java.net/) version 11 or more
+* A [JDK](https://jdk.java.net/) version 17 or more
 * [Apache Maven](https://maven.apache.org/) version 3.6.0 or more
-
-Here is the command for a minimal build:
-
-    mvn clean install
-
-Then, in order to run the application (without packaging the project):
-
-    cd gui && mvn javafx:run
 
 For a run from the project's package:
 
-1. Run `mvn package` in order to generate the package
+1. Run `mvn install` in order to generate the package
 2. Go to the `target` folder (the package is currently this folder)
 3. Call either `start.sh` from Linux/Mac-OS, or `start.bat` from Windows.
 
