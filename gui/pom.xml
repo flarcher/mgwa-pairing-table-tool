@@ -12,11 +12,11 @@
     <artifactId>gui</artifactId>
 
     <properties>
-        <main.class>org.mgwa.w40k.pairing.gui.Main</main.class>
+        <main.class>${dist.main.class}</main.class>
     </properties>
 
     <build>
-        <finalName>table-pairing</finalName>
+        <finalName>${dist.jar.name}</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

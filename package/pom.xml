@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.mgwa.w40k.pairing</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <packaging>pom</packaging>
+    <artifactId>package</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.mgwa.w40k.pairing</groupId>
+            <artifactId>gui</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.akman</groupId>
+                    <artifactId>jpackage-maven-plugin</artifactId>
+                    <version>0.1.5</version>
+                    <configuration>
+                        <appversion>${project.version}</appversion>
+                        <input>${project.basedir}${file.separator}${dist.directory}</input>
+                        <mainjar>${dist.jar.name}.jar</mainjar>
+                        <mainclass>${dist.main.class}</mainclass>
+                        <name>w40k-table-pairing</name>
+                        <dest>${project.basedir}${file.separator}${dist.directory}</dest>
+                        <toolhome>/usr/lib/jvm/java-17-openjdk-amd64</toolhome>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>pack</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.akman</groupId>
+                        <artifactId>jpackage-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jpackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
