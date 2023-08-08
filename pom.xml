@@ -11,6 +11,7 @@
         <module>core</module>
         <module>matrix-xls</module>
         <module>gui</module>
+        <module>package</module>
     </modules>
 
     <properties>
@@ -18,7 +19,9 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Directory used for distribution relative to the path of modules -->
-        <dist.directory>../target</dist.directory>
+        <dist.directory>..${file.separator}target</dist.directory>
+        <dist.jar.name>table-pairing</dist.jar.name>
+        <dist.main.class>org.mgwa.w40k.pairing.gui.Main</dist.main.class>
     </properties>
 
     <build>
@@ -56,7 +59,7 @@
                     <configuration>
                       <rules>
                         <requireMavenVersion>
-                          <version>3.6.0</version>
+                          <version>3.8.6</version>
                         </requireMavenVersion>
                       </rules>
                     </configuration>
