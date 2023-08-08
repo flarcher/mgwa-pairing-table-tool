@@ -1,14 +1,20 @@
 # How to contribute
 
+This article is about contributing to the project.
+
 ## Requirements
 
 In order to build the project, you will need:
 * A [JDK](https://jdk.java.net/) version 17 or more
 * [Apache Maven](https://maven.apache.org/) version 3.8.6 or more
 
-### Fast run
+## Fast run
 
-TODO
+In the development process, we can quickly run the application with the following steps:
+
+1. Run `mvn install` (if not already done)
+2. Go to the `gui` folder
+3. Run `mvn javafx:run`
 
 ## Fat JAR packaging 
 
