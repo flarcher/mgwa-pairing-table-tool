@@ -19,6 +19,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <minimum.maven.version>3.8.6</minimum.maven.version>
+        <!-- `jdk.home` may be overridden depending on your JDK installation; used for packaging only -->
+        <jdk.home>/usr/lib/jvm/java-17-openjdk-amd64</jdk.home>
 
         <!-- Directory used for distribution relative to the path of modules -->
         <dist.directory>..${file.separator}target</dist.directory>
