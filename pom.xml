@@ -18,6 +18,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+        <minimum.maven.version>3.8.6</minimum.maven.version>
+
         <!-- Directory used for distribution relative to the path of modules -->
         <dist.directory>..${file.separator}target</dist.directory>
         <dist.jar.name>table-pairing</dist.jar.name>
@@ -59,7 +61,7 @@
                     <configuration>
                       <rules>
                         <requireMavenVersion>
-                          <version>3.8.6</version>
+                          <version>${minimum.maven.version}</version>
                         </requireMavenVersion>
                       </rules>
                     </configuration>
