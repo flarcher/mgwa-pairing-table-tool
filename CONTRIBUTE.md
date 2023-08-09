@@ -40,3 +40,9 @@ mvn package -Dmake.installer -Djdk.home=__
 * The installer is generated inside the `target` folder
 * The installer is only compatible with the current OS
 * It can take more than one minute for the processing
+
+## Release process
+
+1. Execute the command `mvn release:prepare`
+2. Answer questions
+3. Then execute: `mvn release:perform`
