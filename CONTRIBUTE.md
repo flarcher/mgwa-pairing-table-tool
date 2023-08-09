@@ -24,7 +24,7 @@ In order to run the project using a _fat JAR file_:
 2. Go to the `target` folder
 3. Call either `start.sh` from Linux/Mac-OS, or `start.bat` from Windows.
 
-## Creating an installer
+## <a name="installer"></a> Creating an installer
 
 In order to generate an installer on Linux, you will also need:
 
@@ -43,6 +43,13 @@ mvn package -Dmake.installer -Djdk.home=__
 
 ## Release process
 
+In the process below, we should write `__` instead of the tag name that is also the semantic version to be release (e.g. `0.2`).
+
 1. Prepare the release with `mvn release:prepare`
-2. Answer questions
+2. Answer questions; provide the semantic version `__`
 3. Push the Git commits with `git push`
+4. Push the Git tag with `git push origin __`
+5. Checkout the code-base from the tag with `git checkout __`
+6. Generate the installers like explained in [the corresponding section above](#installer), for each OS
+7. Create a [new GitHub release](https://github.com/flarcher/mgwa-pairing-table-tool/releases/new) with a description, and artifacts. The artifacts are the _fat JAR file_ and the installers (packages) to be uploaded.
+8. Communicate about the new release in the chat channels
