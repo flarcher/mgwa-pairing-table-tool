@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>org.mgwa.w40k.pairing</groupId>
-            <artifactId>gui</artifactId>
+            <artifactId>main</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

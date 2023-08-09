@@ -1,7 +1,7 @@
 package org.mgwa.w40k.pairing.gui.scene;
 
 import javafx.stage.Stage;
-import org.mgwa.w40k.pairing.gui.AppState;
+import org.mgwa.w40k.pairing.state.AppState;
 import javafx.scene.Scene;
 
 /**

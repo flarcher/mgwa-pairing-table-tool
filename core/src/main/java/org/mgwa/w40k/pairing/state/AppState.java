@@ -1,4 +1,4 @@
-package org.mgwa.w40k.pairing.gui;
+package org.mgwa.w40k.pairing.state;
 
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.Score;
@@ -14,7 +14,12 @@ import java.util.Optional;
  */
 public class AppState {
 
+	public static final AppState INSTANCE = new AppState();
+
 	public static final int DEFAULT_ARMY_COUNT = 4;
+
+	/** Simple singleton pattern: forces to use one state. */
+	private AppState() {}
 
 	private String rowTeamName = "";
 	private String colTeamName = "";

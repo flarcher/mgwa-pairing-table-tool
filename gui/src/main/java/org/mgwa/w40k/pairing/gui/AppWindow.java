@@ -6,6 +6,7 @@ import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.LabelGetter;
 import org.mgwa.w40k.pairing.gui.scene.*;
 import org.mgwa.w40k.pairing.matrix.Score;
+import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
@@ -26,24 +27,20 @@ import java.util.stream.IntStream;
  *
  * <p>Here is the method calls sequence for the start of the application:</p>
  * <ol>
- *     <li>At first the {@link #main()} static method is called from the Java main method {@link Main#main(String[])}</li>
+ *     <li>At first the {@link #main(String...)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
  *     <li>Then through the {@link #launch(String...)} method of the JavaFX abstract class...</li>
  *     <li>Our method {@link #start(Stage)} gets finally called</li>
  * </ol>
  */
 public class AppWindow extends Application {
 
-	private static final AppState state = new AppState();
-
-	public static AppState getState() {
-		return state;
-	}
+	private static final AppState state = AppState.INSTANCE;
 
 	/**
-	 * See the {@link Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
+	 * See the {@code Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
 	 * It will eventually call the {@link #start(Stage)} method.
 	 */
-	public static void main() {
+	public static void main(String... args) {
 		launch();
 	}
 

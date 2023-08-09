@@ -13,7 +13,7 @@ In order to build the project, you will need:
 In the development process, we can quickly run the application with the following steps:
 
 1. Run `mvn install` (if not already done)
-2. Go to the `gui` folder
+2. Go to the `main` folder
 3. Run `mvn javafx:run`
 
 ## Fat JAR packaging 

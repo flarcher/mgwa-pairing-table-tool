@@ -4,7 +4,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.mgwa.w40k.pairing.gui.AppState;
+import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
 
 public class WaitingScene implements SceneDefinition {

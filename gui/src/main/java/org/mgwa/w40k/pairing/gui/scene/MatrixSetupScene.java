@@ -9,7 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.mgwa.w40k.pairing.Army;
-import org.mgwa.w40k.pairing.gui.AppState;
+import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.Score;
