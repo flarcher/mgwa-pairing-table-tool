@@ -20,7 +20,7 @@ In the development process, we can quickly run the application with the followin
 
 In order to run the project using a _fat JAR file_:
 
-1. Run `mvn install -Ppack` in order to generate a _fat JAR file_ and run unit-tests.
+1. Run `mvn package -Ppack` in order to generate a _fat JAR file_ and run unit-tests.
 2. Go to the `target` folder
 3. Call either `start.sh` from Linux/Mac-OS, or `start.bat` from Windows.
 
