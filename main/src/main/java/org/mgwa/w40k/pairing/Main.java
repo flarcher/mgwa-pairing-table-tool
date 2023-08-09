@@ -1,6 +1,8 @@
-package org.mgwa.w40k.pairing.gui;
+package org.mgwa.w40k.pairing;
 
+import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
+import org.mgwa.w40k.pairing.gui.AppWindow;
 
 import java.io.File;
 import java.nio.file.InvalidPathException;
@@ -42,7 +44,7 @@ public final class Main {
     public static void main(String[] args) {
 
         // Get the application state
-        AppState state = AppWindow.getState();
+        AppState state = AppState.INSTANCE;
 
         // Reading the optional file path in arguments
         Optional.of(args)

@@ -10,6 +10,7 @@
         <module>matrix-xls</module>
         <module>gui</module>
         <module>package</module>
+        <module>main</module>
     </modules>
 
     <properties>
@@ -23,7 +24,7 @@
         <!-- Directory used for distribution relative to the path of modules -->
         <dist.directory>..${file.separator}target</dist.directory>
         <dist.jar.name>table-pairing</dist.jar.name>
-        <dist.main.class>org.mgwa.w40k.pairing.gui.Main</dist.main.class>
+        <dist.main.class>org.mgwa.w40k.pairing.Main</dist.main.class>
     </properties>
 
     <build>
