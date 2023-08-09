@@ -43,6 +43,6 @@ mvn package -Dmake.installer -Djdk.home=__
 
 ## Release process
 
-1. Execute the command `mvn release:prepare`
+1. Prepare the release with `mvn release:prepare`
 2. Answer questions
-3. Then execute: `mvn release:perform`
+3. Push the Git commits with `git push`
