@@ -1,7 +1,19 @@
-target
+# Editors and IDEs generated files
 *.iml
 **/*.iml
 .idea
 **/.idea
 *~
+
+# Maven related generated files
+target
 **/dependency-reduced-pom.xml
+
+# Maven release plugin temporary files
+**/pom.xml.next
+**/pom.xml.releaseBackup
+**/pom.xml.tag
+pom.xml.next
+pom.xml.releaseBackup
+pom.xml.tag
+release.properties
