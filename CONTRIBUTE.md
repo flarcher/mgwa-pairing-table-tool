@@ -31,7 +31,11 @@ In order to generate an installer on Linux, you will also need:
 * The package `fakeroot`, that is required by **jpackage**.
 * The package `binutils`, since this is requirement for **jlink**. If not present, it would prompt an error message containing `Cannot run program "objcopy"`.
 
-Here is an example of a command that packages the project: `mvn package -Dmake.installer`
+Here is an example of a command that packages the project, where `__` must be replaced by the path to the local JDK:
+
+```
+mvn package -Dmake.installer -Djdk.home=__
+```
 
 * The installer is generated inside the `target` folder
 * The installer is only compatible with the current OS

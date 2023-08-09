@@ -71,7 +71,7 @@
                         <mainclass>${dist.main.class}</mainclass>
                         <name>w40k-table-pairing</name>
                         <dest>${project.basedir}${file.separator}${dist.directory}</dest>
-                        <toolhome>/usr/lib/jvm/java-17-openjdk-amd64</toolhome>
+                        <toolhome>${jdk.home}</toolhome>
                     </configuration>
                 </plugin>
             </plugins>
