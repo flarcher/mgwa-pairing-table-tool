@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * Dedicated class as the main program entrypoint.
  * 
- * Here is why we do not use {@link AppWindow}: https://stackoverflow.com/questions/52653836/maven-shade-javafx-runtime-components-are-missing
+ * Here is why we do can not use {@link AppWindow}: https://stackoverflow.com/questions/52653836/maven-shade-javafx-runtime-components-are-missing
  */
 public final class Main {
 
@@ -44,7 +44,7 @@ public final class Main {
     public static void main(String[] args) {
 
         // Get the application state
-        AppState state = AppState.INSTANCE;
+        AppState state = new AppState();
 
         // Reading the optional file path in arguments
         Optional.of(args)
@@ -53,7 +53,7 @@ public final class Main {
             .ifPresent(state::setMatrixFilePath);
 
         // Launching the user interface
-        AppWindow.main();
+        AppWindow.init(state);
     }
 
 }

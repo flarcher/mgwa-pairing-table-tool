@@ -12,6 +12,7 @@ import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
 import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixReader;
 
+import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -27,20 +28,21 @@ import java.util.stream.IntStream;
  *
  * <p>Here is the method calls sequence for the start of the application:</p>
  * <ol>
- *     <li>At first the {@link #main(String...)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
+ *     <li>At first the {@link #init(AppState)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
  *     <li>Then through the {@link #launch(String...)} method of the JavaFX abstract class...</li>
  *     <li>Our method {@link #start(Stage)} gets finally called</li>
  * </ol>
  */
 public class AppWindow extends Application {
 
-	private static final AppState state = AppState.INSTANCE;
+	private static AppState state;
 
 	/**
 	 * See the {@code Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
 	 * It will eventually call the {@link #start(Stage)} method.
 	 */
-	public static void main(String... args) {
+	public static void init(@Nonnull AppState injectedState) {
+		state = injectedState;
 		launch();
 	}
 

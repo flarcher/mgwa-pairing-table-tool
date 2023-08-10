@@ -14,12 +14,9 @@ import java.util.Optional;
  */
 public class AppState {
 
-	public static final AppState INSTANCE = new AppState();
-
 	public static final int DEFAULT_ARMY_COUNT = 4;
 
-	/** Simple singleton pattern: forces to use one state. */
-	private AppState() {}
+	public AppState() {}
 
 	private String rowTeamName = "";
 	private String colTeamName = "";
