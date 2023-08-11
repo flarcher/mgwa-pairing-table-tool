@@ -12,6 +12,15 @@
     <artifactId>main</artifactId>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>server.yml</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>
@@ -28,13 +37,15 @@
     <dependencies>
         <dependency>
             <groupId>org.mgwa.w40k.pairing</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>http-api</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.mgwa.w40k.pairing</groupId>
             <artifactId>gui</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

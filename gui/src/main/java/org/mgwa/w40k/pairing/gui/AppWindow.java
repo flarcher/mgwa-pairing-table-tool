@@ -1,7 +1,11 @@
 package org.mgwa.w40k.pairing.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.LabelGetter;
 import org.mgwa.w40k.pairing.gui.scene.*;
@@ -16,6 +20,7 @@ import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -36,13 +41,15 @@ import java.util.stream.IntStream;
 public class AppWindow extends Application {
 
 	private static AppState state;
+	private static Runnable onClose;
 
 	/**
 	 * See the {@code Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
 	 * It will eventually call the {@link #start(Stage)} method.
 	 */
-	public static void init(@Nonnull AppState injectedState) {
+	public static void init(@Nonnull AppState injectedState, @Nonnull Runnable injectedOnClose) {
 		state = injectedState;
+		onClose = injectedOnClose;
 		launch();
 	}
 
@@ -74,6 +81,14 @@ public class AppWindow extends Application {
 		this.stage = stage;
 		teamDefinition = new TeamDefinitionScene(labelGetter, this::toMatrixDisplay);
 		goToScene(teamDefinition);
+		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent e) {
+				Platform.exit();
+				onClose.run(); // The important line is here
+				System.exit(0);
+			}
+		});
     }
 
 	private void backToTeamDefinition() {
