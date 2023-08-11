@@ -15,6 +15,7 @@
             <groupId>org.mgwa.w40k.pairing</groupId>
             <artifactId>main</artifactId>
             <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

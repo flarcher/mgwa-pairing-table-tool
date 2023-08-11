@@ -1,0 +1,11 @@
+# Application settings
+#...
+
+# Technical server configuration
+server:
+  type: simple
+  applicationContextPath: /api
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 8000

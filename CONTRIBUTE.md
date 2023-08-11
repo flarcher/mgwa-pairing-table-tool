@@ -2,6 +2,22 @@
 
 This article is about contributing to the project.
 
+## Design
+
+The entrypoint is located in [the Main class in the main module](main/src/main/java/org/mgwa/w40k/pairing/Main.java).
+
+Here is a description of the Maven modules:
+
+| Module     | Description                                                                                             |
+|------------|---------------------------------------------------------------------------------------------------------|
+| main       | Entrypoint of the program. It handles arguments and launches both the UI and the HTTP API.              |
+| gui        | The JavaFX based heavy-weight _User Interface_                                                          |
+| http-api   | The HTTP API that would be used by HTML pages.                                                          |
+| web-app    | The HTML pages. They are included in the package, but have not direct dependency with any other module. |
+| core       | It contains the pairing algorithms, the shared model and utilities.                                     |
+| matrix-xls | It implements the reading of a score matrix from an Excel file.                                         |
+| package    | Technical module that cares about the packaging of the project.                                         |
+
 ## Requirements
 
 In order to build the project, you will need:
@@ -43,7 +59,7 @@ mvn package -Dmake.installer -Djdk.home=__
 
 ## Release process
 
-In the process below, we should write `__` instead of the tag name that is also the semantic version to be release (e.g. `0.2`).
+In the process below, we should write `__` instead of the tag name that is also the semantic version of the release (e.g. `0.2`).
 
 1. Prepare the release with `mvn release:prepare`
 2. Answer questions; provide the semantic version `__`
