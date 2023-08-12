@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.gui.NodeFactory;
 
-public class WaitingScene implements SceneDefinition {
+public class WaitingScene implements SimpleSceneBuilder {
 
     public WaitingScene(String initialMessage) {
         this.text = NodeFactory.createText(initialMessage);
@@ -20,7 +20,7 @@ public class WaitingScene implements SceneDefinition {
     }
 
     @Override
-    public Scene getScene(AppState state, Stage stage) {
+    public Scene getScene() {
         GridPane pane = NodeFactory.createGrid(1);
         pane.addRow(0, this.text);
         return new Scene(pane);
