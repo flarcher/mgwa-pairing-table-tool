@@ -32,6 +32,8 @@ In the development process, we can quickly run the application with the followin
 2. Go to the `main` folder
 3. Run `mvn javafx:run`
 
+The last two steps can be replaced with the launch of the `launch.sh` script from the root folder.
+
 ## Fat JAR packaging 
 
 In order to run the project using a _fat JAR file_:
