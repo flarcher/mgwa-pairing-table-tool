@@ -6,7 +6,6 @@ import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.gui.AppWindow;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.util.Objects;
@@ -86,6 +85,15 @@ public final class Main {
         }
     }
 
+    private static void stopServer(AppServer server) {
+        try {
+            server.stop();
+        } catch (Exception e) {
+            LOGGER.severe("Unable to stop the server");
+            throw new IllegalStateException(e);
+        }
+    }
+
     public static void main(String[] args) {
 
         // Initialize the application state
@@ -94,22 +102,17 @@ public final class Main {
             .map(Main::getMatrixPath)
             .ifPresent(state::setMatrixFilePath);
 
-        // Launching the HTTP server
+        // Preparing the HTTP server
         String serverConfigurationPath = getArgumentAt(args, 1)
             .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
             .orElse(System.getProperty("user.dir") + File.separator + "server.yml");
         AppServer server = new AppServer(state);
-        startServer(serverConfigurationPath, server);
 
         // Launching the user interface
-        AppWindow.init(state, () -> {
-            try {
-                server.stop();
-            } catch (Exception e) {
-                LOGGER.severe("Unable to stop the server");
-                throw new IllegalStateException(e);
-            }
-        });
+        AppWindow.launch(state,
+            () -> { startServer(serverConfigurationPath, server); }, // On init
+            () -> { stopServer(server); } // On stop
+        );
     }
 
 }
