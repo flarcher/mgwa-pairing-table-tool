@@ -2,12 +2,9 @@ package org.mgwa.w40k.pairing.gui;
 
 import javafx.application.Platform;
 import javafx.application.Preloader;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import org.mgwa.w40k.pairing.gui.scene.WaitingScene;
 import org.mgwa.w40k.pairing.state.AppState;
 
 import java.util.Objects;
@@ -41,15 +38,8 @@ public class AppPreloader extends Preloader {
         // If preloader has complex UI it's initialization can be done in MyPreloader#init
         Platform.runLater(() -> {
             Objects.requireNonNull(labelGetter);
-            Label header = new Label(labelGetter.apply("header"));
-            header.setTextAlignment(TextAlignment.LEFT);
-            Label progress = new Label(labelGetter.apply("loading"));
-            progress.setTextAlignment(TextAlignment.CENTER);
-            Label footer = new Label(labelGetter.apply("footer"));
-            footer.setTextAlignment(TextAlignment.RIGHT);
-            VBox root = new VBox(header, progress, footer);
-            root.setAlignment(Pos.CENTER);
-            scene = new Scene(root, WIDTH, HEIGHT);
+            WaitingScene waitingScene = new WaitingScene(labelGetter.apply("loading"));
+            scene = waitingScene.getScene();
         });
     }
 
