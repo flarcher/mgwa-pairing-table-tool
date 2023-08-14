@@ -124,13 +124,27 @@ public final class Main {
     }
 
     private static void openWebApp(Path webAppTargetFolder, int localPort) {
+        int apiPort;
         if (localPort < 0) {
             LOGGER.warning(String.format("Unknown server port ! using default %d", DEFAULT_SERVER_PORT));
-            localPort = DEFAULT_SERVER_PORT;
+            apiPort = DEFAULT_SERVER_PORT;
         }
-        LOGGER.info(String.format("Starting web-application using server port %d", localPort));
+        else {
+            apiPort = localPort;
+        }
+        LOGGER.info(String.format("Starting web-application using server port %d", apiPort));
         Path indexPage = webAppTargetFolder.resolve(WebAppUtils.WEB_APP_FILES_FOLDER).resolve("index.html");
-        WebAppUtils.openURI(Main.class, LOGGER, indexPage, Integer.toString(localPort));
+        // Concurrency fix:
+        // See https://stackoverflow.com/questions/23176624/javafx-freeze-on-desktop-openfile-desktop-browseuri
+        Executors.defaultThreadFactory().newThread(() -> {
+            try {
+                WebAppUtils.openURI(Main.class, LOGGER, indexPage, Integer.toString(apiPort));
+            }
+            catch (Throwable t) {
+                LOGGER.severe("Error trying to open web page " + indexPage);
+                throw t;
+            }
+        }).start();
     }
 
     private static void cleanUpWebApp(Path webAppTargetFolder) {

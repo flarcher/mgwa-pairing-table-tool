@@ -29,6 +29,7 @@ public class WebAppUtils {
      * @param fileName Web page file path.
      * @param hashParameter Optional hash parameter (can be null)
      * @throws IllegalArgumentException In case of a bad file name
+     * @throws IllegalStateException If the system can not open the file
      */
     public static void openURI(Class<?> clazz, Logger logger, Path fileName, String hashParameter) {
         // Checks
@@ -55,10 +56,15 @@ public class WebAppUtils {
             }
             logger.info(String.format("Opening URI %s", uri));
             // Opening
-            Desktop.getDesktop().browse(uri);
+            if ( Desktop.isDesktopSupported() ) { // Important for initialization
+                Desktop.getDesktop().browse(uri);
+            }
+            else {
+                throw new IllegalStateException("Impossible to trigger the browser");
+            }
         }
         catch (URISyntaxException e) {
-            throw new IllegalStateException("Internal error", e);
+            throw new IllegalStateException("Internal error about URI " + uri, e);
         }
         catch (IOException e) {
             logger.severe(String.format("Impossible to open %s", uri));
