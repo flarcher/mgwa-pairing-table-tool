@@ -4,10 +4,12 @@ import org.mgwa.w40k.pairing.api.AppServer;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.gui.AppWindow;
+import org.mgwa.w40k.pairing.web.WebAppUtils;
 
 import java.io.File;
-import java.io.InputStream;
+import java.io.IOException;
 import java.nio.file.*;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -23,6 +25,8 @@ public final class Main {
 
     private static final Logger LOGGER = LoggerSupplier.INSTANCE.getLogger();
 
+    private static final int DEFAULT_SERVER_PORT = 8000;
+
     private static IllegalArgumentException handleInputError(String message) {
         LOGGER.severe(message);
         System.exit(1); // This is the end!
@@ -31,51 +35,33 @@ public final class Main {
 
     private static Path getMatrixPath(String argument) {
         try {
-            Path filePath = Paths.get(argument);
-            File file = filePath.toFile();
-            if (file.isFile() && file.canRead()) {
-                return filePath;
-            }
-            else {
-                throw handleInputError(String.format("The path %s is not a file or can not be read", filePath));
-            }
+            return InputUtils.checkReadablePath(argument);
         }
-        catch (InvalidPathException ipe) {
-            throw handleInputError(String.format("The argument %s is an invalid path", argument));
+        catch (IllegalArgumentException iae) {
+            throw handleInputError(iae.getMessage());
         }
     }
 
-    /**
-     * @param args All arguments
-     * @param index Zero-based index
-     * @return The argument if any.
-     */
-    private static Optional<String> getArgumentAt(String[] args, int index) {
-        return args.length > index ? Optional.of(args[index]) : Optional.empty();
-    }
-
-    private static void startServer(String serverConfigurationLocation, AppServer server) {
-
-        // Check and auto-setup of server configuration file
+    // Check and auto-setup of server configuration file
+    private static void prepareServerConfiguration(String serverConfigurationLocation) {
         Path serverConfigurationPath = Path.of(serverConfigurationLocation);
         File serverConfigurationFile = serverConfigurationPath.toFile();
         if (!serverConfigurationFile.isFile() || !serverConfigurationFile.canRead()) {
-            if (serverConfigurationFile.exists()) {
-                throw handleInputError(String.format("The server configuration file %s can not be read", serverConfigurationLocation));
+            LOGGER.info("Using default server configuration");
+            try {
+                InputUtils.extractResource("/server.yml", serverConfigurationPath);
             }
-            else {
-                LOGGER.info("Using default server configuration");
-                try (InputStream serverFileInputStream = Main.class.getResourceAsStream("/server.yml")) {
-                    Files.copy(Objects.requireNonNull(serverFileInputStream), serverConfigurationPath);
-                }
-                catch (Throwable throwable) {
-                    LOGGER.severe("Unable to use default server configuration");
-                    throw new IllegalStateException("Unable to use default server configuration", throwable);
-                }
+            catch (IllegalArgumentException iae) {
+                throw handleInputError(iae.getMessage());
+            }
+            catch (Throwable throwable) {
+                LOGGER.severe("Unable to use default server configuration");
+                throw new IllegalStateException("Unable to use default server configuration", throwable);
             }
         }
+    }
 
-        // Start
+    private static void startServer(String serverConfigurationLocation, AppServer server) {
         try {
             server.run("server", serverConfigurationLocation);
         }
@@ -94,25 +80,97 @@ public final class Main {
         }
     }
 
+    private static void prepareWebApp(Path webAppTargetFolder) {
+        // Preparing target
+        if (!Files.exists(webAppTargetFolder)) {
+            try {
+                Files.createDirectories(webAppTargetFolder);
+            }
+            catch (IOException e) {
+                throw handleInputError(String.format("Unable to create %s directory", webAppTargetFolder));
+            }
+        }
+        else if (!Files.isDirectory(webAppTargetFolder)) {
+            throw handleInputError(String.format("%s is not a directory", webAppTargetFolder));
+        }
+        // Listing web-app resources
+        Path meta_inf = Paths.get("META-INF");
+        List<Path> resources = InputUtils.listResourcesFromClassPath((source, resourceName) -> {
+            if (Objects.requireNonNull(source) != ResourceResolver.Source.JAVA_ARCHIVE) {
+                return false;
+            }
+            if (resourceName.getName(0).equals(meta_inf)) {
+                return false;
+            }
+            Path parent = resourceName.getParent();
+            if (parent == null) {
+                return false;
+            }
+            Path lastFolder = parent.getFileName();
+            return lastFolder.equals(WebAppUtils.WEB_APP_FILES_FOLDER);
+        });
+        if (resources.isEmpty()) {
+            throw new IllegalStateException("No web-app resource found");
+        }
+        // Copying resources outside the JAR
+        resources.forEach(resource -> {
+            Path targetPath = webAppTargetFolder.resolve(resource);
+            LOGGER.info(String.format("Extracting %s", targetPath));
+            String resourcePath = !File.separator.equals("/")
+                ? resource.toString().replaceAll(File.separator, "/")
+                : resource.toString();
+            InputUtils.extractResource(resourcePath, targetPath);
+        });
+    }
+
+    private static void openWebApp(Path webAppTargetFolder, int localPort) {
+        if (localPort < 0) {
+            LOGGER.warning(String.format("Unknown server port ! using default %d", DEFAULT_SERVER_PORT));
+            localPort = DEFAULT_SERVER_PORT;
+        }
+        LOGGER.info(String.format("Starting web-application using server port %d", localPort));
+        Path indexPage = webAppTargetFolder.resolve(WebAppUtils.WEB_APP_FILES_FOLDER).resolve("index.html");
+        WebAppUtils.openURI(Main.class, LOGGER, indexPage, Integer.toString(localPort));
+    }
+
+    private static void cleanUpWebApp(Path webAppTargetFolder) {
+        LOGGER.info(String.format("Removing %s", webAppTargetFolder));
+        InputUtils.deleteDirectoryRecursively(webAppTargetFolder);
+    }
+
     public static void main(String[] args) {
 
         // Initialize the application state
         AppState state = new AppState();
-        getArgumentAt(args, 0)
+        InputUtils.getArgumentAt(args, 0)
             .map(Main::getMatrixPath)
             .ifPresent(state::setMatrixFilePath);
 
-        // Preparing the HTTP server
-        String serverConfigurationPath = getArgumentAt(args, 1)
-            .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
-            .orElse(System.getProperty("user.dir") + File.separator + "server.yml");
-        AppServer server = new AppServer(state);
+        // Preparing web pages
+        Path webAppTargetFolder = InputUtils.getArgumentAt(args, 2)
+            .or(() -> Optional.ofNullable(System.getenv("WEBAPP_TMP_FOLDER")))
+            .map(Paths::get)
+            .orElseGet(() -> InputUtils.createTempDirectory("web-app"));
+        prepareWebApp(webAppTargetFolder);
 
-        // Launching the user interface
-        AppWindow.launch(state,
-            () -> { startServer(serverConfigurationPath, server); }, // On init
-            () -> { stopServer(server); } // On stop
-        );
+        try {
+            // Preparing the HTTP server
+            String serverConfigurationPath = InputUtils.getArgumentAt(args, 1)
+                    .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
+                    .orElse(System.getProperty("user.dir") + File.separator + "server.yml");
+            prepareServerConfiguration(serverConfigurationPath);
+            AppServer server = new AppServer(state);
+
+            // Launching the user interface
+            AppWindow.launch(state,
+                () -> startServer(serverConfigurationPath, server),           // On init
+                () -> openWebApp(webAppTargetFolder, server.getServerPort()), // On next
+                () -> stopServer(server)                                      // On stop
+            );
+        }
+        finally {
+            cleanUpWebApp(webAppTargetFolder);
+        }
     }
 
 }

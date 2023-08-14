@@ -16,6 +16,7 @@ public class AppServer extends Application<PairingConfiguration> {
 
     private final AppState state;
     private Environment environment;
+    private ConfigurationHealthCheck configurationHealthCheck;
 
     public AppServer(AppState state) {
         this.state = Objects.requireNonNull(state);
@@ -41,10 +42,21 @@ public class AppServer extends Application<PairingConfiguration> {
         environment.jersey().register(new MatrixResource());
 
         // Health checks
-        environment.healthChecks().register("configuration", new ConfigurationHealthCheck(environment, logger));
+        configurationHealthCheck = new ConfigurationHealthCheck(environment, logger);
+        environment.healthChecks().register("configuration", configurationHealthCheck);
     }
 
     public void stop() throws Exception {
         environment.getApplicationContext().getServer().stop();
+    }
+
+    /**
+     * @return The first known server port or {@code -1} if unknown.
+     */
+    public int getServerPort() {
+        return configurationHealthCheck.getServerPorts()
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.get(0))
+                .orElse(-1);
     }
 }
