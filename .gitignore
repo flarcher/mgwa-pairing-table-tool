@@ -18,5 +18,3 @@ pom.xml.releaseBackup
 pom.xml.tag
 release.properties
 
-# Generated file used for test-launch
-main/server.yml

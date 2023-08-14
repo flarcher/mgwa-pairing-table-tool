@@ -138,6 +138,22 @@ public final class Main {
         InputUtils.deleteDirectoryRecursively(webAppTargetFolder);
     }
 
+    private static Path prepareLocalDirectory() {
+        String userHomeFolder = System.getProperty("user.home");
+        Path localFolder = Paths.get(userHomeFolder)
+            .resolve(".cache").resolve("mgwa").resolve("pairing");
+        LOGGER.info("Using local directory " + localFolder);
+        if (!Files.exists(localFolder)) {
+            try {
+                Files.createDirectories(localFolder);
+            }
+            catch (IOException ioe) {
+                throw handleInputError("Impossible to create " + localFolder);
+            }
+        }
+        return localFolder;
+    }
+
     public static void main(String[] args) {
 
         // Initialize the application state
@@ -146,18 +162,21 @@ public final class Main {
             .map(Main::getMatrixPath)
             .ifPresent(state::setMatrixFilePath);
 
+        // Prepare local cache directory
+        Path appDir = prepareLocalDirectory();
+
         // Preparing web pages
         Path webAppTargetFolder = InputUtils.getArgumentAt(args, 2)
             .or(() -> Optional.ofNullable(System.getenv("WEBAPP_TMP_FOLDER")))
             .map(Paths::get)
-            .orElseGet(() -> InputUtils.createTempDirectory("web-app"));
+            .orElseGet(() -> appDir.resolve("web-app"));
         prepareWebApp(webAppTargetFolder);
-
         try {
+
             // Preparing the HTTP server
             String serverConfigurationPath = InputUtils.getArgumentAt(args, 1)
                     .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
-                    .orElse(System.getProperty("user.dir") + File.separator + "server.yml");
+                    .orElse(appDir.resolve("server.yml").toString());
             prepareServerConfiguration(serverConfigurationPath);
             AppServer server = new AppServer(state);
 
