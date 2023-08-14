@@ -7,28 +7,32 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public class ConfigurationHealthCheck extends HealthCheck {
 
 	public ConfigurationHealthCheck(Environment environment, Logger logger) {
-		this.environment = Objects.requireNonNull(environment);
 		this.logger      = Objects.requireNonNull(logger);
+		getServerPortsAsync(environment);
 	}
 
-	private final Environment environment;
+	//private final Environment environment;
 	private final Logger logger;
 
-	private void printServerPortsAsync(Environment environment) {
+	private final AtomicReference<List<Integer>> serverPorts = new AtomicReference<>();
+
+	private void getServerPortsAsync(Environment environment) {
 		environment.lifecycle().addServerLifecycleListener(new ServerLifecycleListener() {
 
 			@Override
 			public void serverStarted(Server server) {
-				getServerPorts(server)
-					.forEach(port -> logger.info(String.format("Using port %d", port)));
+				List<Integer> ports = getServerPorts(server)
+					.peek(port -> logger.info(String.format("Using port %d", port)))
+					.toList();
+				serverPorts.set(ports);
 			}
 		});
 	}
@@ -44,9 +48,14 @@ public class ConfigurationHealthCheck extends HealthCheck {
 		}
 	}
 
+	Optional<List<Integer>> getServerPorts() {
+		return Optional.ofNullable(serverPorts.get());
+	}
+
 	@Override
 	protected Result check() throws Exception {
-		return getServerPorts(environment.getAdminContext().getServer()).anyMatch(p -> p > 1000)
+		return getServerPorts().orElse(Collections.emptyList()).stream()
+			.anyMatch(p -> p < 1000)
 				? Result.healthy()
 				: Result.unhealthy("Using system network port: forbidden");
 	}

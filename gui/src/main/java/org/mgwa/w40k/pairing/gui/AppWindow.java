@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ import java.util.stream.IntStream;
  *
  * <p>Here is the method calls sequence for the start of the application:</p>
  * <ol>
- *     <li>At first the {@link #launch(AppState, Runnable, Runnable)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
+ *     <li>At first the {@link #launch(AppState, Runnable, Runnable, Runnable)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
  *     <li>Then through the {@link #launch(String...)} method of the JavaFX abstract class...</li>
  *     <li>Our method {@link #start(Stage)} gets finally called</li>
  * </ol>
@@ -44,6 +45,7 @@ public class AppWindow extends Application {
 	private static AppState state;
 	private static Runnable onInit;
 	private static Runnable onClose;
+	private static Runnable onNext;
 
 	/**
 	 * See the {@code Main} class acts as the main class of the Java application in order to avoid a RuntimeException.
@@ -52,10 +54,12 @@ public class AppWindow extends Application {
 	public static void launch(
 			@Nonnull AppState injectedState,
 			@Nonnull Runnable injectedOnInit,
+			@Nonnull Runnable injectedOnNext,
 			@Nonnull Runnable injectedOnClose) {
-		state = injectedState;
-		onInit = injectedOnInit;
-		onClose = injectedOnClose;
+		state   = Objects.requireNonNull(injectedState);
+		onInit  = Objects.requireNonNull(injectedOnInit);
+		onClose = Objects.requireNonNull(injectedOnClose);
+		onNext  = Objects.requireNonNull(injectedOnNext);
 
 		logger.info("Launching ...");
 
@@ -69,20 +73,40 @@ public class AppWindow extends Application {
 	private static final Logger logger = LoggerSupplier.INSTANCE.getLogger();
 	private static final LabelGetter labelGetter = LabelGetter.create();
 
+	private static final AtomicBoolean isClosed = new AtomicBoolean(false);
+
 	//--- Mechanics
 
 	@Override
 	public void init() throws Exception {
 		logger.info("Initializing ...");
 		onInit.run(); // The important line is here
+
+		// Make sure that the JVM exists properly
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+
+			@Override
+			public void run() {
+				closeAtomically();
+			}
+		});
+
 		logger.info("Initialized");
+	}
+
+	private void closeAtomically() {
+		if (isClosed.compareAndSet(false, true)) {
+			logger.info("Stopping ...");
+			Platform.exit();
+			onClose.run(); // The important line is here
+			logger.info("Stopped");
+			System.exit(0);
+		}
 	}
 
 	@Override
 	public void stop() throws Exception {
-		logger.info("Stopping ...");
-		onClose.run(); // The important line is here
-		logger.info("Stopped");
+		closeAtomically();
 	}
 
 	private Stage stage;
@@ -103,7 +127,7 @@ public class AppWindow extends Application {
 	//--- Scenes
 
 	private TeamDefinitionScene teamDefinition;
-	private MatrixSetupScene matrixSetup;
+	private InfoScene continueWithWebApp;
 
     @Override
     public void start(Stage stage) {
@@ -119,8 +143,6 @@ public class AppWindow extends Application {
 				} catch (Exception exception) {
 					throw new IllegalStateException("Internal error", exception);
 				}
-				Platform.exit();
-				System.exit(0);
 			}
 		});
 		logger.info("Started");
@@ -181,14 +203,16 @@ public class AppWindow extends Application {
 		}
 
 		// Ending the loading
-		if (matrixSetup == null) {
-			matrixSetup = new MatrixSetupScene(labelGetter, this::backToTeamDefinition, this::nextAssignment);
+		if (continueWithWebApp == null) {
+			continueWithWebApp = new InfoScene(
+				this::backToTeamDefinition,
+				labelGetter.apply("see.webapp"),
+				labelGetter.apply("previous"));
 		}
-		goToScene(matrixSetup);
+
+		goToScene(continueWithWebApp);
+
+		onNext.run(); // Calls the web-app
 	}
 
-	private void nextAssignment() {
-		logger.info("Ready to Assign!");
-		// TODO
-	}
 }

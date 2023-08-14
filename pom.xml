@@ -12,6 +12,7 @@
         <module>package</module>
         <module>main</module>
         <module>http-api</module>
+        <module>web-app</module>
     </modules>
 
     <properties>
