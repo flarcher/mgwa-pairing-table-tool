@@ -39,7 +39,7 @@ public class AppServer extends Application<PairingConfiguration> {
         // ByPass CORS security filtering
         environment.jersey().register(new AllowAllOriginsResponseFilter());
         // Register API resources
-        environment.jersey().register(new MatrixResource());
+        environment.jersey().register(new MatrixResource(state));
 
         // Health checks
         configurationHealthCheck = new ConfigurationHealthCheck(environment, logger);
