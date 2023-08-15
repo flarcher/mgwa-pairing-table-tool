@@ -1,8 +1,30 @@
 <html lang="fr">
-<head>
+  <head>
     <title>Table Pairing Tool</title>
-</head>
-<body>
-    <h1>Hello!</h1>
-</body>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="./style.css">
+    <script src="./utils.js"></script>
+    <script src="./app.js"></script>
+  </head>
+  <body>
+    <h1>Table Pairing Tool</h1>
+
+    <section id="not_supported" class="error">Your browser is not supported</section>
+
+    <section id="no_api" class="error">Error: the API can not be reached on port <span id="port"></span>: <span id="reason"></span></section>
+
+    <section id="loading">Loading...</section>
+
+    <section id="ready">
+
+      <div>Everything is awesome!</div>
+
+    </section>
+
+		<footer>
+			<span class="left">Made with ❤️ by <em>Fabrice Larcher</em> on <a href="https://github.com/flarcher/mgwa-pairing-table-tool">GitHub</a></span>
+			<span class="right">Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2</a></span>
+		</footer>
+  </body>
 </html>

@@ -1,0 +1,72 @@
+body {
+	font-size: 1em;
+	font-variant: small-caps;
+	text-align: center;
+	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+	--revert-color: rgb(192, 192, 192);
+	--revert-em-color: #FFFFFF;
+	--main-color: #242424;
+	--main-em-color: #000000;
+}
+em {
+	color: var(--main-em-color);
+	font-weight: bold;
+	font-style: normal;
+}
+h1 {
+	color: var(--main-em-color);
+	text-decoration: underline double var(--revert-color);
+	letter-spacing: 0.2em;
+	font-size: 2em;
+}
+section {
+	border-radius: 5px;
+	border: 2px solid #525252;
+	padding: 3em;
+	margin: 10px;
+	color: var(--main-color);
+	display: none;
+}
+section.current {
+	display: block;
+}
+section.error {
+	border-color: red;
+	border-width: 3px;
+	color: brown;
+	font-weight: bold;
+}
+footer {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: calc(100vw - 20px);
+	color: var(--revert-color);
+	background-color: var(--main-color);
+	line-height: 2em;
+	padding: 10px;
+	font-size: 0.75em;
+	--link-color: turquoise;
+	--link-padding: 3px;
+}
+footer a {
+	color: var(--revert-em-color);
+	text-decoration: underline;
+	text-decoration-color: var(--link-color);
+	padding: var(--link-padding);
+}
+footer a:hover {
+	text-decoration: none;
+	background-color: var(--link-color);
+	border-radius: var(--link-padding);
+	color: var(--main-color);
+}
+footer em {
+	color: var(--revert-em-color);
+}
+.left {
+	float: left;
+}
+.right {
+	float: right;
+}
