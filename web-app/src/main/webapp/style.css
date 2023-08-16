@@ -1,5 +1,6 @@
 body {
-	margin: 50px 5px;
+	margin: 50px 0;
+	padding: 5px;
 	font-size: 1em;
 	font-variant: small-caps;
 	text-align: center;
@@ -8,6 +9,12 @@ body {
 	--revert-em-color: #FFFFFF;
 	--main-color: #242424;
 	--main-em-color: #000000;
+	--link-color: blue;
+	--link-padding: 3px;
+	--border-color: #525252;
+	--border-width: 2px;
+	--bg-color: #FDFDFD;
+	background-color: var(--bg-color);
 }
 em, .name, .names > td {
 	color: var(--main-em-color);
@@ -16,7 +23,7 @@ em, .name, .names > td {
 }
 section {
 	border-radius: 5px;
-	border: 2px solid #525252;
+	border: var(--border-width) solid var(--border-color);
 	padding: 10px;
 	margin: 0;
 	color: var(--main-color);
@@ -27,7 +34,6 @@ section.current {
 }
 section.error {
 	border-color: red;
-	border-width: 3px;
 	color: brown;
 	font-weight: bold;
 }
@@ -40,7 +46,6 @@ header, footer {
 	line-height: 25px;
 	padding: 10px;
 	--link-color: turquoise;
-	--link-padding: 3px;
 }
 header {
 	top: 0;
@@ -86,19 +91,29 @@ table .score {
 	display: none;
 }
 nav {
-	--link-color: blue;
-	--link-padding: 3px;
+	height: 20px;
 }
-nav > a {
+nav > a, nav > a:visited {
 	cursor: pointer;
 	color: var(--link-color);
 	text-decoration-color: var(--link-color);
 	text-decoration: underline;
 	padding: var(--link-padding);
+	border-radius: var(--link-padding);
+}
+nav > a.selected, nav > a.selected:hover {
+	cursor: default;
+	text-decoration: none;
+	background-color: var(--bg-color);
+	color: var(--main-em-color);
+	border-width: var(--border-width);
+	border-style: solid;
+	border-color: var(--border-color) var(--border-color) var(--bg-color) var(--border-color);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 }
 nav > a:hover {
 	text-decoration: none;
 	background-color: var(--link-color);
-	border-radius: var(--link-padding);
-	color: var(--main-color);
+	color: var(--revert-color);
 }

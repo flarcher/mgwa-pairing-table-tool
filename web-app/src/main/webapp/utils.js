@@ -17,6 +17,28 @@ var switchSection = function(id) {
 	return section;
 };
 
+var _switchNavTab = function(section, tabId, sourceAnchors) {
+	var targetedElement = section.querySelector('div#'+tabId);
+	if (!targetedElement) {
+		throw "No target element #" + tabId + " found!";
+	}
+	section.querySelectorAll('div.current').forEach(s => {
+		s.classList.remove('current');
+	});
+	document.querySelectorAll('nav > a.selected').forEach(a => {
+		a.classList.remove('selected');
+	});
+	sourceAnchors.forEach(a => a.classList.add('selected'))
+	targetedElement.classList.add('current');
+};
+
+// Forces navigation using the tab ID
+var switchNavTab = function(section, tabId) {
+	var sourceAnchors = Array.from(document.querySelectorAll('nav > a'))
+		.filter(a => { return a.dataset.target === tabId });
+	_switchNavTab(section, tabId, sourceAnchors);
+};
+
 /*
  * Switch from a navigation tab to another
  * using `nav > a` anchors corresponding `div` elements.
@@ -24,23 +46,11 @@ var switchSection = function(id) {
 var setupNavBar = function(section) {
 	document.querySelector('nav').classList.remove('hidden');
     document.querySelectorAll('nav > a').forEach(anchor => {
-            var linkTarget = anchor.dataset.target;
-            var targetedElement = section.querySelector('div#'+linkTarget);
-            if (!targetedElement) {
-                throw "No target element #" + linkTarget + " found!";
-            }
-			anchor.addEventListener('click', e => {
-					section.querySelectorAll('div.current').forEach(s => {
-						s.classList.remove('current');
-					});
-					document.querySelectorAll('nav > a.selected').forEach(a => {
-						a.classList.remove('selected');
-					});
-					anchor.classList.add('selected');
-                    targetedElement.classList.add('current');
-                });
-        });
-}
+		anchor.addEventListener('click', e => {
+			_switchNavTab(section, anchor.dataset.target, [ anchor ]);
+		});
+	});
+};
 
 function emptyElement(element) {
 	while (element.firstElementChild) {
