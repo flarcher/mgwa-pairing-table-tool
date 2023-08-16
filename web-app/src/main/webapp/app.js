@@ -116,9 +116,10 @@ window.addEventListener("load", function() {
                 // Refresh the DOM
                 refreshMatrix();
 
-                // Show the section
+                // Display relevant DOM elements
                 var section = switchSection("ready");
                 setupNavBar(section);
+                switchNavTab(section, 'matrix');
             },
             errors => {
                 errors.forEach(error => console.error("API call error: " + error));
