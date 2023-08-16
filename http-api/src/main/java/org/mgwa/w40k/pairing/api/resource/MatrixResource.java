@@ -1,14 +1,18 @@
 package org.mgwa.w40k.pairing.api.resource;
 
+import org.mgwa.w40k.pairing.Army;
+import org.mgwa.w40k.pairing.api.model.EstimatedScore;
 import org.mgwa.w40k.pairing.api.model.Match;
-import org.mgwa.w40k.pairing.api.model.Matrix;
+import org.mgwa.w40k.pairing.matrix.Matrix;
+import org.mgwa.w40k.pairing.matrix.Score;
 import org.mgwa.w40k.pairing.state.AppState;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 @Path("")
 public class MatrixResource {
@@ -29,11 +33,51 @@ public class MatrixResource {
                 state.getArmyCount());
     }
 
+    private Matrix getMatrix() {
+        return state.getMatrix()
+            .orElseThrow(() -> new WebApplicationException(
+                    "No matrix defined yet",
+                    Response.Status.INTERNAL_SERVER_ERROR));
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("matrix")
-    public Matrix getDefault() {
-        // TODO
-        return new Matrix();
+    @Path("match/{rowsOrColumns}")
+    public Response getArmies(@PathParam("rowsOrColumns") String rowsOrColumns) {
+        Matrix matrix = getMatrix();
+        boolean isRow;
+        switch (rowsOrColumns) {
+            case "rows", "row" -> {
+                isRow = true;
+            }
+            case "columns", "column", "col", "cols" -> {
+                isRow = false;
+            }
+            default ->
+                throw new WebApplicationException(
+                    "Unknown kind of army " + rowsOrColumns,
+                    Response.Status.BAD_REQUEST);
+        }
+        List<String> armyNames = matrix.getArmies(isRow).stream().map(Army::getName).toList();
+        return Response.ok(armyNames, MediaType.APPLICATION_JSON_TYPE).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("scores")
+    public Response getDefault() {
+        Matrix matrix = getMatrix();
+        EstimatedScore DEFAULT_SCORE = EstimatedScore.from(Score.newDefault());
+        int size = state.getArmyCount();
+        List<List<EstimatedScore>> scores = IntStream.range(0, size)
+                .mapToObj(row ->
+                    IntStream.range(0, size)
+                        .mapToObj(column -> matrix.getScore(row, column)
+                            .map(EstimatedScore::from)
+                            .orElse(DEFAULT_SCORE))
+                        .toList()
+                )
+                .toList();
+        return Response.ok(scores, MediaType.APPLICATION_JSON_TYPE).build();
     }
 }

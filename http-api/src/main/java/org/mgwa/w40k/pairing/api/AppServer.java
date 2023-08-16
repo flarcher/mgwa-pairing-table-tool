@@ -10,7 +10,7 @@ import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import java.util.Objects;
 import java.util.logging.Logger;
 
-public class AppServer extends Application<PairingConfiguration> {
+public class AppServer extends Application<AppConfiguration> {
 
     private static final Logger logger = LoggerSupplier.INSTANCE.getLogger();
 
@@ -28,12 +28,12 @@ public class AppServer extends Application<PairingConfiguration> {
     }
 
     @Override
-    public void initialize(Bootstrap<PairingConfiguration> bootstrap) {
+    public void initialize(Bootstrap<AppConfiguration> bootstrap) {
         logger.info("HTTP API initialized");
     }
 
     @Override
-    public void run(PairingConfiguration configuration, Environment environment) throws Exception {
+    public void run(AppConfiguration configuration, Environment environment) throws Exception {
         this.environment = environment;
 
         // ByPass CORS security filtering
