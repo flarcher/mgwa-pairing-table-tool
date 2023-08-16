@@ -18,7 +18,7 @@ import java.util.function.Function;
 abstract class AbstractMainScene implements SceneDefinition {
 
 	protected static final int SCENE_WIDTH = 800;
-	protected static final int SCENE_HEIGHT = 600;
+	protected static final int SCENE_HEIGHT = 300;
 
 	public AbstractMainScene(Function<String, String> labelGetter, int columnCount) {
 		this.columnCount = columnCount;

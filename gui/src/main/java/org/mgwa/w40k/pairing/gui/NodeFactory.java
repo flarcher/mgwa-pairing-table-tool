@@ -35,7 +35,7 @@ public final class NodeFactory {
 	}
 
 	private static final Font FONT_FOOTER = Font.font(FONT_REGULAR.getName(),12);
-	private static final Font FONT_HEADER = Font.font(FONT_REGULAR.getName(),42);
+	private static final Font FONT_HEADER = Font.font(FONT_REGULAR.getName(),36);
 
 	private NodeFactory() {}
 
