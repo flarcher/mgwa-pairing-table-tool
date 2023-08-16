@@ -8,23 +8,35 @@
     <script src="./app.js"></script>
   </head>
   <body>
-    <h1>Table Pairing Tool</h1>
+    <header>
+      <span>Table Pairing Tool</span>
+    </header>
+
+    <nav class="hidden">
+      <a data-target="matrix">Score matrix</a>
+    </nav>
 
     <section id="not_supported" class="error">Your browser is not supported</section>
 
     <section id="no_api" class="error">Error: the API can not be reached on port <span id="port"></span>: <span id="reason"></span></section>
 
+    <section id="api_error" class="error">Error: the API returned an error <span id="status"></span>: <span id="message"></span></section>
+
     <section id="loading">Loading...</section>
 
     <section id="ready">
 
-      <div>Everything is awesome!</div>
+      <div id="matrix" class="current">
+          <table>
+            <tbody></tbody>
+          </table>
+      </div>
 
     </section>
 
 		<footer>
-			<span class="left">Made with ❤️ by <em>Fabrice Larcher</em> on <a href="https://github.com/flarcher/mgwa-pairing-table-tool">GitHub</a></span>
-			<span class="right">Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2</a></span>
+			<span class="left">Made with ❤️ for the <a href="https://mgwa.forumactif.com/">MGWA organization</a>.</span>
+			<span class="right">Source on <a href="https://github.com/flarcher/mgwa-pairing-table-tool">GitHub</a>. Licensed under <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache-2 terms</a>.</span>
 		</footer>
   </body>
 </html>

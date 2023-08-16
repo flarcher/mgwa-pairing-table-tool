@@ -1,4 +1,5 @@
 body {
+	margin: 50px 5px;
 	font-size: 1em;
 	font-variant: small-caps;
 	text-align: center;
@@ -8,22 +9,16 @@ body {
 	--main-color: #242424;
 	--main-em-color: #000000;
 }
-em {
+em, .name, .names > td {
 	color: var(--main-em-color);
 	font-weight: bold;
 	font-style: normal;
 }
-h1 {
-	color: var(--main-em-color);
-	text-decoration: underline double var(--revert-color);
-	letter-spacing: 0.2em;
-	font-size: 2em;
-}
 section {
 	border-radius: 5px;
 	border: 2px solid #525252;
-	padding: 3em;
-	margin: 10px;
+	padding: 10px;
+	margin: 0;
 	color: var(--main-color);
 	display: none;
 }
@@ -36,18 +31,25 @@ section.error {
 	color: brown;
 	font-weight: bold;
 }
-footer {
+header, footer {
 	position: fixed;
-	bottom: 0;
 	left: 0;
 	width: calc(100vw - 20px);
 	color: var(--revert-color);
 	background-color: var(--main-color);
-	line-height: 2em;
+	line-height: 25px;
 	padding: 10px;
-	font-size: 0.75em;
 	--link-color: turquoise;
 	--link-padding: 3px;
+}
+header {
+	top: 0;
+	letter-spacing: 0.2em;
+	font-size: 1.5em;
+}
+footer {
+	bottom: 0;
+	font-size: 0.75em;
 }
 footer a {
 	color: var(--revert-em-color);
@@ -69,4 +71,34 @@ footer em {
 }
 .right {
 	float: right;
+}
+tr.names > td, tr > td.name {
+	text-align: center;
+}
+table {
+	width: 100%;
+}
+table .score {
+	text-align: center;
+	white-space: nowrap;
+}
+.hidden {
+	display: none;
+}
+nav {
+	--link-color: blue;
+	--link-padding: 3px;
+}
+nav > a {
+	cursor: pointer;
+	color: var(--link-color);
+	text-decoration-color: var(--link-color);
+	text-decoration: underline;
+	padding: var(--link-padding);
+}
+nav > a:hover {
+	text-decoration: none;
+	background-color: var(--link-color);
+	border-radius: var(--link-padding);
+	color: var(--main-color);
 }
