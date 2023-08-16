@@ -111,14 +111,17 @@ public final class NodeFactory {
 				INTEGER_STRING_CONVERTER,
 				initialValue,
 				change -> {
+					TextFormatter.Change out = null;
 					String newValue = change.getControlNewText();
 					if (!newValue.isEmpty()) {
-						Integer number = INTEGER_STRING_CONVERTER.fromString(newValue);
-						if (number != null) {
-							return change;
+						try {
+							Integer number = INTEGER_STRING_CONVERTER.fromString(newValue);
+							out = number != null ? change : null;
+						} catch (@SuppressWarnings("unused") NumberFormatException nfe) {
+							// Nothing
 						}
 					}
-					return null;
+					return out;
 				}
 		));
 		field.setText(INTEGER_STRING_CONVERTER.toString(initialValue));
