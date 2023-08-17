@@ -49,6 +49,29 @@ var addTableCornerCell = function(row) {
     row.appendChild(cornerCell);
 };
 
+var setupScoreElement = function(element, score) {
+    element.classList.add('score');
+    element.textContent = score.min.toFixed() + "-" + score.max.toFixed();
+    var scoreClass
+    if (score.min > score.max) {
+        console.warn("Invalid score " + score);
+    }
+    if (score.min < 3 && score.max > 17) {
+        scoreClass = 'game';
+    } else if (score.max < 5) {
+        scoreClass = 'bad';
+    } else if (score.min > 15) {
+        scoreClass = 'good';
+    } else if (score.min < 10) {
+        scoreClass = 'above';
+    } else if (score.max < 10) {
+        scoreClass = 'below';
+    } else if (score.min > 7 && score.max < 13) {
+        scoreClass = 'middle';
+    }
+    element.classList.add(scoreClass);
+};
+
 var refreshMatrix = function() {
     var matrixTableBody = document.querySelector("#matrix > table > tbody");
 
@@ -100,9 +123,7 @@ var refreshMatrix = function() {
         newRow.appendChild(rowArmyCell);
         for (let j = 0; j < columnArmies.length; j++) {
             let scoreCell = document.createElement("td");
-            scoreCell.classList.add('score');
-            let score = scores[i][j];
-            scoreCell.textContent = score.min.toFixed() + "-" + score.max.toFixed();
+            setupScoreElement(scoreCell, scores[i][j]);
             newRow.appendChild(scoreCell);
         }
     }

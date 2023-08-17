@@ -80,18 +80,48 @@ footer em {
 tr.names > td, tr > td.name {
 	text-align: center;
 	height: 1em;
+	border: 1px solid var(--border-color);
+}
+tr.names > td[colspan] {
+	border: none;
 }
 tr > td.name[rowspan] {
 	width: 1em;
 	height: auto;
 	transform: rotate(-90deg);
+	border: none;
+}
+tr.names > td.corner {
+	border: none;
 }
 table {
 	width: 100%;
 }
-table .score {
+.score {
 	text-align: center;
 	white-space: nowrap;
+	color: var(--main-color);
+}
+.score.game {
+	background-color: purple;
+	color: var(--revert-color);
+}
+.score.bad {
+	background-color: black;
+	color: var(--revert-color);
+}
+.score.below {
+	background-color: darkorange;
+}
+.score.middle {
+	background-color: yellow;
+}
+.score.above {
+	background-color: green;
+}
+.score.good {
+	background-color: blue;
+	color: var(--revert-color);
 }
 .hidden {
 	display: none;
