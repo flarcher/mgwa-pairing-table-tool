@@ -34,6 +34,8 @@ In the development process, we can quickly run the application with the followin
 
 The last two steps can be replaced with the launch of the `launch.sh` script from the root folder.
 
+If a code update is only related to [the web application files](web-app/src/main/webapp) then the script `update-web-app.sh` would update the web files in the local cache folder. A page reload would then show the result, as long as the API is still running.  
+
 ## Fat JAR packaging 
 
 In order to run the project using a _fat JAR file_:

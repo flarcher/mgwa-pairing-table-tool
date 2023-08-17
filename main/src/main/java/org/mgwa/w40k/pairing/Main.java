@@ -184,7 +184,7 @@ public final class Main {
         Path webAppTargetFolder = InputUtils.getArgumentAt(args, 2)
             .or(() -> Optional.ofNullable(System.getenv("WEBAPP_TMP_FOLDER")))
             .map(Paths::get)
-            .orElseGet(() -> appDir.resolve("web-app"));
+            .orElse(appDir);
         prepareWebApp(webAppTargetFolder);
         try {
 
