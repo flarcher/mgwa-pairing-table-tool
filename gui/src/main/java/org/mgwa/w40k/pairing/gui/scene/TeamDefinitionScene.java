@@ -57,6 +57,7 @@ public class TeamDefinitionScene extends AbstractMainScene {
 			logger.finer(String.format("New table count %s->%s", oldValue, newValue));
 			state.setArmyCount(Integer.parseUnsignedInt(newValue));
 		});
+		armyCount.setDisable(state.getMatrixFilePath().isPresent());
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(selectYourFile);
 		Button fileSelectButton = NodeFactory.createButton(selectYourFile, e -> {
