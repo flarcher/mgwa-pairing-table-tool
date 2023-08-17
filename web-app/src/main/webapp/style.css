@@ -79,6 +79,12 @@ footer em {
 }
 tr.names > td, tr > td.name {
 	text-align: center;
+	height: 1em;
+}
+tr > td.name[rowspan] {
+	width: 1em;
+	height: auto;
+	transform: rotate(-90deg);
 }
 table {
 	width: 100%;

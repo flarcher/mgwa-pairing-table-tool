@@ -43,21 +43,37 @@ var getApiUrl = function() {
     return apiUrlPrefix;
 }
 
+var addTableCornerCell = function(row) {
+    var cornerCell = document.createElement("td");
+    cornerCell.classList.add('corner');
+    row.appendChild(cornerCell);
+};
+
 var refreshMatrix = function() {
     var matrixTableBody = document.querySelector("#matrix > table > tbody");
 
     emptyElement(matrixTableBody); // reset
 
+    const memberCount = getData().match.team_member_count;
     var newRow = document.createElement("tr");
     newRow.classList.add('names');
     matrixTableBody.appendChild(newRow);
-    const cornerCell = document.createElement("td");
-    cornerCell.classList.add('corner');
-    newRow.appendChild(cornerCell);
-    
+    addTableCornerCell(newRow);
+    addTableCornerCell(newRow);
+    const columnTeamCell = document.createElement("td");
+    columnTeamCell.textContent = getData().match.column_team;
+    columnTeamCell.setAttribute("colspan", memberCount.toFixed());
+    newRow.appendChild(columnTeamCell);
+
+    newRow = document.createElement("tr");
+    newRow.classList.add('names');
+    matrixTableBody.appendChild(newRow);
+    addTableCornerCell(newRow);
+    addTableCornerCell(newRow);
+
     var columnArmies = getData().col_armies; // Column armies names
     var rowArmies    = getData().row_armies; // Row armies names
-    if (columnArmies.length != rowArmies.length) {
+    if (memberCount != rowArmies.length || memberCount != columnArmies.length) {
         throw "Inconsistent matrix size"
     }
 
@@ -67,10 +83,17 @@ var refreshMatrix = function() {
         newRow.appendChild(colArmyCell);
     }
 
-    var scores    = getData().scores;     // Matrix values
+    var scores = getData().scores;     // Matrix values
     for (let i = 0; i < rowArmies.length; i++) {
         newRow = document.createElement("tr");
         matrixTableBody.appendChild(newRow);
+        if (i == 0) {
+            const rowTeamCell = document.createElement("td");
+            rowTeamCell.textContent = getData().match.row_team;
+            rowTeamCell.setAttribute("rowspan", memberCount.toFixed());
+            rowTeamCell.classList.add('name');
+            newRow.appendChild(rowTeamCell);
+        }
         let rowArmyCell = document.createElement("td");
         rowArmyCell.classList.add('name');
         rowArmyCell.textContent = rowArmies[i];
