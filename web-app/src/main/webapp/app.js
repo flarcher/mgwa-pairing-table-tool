@@ -6,19 +6,19 @@ var errorHandler = function(jsonResponse) {
     var cause = jsonResponse["cause"];
     var message = jsonResponse["message"] || "?"
     if (cause === "network") {
+        var port = getData().port;
         // Display error
         var section = switchSection("no_api");
         section.querySelector('#port').innerHTML = port.toFixed();
         section.querySelector('#reason').innerHTML = message
         // Optional retry
-        var hashPort = window.pairing_api.port;
-        if (hashPort != defaultPort) {
+        /*if (port != defaultPort) {
             // Automatically redirect to the default port
             setTimeout(() => {
                 window.location.hash = defaultPort.toFixed();
                 window.location.reload(false);
             }, 3000)
-        }
+        }*/
     }
     else {
         var section = switchSection("api_error");
@@ -37,6 +37,7 @@ var getApiUrl = function() {
             port = parseInt(query.substring(begin + 1));
         }
     }
+    getData().port = port;
     var apiUrlPrefix = 'http://localhost:' + port.toFixed() + '/api/';
     console.info('API URL is ' + apiUrlPrefix);
     return apiUrlPrefix;
