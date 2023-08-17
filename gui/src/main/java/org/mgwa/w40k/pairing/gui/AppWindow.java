@@ -20,6 +20,7 @@ import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -168,36 +169,35 @@ public class AppWindow extends Application {
 		return matrix.setDefaultScore(Score.newDefault());
 	}
 
-	private Matrix loadMatrixFile(Path path) {
+	private Optional<Matrix> loadMatrixFile(Path path) {
 		// Waiting loading the file
 		try (MatrixReader matrixReader = XlsMatrixReader.fromFile(path.toFile())) {
 			Matrix matrix = matrixReader.get();
 			logger.info(String.format("Using matrix of size %s", matrix.getSize()));
-			return matrix;
+			return Optional.of(matrix);
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Impossible to read file", e);
 			displayError(String.format("%s %s", labelGetter.getLabel("can-not-read-file"), path), teamDefinition);
-			return null;
+			return Optional.empty();
 		}
 	}
 
 	private void toMatrixDisplay() {
 
-		if (!state.getMatrix().isPresent()) {
-			Matrix matrix;
-			if (state.getMatrixFilePath().isPresent()) {
-				Path path = state.getMatrixFilePath().get();
-				// Waiting loading the file
-				goToScene(new WaitingScene(String.format("Loading file %s", path)));
-				matrix = loadMatrixFile(path);
-			} else {
-				logger.info("Using empty matrix");
-				matrix = loadMatrixDefault();
-			}
-			state.setMatrix(matrix);
+		Matrix matrix;
+		if (state.getMatrixFilePath().isPresent()) {
+			Path path = state.getMatrixFilePath().get();
+			// Waiting loading the file
+			goToScene(new WaitingScene(String.format("Loading file %s", path)));
+			logger.info("Reading matrix file " + path);
+			matrix = loadMatrixFile(path).orElse(loadMatrixDefault());
+		} else {
+			logger.info("Using empty matrix");
+			matrix = loadMatrixDefault();
 		}
-		else {
-			Matrix matrix = state.getMatrix().get();
+		state.setMatrix(matrix);
+
+		if (state.getMatrix().isPresent()) {
 			logger.info(String.format("Resizing matrix from %d to %d", matrix.getSize(), state.getArmyCount()));
 			state.forceArmyCountConsistency(Score.newDefault());
 		}
