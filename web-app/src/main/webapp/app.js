@@ -79,17 +79,18 @@ var refreshMatrix = function() {
 
     const memberCount = getData().match.team_member_count;
     var newRow = document.createElement("tr");
-    newRow.classList.add('names');
     matrixTableBody.appendChild(newRow);
     addTableCornerCell(newRow);
     addTableCornerCell(newRow);
     const columnTeamCell = document.createElement("td");
-    columnTeamCell.textContent = getData().match.column_team;
+    columnTeamCell.classList.add('name');
     columnTeamCell.setAttribute("colspan", memberCount.toFixed());
+    const columnTeamSpan = document.createElement("span");
+    columnTeamSpan.textContent = getData().match.column_team;
+    columnTeamCell.appendChild(columnTeamSpan);
     newRow.appendChild(columnTeamCell);
 
     newRow = document.createElement("tr");
-    newRow.classList.add('names');
     matrixTableBody.appendChild(newRow);
     addTableCornerCell(newRow);
     addTableCornerCell(newRow);
@@ -102,6 +103,7 @@ var refreshMatrix = function() {
 
     for (let i = 0; i < columnArmies.length; i++) {
         let colArmyCell = document.createElement("td");
+        colArmyCell.classList.add('name');
         colArmyCell.textContent = columnArmies[i];
         newRow.appendChild(colArmyCell);
     }
@@ -112,9 +114,11 @@ var refreshMatrix = function() {
         matrixTableBody.appendChild(newRow);
         if (i == 0) {
             const rowTeamCell = document.createElement("td");
-            rowTeamCell.textContent = getData().match.row_team;
             rowTeamCell.setAttribute("rowspan", memberCount.toFixed());
             rowTeamCell.classList.add('name');
+            const rowTeamSpan = document.createElement("span");
+            rowTeamSpan.textContent = getData().match.row_team;
+            rowTeamCell.appendChild(rowTeamSpan);
             newRow.appendChild(rowTeamCell);
         }
         let rowArmyCell = document.createElement("td");

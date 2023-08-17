@@ -77,22 +77,28 @@ footer em {
 .right {
 	float: right;
 }
-tr.names > td, tr > td.name {
+tr > td.name {
 	text-align: center;
 	height: 1em;
 	border: 1px solid var(--border-color);
 }
-tr.names > td[colspan] {
+tr > td.name[colspan], tr > td.name[rowspan] {
 	border: none;
+}
+tr > td.name[colspan] > span {
+	white-space: nowrap;
+	display: block;
+	height: 20px;
 }
 tr > td.name[rowspan] {
 	width: 1em;
 	height: auto;
-	transform: rotate(-90deg);
-	border: none;
 }
-tr.names > td.corner {
-	border: none;
+tr > td.name[rowspan] > span {
+	transform: rotate(-90deg);
+	white-space: nowrap;
+	display: block;
+	width: 20px;
 }
 table {
 	width: 100%;
@@ -117,11 +123,11 @@ table {
 	background-color: yellow;
 }
 .score.above {
-	background-color: green;
+	background-color: yellowgreen;
 }
 .score.good {
 	background-color: blue;
-	color: var(--revert-color);
+	color: white;
 }
 .hidden {
 	display: none;
