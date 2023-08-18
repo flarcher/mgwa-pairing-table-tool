@@ -171,11 +171,39 @@ var refreshTables = function() {
     }
 };
 
+var isBrowserSupported = function() {
+    // Checking the presence of recent Javascript functions that are used
+    return window.fetch && Promise.all;
+}
+
+var checkMatchSetup = function() {
+    var team_size = getData().match.team_member_count;
+    if (team_size < 4) {
+        return "Not enough member per team";
+    }
+    else if (team_size > 10) {
+        return "Too much member per team";
+    }
+
+    const teamNames = new Set();
+    getData().row_armies.forEach(army => teamNames.add(army));
+    if (teamNames.size != getData().row_armies.length) {
+        return "Redundant row army name";
+    }
+    teamNames.clear();
+    getData().col_armies.forEach(army => teamNames.add(army));
+    if (teamNames.size != getData().col_armies.length) {
+        return "Redundant row army name";
+    }
+
+    return null; // No result = OK
+}
+
 // Initialization
 window.addEventListener("load", function() {
 
         // Browser support check
-        if (!window.fetch || !Promise.all) {
+        if (!isBrowserSupported()) {
 			switchSection("not_supported"); // Warning about non compatible browser
             return;
 		}
@@ -200,14 +228,23 @@ window.addEventListener("load", function() {
                 getData().col_armies = jsonResults[2];
                 getData().scores     = jsonResults[3];
 
-                // Refresh the DOM
-                refreshMatrix();
-                refreshTables();
+                // Data check
+                var shownSection;
+                var validationError = checkMatchSetup();
+                if (validationError) {
+                    shownSection = switchSection("invalid");
+                    shownSection.querySelector("#reason").textContent = validationError;
+                }
+                else {
+                    // Refresh the DOM
+                    refreshMatrix();
+                    refreshTables();
 
-                // Display relevant DOM elements
-                var section = switchSection("ready");
-                setupNavBar(section);
-                switchNavTab(section, 'matrix');
+                    // Display relevant DOM elements
+                    shownSection = switchSection("ready");
+                    setupNavBar(shownSection);
+                    switchNavTab(shownSection, 'matrix');
+                }
             },
             errors => {
                 errors.forEach(error => console.error("API call error: " + error));
