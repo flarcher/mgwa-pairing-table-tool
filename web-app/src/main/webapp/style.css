@@ -16,11 +16,7 @@ body {
 	--bg-color: #FDFDFD;
 	background-color: var(--bg-color);
 }
-em, .name {
-	color: var(--main-em-color);
-	font-weight: bold;
-	font-style: normal;
-}
+/*=== Switchable sections ===*/
 section {
 	border-radius: 5px;
 	border: var(--border-width) solid var(--border-color);
@@ -37,6 +33,7 @@ section.error {
 	color: brown;
 	font-weight: bold;
 }
+/*=== Header + Footer ===*/
 header, footer {
 	position: fixed;
 	left: 0;
@@ -70,6 +67,12 @@ footer a:hover {
 footer em {
 	color: var(--revert-em-color);
 }
+/*=== Utility classes ===*/
+em, .name {
+	color: var(--main-em-color);
+	font-weight: bold;
+	font-style: normal;
+}
 .left {
 	display: block;
 	float: left;
@@ -78,6 +81,7 @@ footer em {
 	display: block;
 	float: right;
 }
+/*=== Score matrix ===*/
 tr > td.name {
 	text-align: center;
 	height: 22px;
@@ -131,6 +135,7 @@ table {
 	background-color: blue;
 	color: white;
 }
+/*=== Navigation bar ===*/
 .hidden {
 	display: none;
 }
@@ -169,7 +174,7 @@ nav > a:hover {
 #ready > div.current {
 	display: block;
 }
-/* Tables 
+/*=== Tables ===
  * 
  * <div id="tables>
  *   <!-- ... -->
