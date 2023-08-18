@@ -11,14 +11,6 @@ var errorHandler = function(jsonResponse) {
         var section = switchSection("no_api");
         section.querySelector('#port').innerHTML = port.toFixed();
         section.querySelector('#reason').innerHTML = message
-        // Optional retry
-        /*if (port != defaultPort) {
-            // Automatically redirect to the default port
-            setTimeout(() => {
-                window.location.hash = defaultPort.toFixed();
-                window.location.reload(false);
-            }, 3000)
-        }*/
     }
     else {
         var section = switchSection("api_error");

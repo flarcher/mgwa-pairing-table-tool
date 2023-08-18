@@ -9,14 +9,14 @@ body {
 	--revert-em-color: #FFFFFF;
 	--main-color: #242424;
 	--main-em-color: #000000;
-	--link-color: blue;
+	--link-color: turquoise;
 	--link-padding: 3px;
 	--border-color: #525252;
 	--border-width: 2px;
 	--bg-color: #FDFDFD;
 	background-color: var(--bg-color);
 }
-em, .name, .names > td {
+em, .name {
 	color: var(--main-em-color);
 	font-weight: bold;
 	font-style: normal;
@@ -45,7 +45,6 @@ header, footer {
 	background-color: var(--main-color);
 	line-height: 25px;
 	padding: 10px;
-	--link-color: turquoise;
 }
 header {
 	top: 0;
@@ -72,15 +71,17 @@ footer em {
 	color: var(--revert-em-color);
 }
 .left {
+	display: block;
 	float: left;
 }
 .right {
+	display: block;
 	float: right;
 }
 tr > td.name {
 	text-align: center;
-	height: 1em;
-	border: 1px solid var(--border-color);
+	height: 22px;
+	border: 1px solid lightgray;
 }
 tr > td.name[colspan], tr > td.name[rowspan] {
 	border: none;
@@ -99,6 +100,7 @@ tr > td.name[rowspan] > span {
 	white-space: nowrap;
 	display: block;
 	width: 20px;
+	margin-bottom: -100%;
 }
 table {
 	width: 100%;
@@ -141,15 +143,16 @@ nav > a, nav > a:visited {
 	text-decoration-color: var(--link-color);
 	text-decoration: underline;
 	padding: var(--link-padding);
+	border-width: var(--border-width);
+	border-style: solid;
 	border-radius: var(--link-padding);
+	border-color: transparent;
 }
 nav > a.selected, nav > a.selected:hover {
 	cursor: default;
 	text-decoration: none;
 	background-color: var(--bg-color);
 	color: var(--main-em-color);
-	border-width: var(--border-width);
-	border-style: solid;
 	border-color: var(--border-color) var(--border-color) var(--bg-color) var(--border-color);
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
@@ -157,5 +160,13 @@ nav > a.selected, nav > a.selected:hover {
 nav > a:hover {
 	text-decoration: none;
 	background-color: var(--link-color);
-	color: var(--revert-color);
+	color: var(--main-color);
+	border-style: dotted;
+	border-color: var(--link-color);
+}
+#ready > div {
+	display: none;
+}
+#ready > div.current {
+	display: block;
 }
