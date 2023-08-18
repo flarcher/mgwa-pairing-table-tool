@@ -170,3 +170,73 @@ nav > a:hover {
 #ready > div.current {
 	display: block;
 }
+/* Tables 
+ * 
+ * <div id="tables>
+ *   <!-- ... -->
+ *   <div>
+ *     <label></label>
+ *     <div class="table">
+ *       <span class="left"></span>
+ *       <span class="right"></span>
+ *     </div>
+ *   </div>
+ * </div>
+ */
+#tables > div {
+	--row-height: 40px;
+	--row-width: 60%;
+	--table-bw: 1px;
+	--table-color: #ffef9c;
+	margin-bottom: 20px;
+}
+#tables > div > label {
+	display: block;
+	line-height: var(--row-height);
+	float: left;
+	max-width: calc(40% - 10px);
+}
+#tables > div.teams > label,
+#tables > div.teams > .name {
+	height: 1em;
+}
+#tables > div.teams > .name {
+	min-width: var(--row-width);
+	line-height: var(--row-height);
+}
+#tables > div > .name,
+#tables > div > .table {
+	display: inline-block;
+}
+#tables > div > .table {
+	height: var(--row-height);
+	min-width: var(--row-width);
+	border: calc(2 * var(--table-bw)) solid var(--border-color);
+	box-shadow: 5px 3px 3px grey;
+	background-color: var(--table-color);
+}
+#tables > div > .table::after {
+	clear: both;
+}
+#tables > div > .table.unassigned {
+	background-color: lightgrey;
+}
+#tables > div > .table.unassigned > span::before {
+	content: "?";
+	position: relative;
+	font-size: calc(var(--row-height) / 2);
+	top: calc(50% - 10px);
+	left: 0;
+}
+#tables .table > span {
+	box-sizing: border-box;
+	width: 50%;
+	height: 100%;
+	border: var(--table-bw) dashed transparent;
+}
+#tables .table > span.left {
+	border-right-color: var(--border-color);
+}
+#tables .table > span.right {
+	border-left-color: var(--border-color);
+}
