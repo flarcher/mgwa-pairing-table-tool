@@ -45,8 +45,9 @@ var setupScoreElement = function(element, score) {
     element.classList.add('score');
     element.textContent = score.min.toFixed() + "-" + score.max.toFixed();
     var scoreClass
-    if (score.min > score.max) {
+    if (score.min > score.max || score.min < 0 || score.max > 20) {
         console.warn("Invalid score " + score);
+        return;
     }
     if (score.min < 3 && score.max > 17) {
         scoreClass = 'game';
@@ -54,14 +55,22 @@ var setupScoreElement = function(element, score) {
         scoreClass = 'bad';
     } else if (score.min > 15) {
         scoreClass = 'good';
-    } else if (score.min < 10) {
-        scoreClass = 'above';
-    } else if (score.max < 10) {
-        scoreClass = 'below';
-    } else if (score.min > 7 && score.max < 13) {
-        scoreClass = 'middle';
     }
-    element.classList.add(scoreClass);
+
+    if (!scoreClass) {
+        const average = (score.min + score.max) / 2;
+        if (average > 10) {
+            scoreClass = 'above';
+        } else if (average < 10) {
+            scoreClass = 'below';
+        } else if (average == 10) {
+            scoreClass = 'middle';
+        }
+    }
+
+    if (scoreClass) {
+        element.classList.add(scoreClass);
+    }
 };
 
 var refreshMatrix = function() {
