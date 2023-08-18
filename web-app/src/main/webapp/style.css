@@ -139,9 +139,8 @@ nav {
 }
 nav > a, nav > a:visited {
 	cursor: pointer;
-	color: var(--link-color);
-	text-decoration-color: var(--link-color);
-	text-decoration: underline;
+	color: blue;
+	text-decoration: none;
 	padding: var(--link-padding);
 	border-width: var(--border-width);
 	border-style: solid;
