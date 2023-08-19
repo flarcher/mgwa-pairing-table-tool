@@ -87,9 +87,6 @@ tr > td.name {
 	height: 22px;
 	border: 1px solid lightgray;
 }
-tr > td.name[colspan], tr > td.name[rowspan] {
-	border: none;
-}
 tr > td.name[colspan] > span {
 	white-space: nowrap;
 	display: block;
@@ -104,10 +101,12 @@ tr > td.name[rowspan] > span {
 	white-space: nowrap;
 	display: block;
 	width: 20px;
-	margin-bottom: -100%;
+	position: relative;
+	top: 22px;
 }
 table {
 	width: 100%;
+	font-variant: small-caps;
 }
 .score {
 	text-align: center;
