@@ -214,13 +214,27 @@ section > div > div > label {
 	display: block;
 	line-height: var(--row-height);
 	float: left;
-	max-width: calc(40% - 10px);
+	width: 100px; /* Fix width is needed for alignment */
+	text-align: left;
 }
 section > div > div.teams > label,
 section > div > div.teams > .name {
 	height: 1em;
 }
-section > div > div.teams > .name {
+.teams {
+	margin-bottom: 20px;
+}
+.teams > .name {
+	line-height: var(--row-height);
+	min-width: var(--row-width);
+	display: inline-block;
+}
+.teams > .name > .left,
+.teams > .name > .right {
+	width: 50%;
+}
+/*=== Assignment screen ===*/
+#assign > div > .choice {
 	line-height: var(--row-height);
 	min-width: var(--row-width);
 	display: inline-block;
