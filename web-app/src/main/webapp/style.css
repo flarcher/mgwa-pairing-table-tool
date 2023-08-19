@@ -14,11 +14,13 @@ body {
 	--border-color: #161414;
 	--border-width: 2px;
 	--bg-color: #FDFDFD;
+	--border-radius: 5px;
+	--army-color: #ffef9c;
 	background-color: var(--main-color);
 }
 /*=== Switchable sections ===*/
 section {
-	border-radius: 5px;
+	border-radius: var(--border-radius);
 	border: var(--border-width) solid var(--border-color);
 	padding: 10px;
 	margin: 0;
@@ -239,6 +241,30 @@ section > div > div.teams > .name {
 	min-width: var(--row-width);
 	display: inline-block;
 }
+/*=== Analysis screen ===*/
+#analysis fieldset {
+	border-radius: var(--border-radius);
+}
+#analysis fieldset label:hover {
+	cursor: pointer;
+	font-weight: bold;
+	color: var(--main-em-color);
+}
+#analysis span.army {
+	display: inline-block;
+	padding: 5px;
+	margin: 5px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background-color: var(--army-color);
+}
+#analysis span.army:hover {
+	cursor: pointer;
+	color: white;
+	border-color: red;
+	background-color: orangered;
+	box-shadow: 3px 2px 2px orange;
+}
 /*=== Tables ===
  * 
  * <div id="tables>
@@ -254,7 +280,6 @@ section > div > div.teams > .name {
  */
 #tables > div > .table {
 	--table-bw: 1px;
-	--table-color: #ffef9c;
 	display: inline-block;
 }
 #tables > div > .table {
@@ -262,7 +287,7 @@ section > div > div.teams > .name {
 	min-width: var(--row-width);
 	border: calc(2 * var(--table-bw)) solid var(--border-color);
 	box-shadow: 5px 3px 3px grey;
-	background-color: var(--table-color);
+	background-color: var(--army-color);
 }
 #tables > div > .table.unassigned {
 	background-color: lightgrey;

@@ -159,6 +159,50 @@ var refreshAssignmentForm = function() {
     // TODO
 };
 
+var refreshArmyList = function(isRowArmy, parentDiv) {
+    const data = getData();
+    const allArmies = isRowArmy ? data.row_armies : data.col_armies;
+    const assignedList = data.tables
+        ? data.tables.map(t => isRowArmy ? t.row_army : t.col_army)
+        : undefined;
+    var filteredList = assignedList
+        ? allArmies.filter(armyName => ! assignedList.find(assigned => assigned === armyName))
+        : [];
+
+    emptyElement(parentDiv);
+    filteredList.forEach(armyName => {
+        var candidateElement = document.createElement('span');
+        candidateElement.classList.add('army');
+        candidateElement.textContent = armyName;
+        parentDiv.appendChild(candidateElement);
+    });
+};
+
+var initAnalysisForm = function() {
+    const section = document.getElementById('analysis');
+    const armyDiv = section.querySelector('.selector > div');
+    section.querySelectorAll('.teams input').forEach(radioInput => {
+        if (radioInput.checked) {
+            refreshArmyList(radioInput.value === "row", armyDiv); // Otherwise "column"
+        }
+        radioInput.addEventListener('click', e => {
+            refreshArmyList(e.target.value === "row", armyDiv); // Otherwise "column"
+        });
+    });
+};
+
+var refreshAnalysisForm = function() {
+    var formDiv = document.getElementById("analysis");
+    var teamNamesRow = formDiv.querySelectorAll("fieldset.teams label");
+    if (teamNamesRow.length != 2) {
+        throw "Expecting 2 teams";
+    }
+    teamNamesRow[0].textContent = getData().match.row_team
+    teamNamesRow[1].textContent = getData().match.column_team
+
+    // TODO
+};
+
 var isBrowserSupported = function() {
     // Checking the presence of recent Javascript functions that are used
     return window.fetch && Promise.all;
@@ -187,6 +231,19 @@ var checkMatchSetup = function() {
     return null; // No result = OK
 };
 
+var initAll = function() {
+    setupNavBar(document.getElementById('ready'));
+    initAnalysisForm();
+}
+
+var refreshAll = function() {
+    refreshMatrix();
+    refreshTables();
+    refreshBadges();
+    refreshAssignmentForm();
+    refreshAnalysisForm();
+};
+
 // Initialization
 window.addEventListener("load", function() {
 
@@ -210,6 +267,7 @@ window.addEventListener("load", function() {
                 apiURl + 'scores'
             ],
             jsonResults => {
+
                 // Assign data
                 getData().match      = jsonResults[0];
                 getData().row_armies = jsonResults[1];
@@ -221,6 +279,9 @@ window.addEventListener("load", function() {
                         "columns": []
                     }; // Not assigning yet
 
+                // Initialize the DOM
+                initAll();
+
                 // Data check
                 var shownSection;
                 var validationError = checkMatchSetup();
@@ -230,14 +291,10 @@ window.addEventListener("load", function() {
                 }
                 else {
                     // Refresh the DOM
-                    refreshMatrix();
-                    refreshTables();
-                    refreshBadges();
-                    refreshAssignmentForm();
+                    refreshAll();
 
                     // Display relevant DOM elements
                     shownSection = switchSection("ready");
-                    setupNavBar(shownSection);
                     switchNavTab(shownSection, 'matrix');
                 }
             },
