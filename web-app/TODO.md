@@ -21,4 +21,4 @@
 
 ## Assignment
 
-- TODO
+- TODO: finish the implementation with defender and attacker choices
