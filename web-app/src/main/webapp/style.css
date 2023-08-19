@@ -108,6 +108,7 @@ table {
 	width: 100%;
 	font-variant: small-caps;
 }
+/*=== Score cell ===*/
 .score {
 	text-align: center;
 	white-space: nowrap;
