@@ -134,13 +134,29 @@ var refreshTables = function() {
     }
 };
 
-var refreshHeader = function() {
+var refreshBadges = function() {
     const memberCount = getData().match.team_member_count;
     const pairCount = getData().tables.length;
     const stepCounts = getStepCounts(memberCount, pairCount)
+
+    const stepsLabel = stepCounts[0].toFixed() + "/" + stepCounts[1].toFixed();
+    const pairsLabel = pairCount.toFixed() + "/" + memberCount.toFixed();
+
     var header = document.querySelector('header');
-    header.querySelector('#steps').textContent = stepCounts[0].toFixed() + "/" + stepCounts[1].toFixed();
-    header.querySelector('#pairs').textContent = pairCount.toFixed() + "/" + memberCount.toFixed();
+    header.querySelector('#steps').textContent = stepsLabel;
+    header.querySelector('#pairs').textContent = pairsLabel;
+};
+
+var refreshAssignmentForm = function() {
+    var tablesDiv = document.getElementById("assign");
+    var teamNamesRow = tablesDiv.querySelectorAll(".teams .name > span");
+    if (teamNamesRow.length != 2) {
+        throw "Expecting 2 teams";
+    }
+    teamNamesRow[0].textContent = getData().match.row_team
+    teamNamesRow[1].textContent = getData().match.column_team
+
+    // TODO
 };
 
 var isBrowserSupported = function() {
@@ -199,7 +215,11 @@ window.addEventListener("load", function() {
                 getData().row_armies = jsonResults[1];
                 getData().col_armies = jsonResults[2];
                 getData().scores     = jsonResults[3];
-                getData().tables     = []; // No assignment yet
+                getData().tables     = []; // No table assigned yet
+                getData().attackers  = {
+                        "rows"   : [],
+                        "columns": []
+                    }; // Not assigning yet
 
                 // Data check
                 var shownSection;
@@ -212,7 +232,8 @@ window.addEventListener("load", function() {
                     // Refresh the DOM
                     refreshMatrix();
                     refreshTables();
-                    refreshHeader();
+                    refreshBadges();
+                    refreshAssignmentForm();
 
                     // Display relevant DOM elements
                     shownSection = switchSection("ready");
