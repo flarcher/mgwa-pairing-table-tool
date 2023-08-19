@@ -11,10 +11,10 @@ body {
 	--main-em-color: #000000;
 	--link-color: turquoise;
 	--link-padding: 3px;
-	--border-color: #525252;
+	--border-color: #161414;
 	--border-width: 2px;
 	--bg-color: #FDFDFD;
-	background-color: var(--bg-color);
+	background-color: var(--main-color);
 }
 /*=== Switchable sections ===*/
 section {
@@ -24,6 +24,8 @@ section {
 	margin: 0;
 	color: var(--main-color);
 	display: none;
+	background-color: var(--bg-color);
+	min-height: 25%;
 }
 section.current {
 	display: block;
@@ -41,12 +43,37 @@ header, footer {
 	color: var(--revert-color);
 	background-color: var(--main-color);
 	line-height: 25px;
-	padding: 10px;
+	--frame-padding: 10px;
+	padding: var(--frame-padding);
 }
 header {
 	top: 0;
+}
+header > .title {
 	letter-spacing: 0.2em;
 	font-size: 1.5em;
+}
+header > .badge {
+	--badge-radius: 5px;
+	border-style: solid;
+	border-width: 0 var(--border-width) var(--border-width) var(--border-width);
+	border-color: var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--main-em-color);
+    font-size: 1em;
+    padding: 0.25em;
+    line-height: 1em;
+    margin-top: calc(var(--frame-padding) * -1);
+}
+header > .badge.left {
+	margin-left: calc(var(--frame-padding) * -1);
+	border-bottom-right-radius: var(--badge-radius);
+	border-left-width: 0;
+}
+header > .badge.right {
+	margin-right: calc(var(--frame-padding) * -1);
+	border-bottom-left-radius: var(--badge-radius);
+	border-right-width: 0;
 }
 footer {
 	bottom: 0;
@@ -144,9 +171,9 @@ nav {
 }
 nav > a, nav > a:visited {
 	cursor: pointer;
-	color: blue;
+	color: var(--link-color);
 	text-decoration: none;
-	padding: var(--link-padding);
+	padding: var(--link-padding) 10px;
 	border-width: var(--border-width);
 	border-style: solid;
 	border-radius: var(--link-padding);
@@ -174,6 +201,30 @@ nav > a:hover {
 #ready > div.current {
 	display: block;
 }
+/*=== Shared display ===*/
+section > div > div {
+	--row-width: 60%;
+	--row-height: 40px;
+	margin-bottom: 15px;
+}
+section > div > div::after {
+	clear: both;
+}
+section > div > div > label {
+	display: block;
+	line-height: var(--row-height);
+	float: left;
+	max-width: calc(40% - 10px);
+}
+section > div > div.teams > label,
+section > div > div.teams > .name {
+	height: 1em;
+}
+section > div > div.teams > .name {
+	line-height: var(--row-height);
+	min-width: var(--row-width);
+	display: inline-block;
+}
 /*=== Tables ===
  * 
  * <div id="tables>
@@ -187,29 +238,9 @@ nav > a:hover {
  *   </div>
  * </div>
  */
-#tables > div {
-	--row-height: 40px;
-	--row-width: 60%;
+#tables > div > .table {
 	--table-bw: 1px;
 	--table-color: #ffef9c;
-	margin-bottom: 15px;
-}
-#tables > div > label {
-	display: block;
-	line-height: var(--row-height);
-	float: left;
-	max-width: calc(40% - 10px);
-}
-#tables > div.teams > label,
-#tables > div.teams > .name {
-	height: 1em;
-}
-#tables > div.teams > .name {
-	min-width: var(--row-width);
-	line-height: var(--row-height);
-}
-#tables > div > .name,
-#tables > div > .table {
 	display: inline-block;
 }
 #tables > div > .table {
@@ -218,9 +249,6 @@ nav > a:hover {
 	border: calc(2 * var(--table-bw)) solid var(--border-color);
 	box-shadow: 5px 3px 3px grey;
 	background-color: var(--table-color);
-}
-#tables > div > .table::after {
-	clear: both;
 }
 #tables > div > .table.unassigned {
 	background-color: lightgrey;

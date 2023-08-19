@@ -35,44 +35,6 @@ var getApiUrl = function() {
     return apiUrlPrefix;
 }
 
-var addTableCornerCell = function(row) {
-    var cornerCell = document.createElement("td");
-    cornerCell.classList.add('corner');
-    row.appendChild(cornerCell);
-};
-
-var setupScoreElement = function(element, score) {
-    element.classList.add('score');
-    element.textContent = score.min.toFixed() + "-" + score.max.toFixed();
-    var scoreClass
-    if (score.min > score.max || score.min < 0 || score.max > 20) {
-        console.warn("Invalid score " + score);
-        return;
-    }
-    if (score.min < 3 && score.max > 17) {
-        scoreClass = 'game';
-    } else if (score.max < 5) {
-        scoreClass = 'bad';
-    } else if (score.min > 15) {
-        scoreClass = 'good';
-    }
-
-    if (!scoreClass) {
-        const average = (score.min + score.max) / 2;
-        if (average > 10) {
-            scoreClass = 'above';
-        } else if (average < 10) {
-            scoreClass = 'below';
-        } else if (average == 10) {
-            scoreClass = 'middle';
-        }
-    }
-
-    if (scoreClass) {
-        element.classList.add(scoreClass);
-    }
-};
-
 var refreshMatrix = function() {
     var matrixTableBody = document.querySelector("#matrix > table > tbody");
 
@@ -159,6 +121,7 @@ var refreshTables = function() {
         tableRow.appendChild(tableName);
         var tableDiv = document.createElement("div");
         tableDiv.classList.add('table');
+        // TODO: read data for table content
         tableDiv.classList.add('unassigned');
         var left = document.createElement("span");
         left.classList.add('left');
@@ -171,14 +134,23 @@ var refreshTables = function() {
     }
 };
 
+var refreshHeader = function() {
+    const memberCount = getData().match.team_member_count;
+    const pairCount = getData().tables.length;
+    const stepCounts = getStepCounts(memberCount, pairCount)
+    var header = document.querySelector('header');
+    header.querySelector('#steps').textContent = stepCounts[0].toFixed() + "/" + stepCounts[1].toFixed();
+    header.querySelector('#pairs').textContent = pairCount.toFixed() + "/" + memberCount.toFixed();
+};
+
 var isBrowserSupported = function() {
     // Checking the presence of recent Javascript functions that are used
     return window.fetch && Promise.all;
-}
+};
 
 var checkMatchSetup = function() {
     var team_size = getData().match.team_member_count;
-    if (team_size < 4) {
+    if (team_size < 3) {
         return "Not enough member per team";
     }
     else if (team_size > 10) {
@@ -197,7 +169,7 @@ var checkMatchSetup = function() {
     }
 
     return null; // No result = OK
-}
+};
 
 // Initialization
 window.addEventListener("load", function() {
@@ -227,6 +199,7 @@ window.addEventListener("load", function() {
                 getData().row_armies = jsonResults[1];
                 getData().col_armies = jsonResults[2];
                 getData().scores     = jsonResults[3];
+                getData().tables     = []; // No assignment yet
 
                 // Data check
                 var shownSection;
@@ -239,6 +212,7 @@ window.addEventListener("load", function() {
                     // Refresh the DOM
                     refreshMatrix();
                     refreshTables();
+                    refreshHeader();
 
                     // Display relevant DOM elements
                     shownSection = switchSection("ready");

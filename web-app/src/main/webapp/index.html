@@ -9,12 +9,15 @@
   </head>
   <body>
     <header>
-      <span>Table Pairing Tool</span>
+      <span class="left badge"><span>Step: </span><span id="steps"></span></span>
+      <span class="title">Table Pairing Tool</span>
+      <span class="right badge"><span>Table: </span><span id="pairs"></span></span>
     </header>
 
     <nav class="hidden">
       <a data-target="init">New pairing</a>
       <a data-target="matrix">Score matrix</a>
+      <a data-target="assign">Assignment</a>
       <a data-target="tables">Tables</a>
     </nav>
 
@@ -40,7 +43,16 @@
           </table>
       </div>
 
+      <div id="assign">
+        <div class="teams">
+          <label>Teams:</label>
+          <div class="name">
+            <span class="left"></span>
+            <span class="right"></span>
+          </div>
+        </div>
 
+      </div>
 
       <div id="tables">
         <div class="teams">
@@ -64,8 +76,8 @@
     </section>
 
 		<footer>
-			<span class="left">Made with ❤️ for the <a href="https://mgwa.forumactif.com/">MGWA organization</a>.</span>
-			<span class="right">Source on <a href="https://github.com/flarcher/mgwa-pairing-table-tool">GitHub</a>. Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA</a>.</span>
+			<span class="left">Made with ❤️ for the <a href="https://mgwa.forumactif.com/">MGWA organization</a></span>
+			<span class="right">Source on <a href="https://github.com/flarcher/mgwa-pairing-table-tool">GitHub</a>. Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA</a></span>
 		</footer>
   </body>
 </html>
