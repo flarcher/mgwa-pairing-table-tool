@@ -8,15 +8,15 @@ The entrypoint is located in [the Main class in the main module](main/src/main/j
 
 Here is a description of the Maven modules:
 
-| Module     | Description                                                                                             |
-|------------|---------------------------------------------------------------------------------------------------------|
-| main       | Entrypoint of the program. It handles arguments and launches both the UI and the HTTP API.              |
-| gui        | The JavaFX based heavy-weight _User Interface_                                                          |
-| http-api   | The HTTP API that would be used by HTML pages.                                                          |
-| web-app    | The HTML pages. They are included in the package, but have not direct dependency with any other module. |
-| core       | It contains the pairing algorithms, the shared model and utilities.                                     |
-| matrix-xls | It implements the reading of a score matrix from an Excel file.                                         |
-| package    | Technical module that cares about the packaging of the project.                                         |
+| Module     | Description                                                                                |
+|------------|--------------------------------------------------------------------------------------------|
+| main       | Entrypoint of the program. It handles arguments and launches both the UI and the HTTP API. |
+| gui        | The JavaFX based heavy-weight _User Interface_.                                            |
+| http-api   | The HTTP API that would be used by HTML pages.                                             |
+| web-app    | The _Web-Application_ source code. See [the corresponding README](web-app/README.md).      |
+| core       | It contains the pairing algorithms, the shared model and utilities.                        |
+| matrix-xls | It implements the reading of a score matrix from an Excel file.                            |
+| package    | Technical module that cares about the packaging of the project.                            |
 
 ## Requirements
 
