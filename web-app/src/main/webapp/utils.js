@@ -58,6 +58,60 @@ function emptyElement(element) {
 	}
 }
 
+var addTableCornerCell = function(row) {
+    var cornerCell = document.createElement("td");
+    cornerCell.classList.add('corner');
+    row.appendChild(cornerCell);
+};
+
+var setupScoreElement = function(element, score) {
+    element.classList.add('score');
+    element.textContent = score.min.toFixed() + "-" + score.max.toFixed();
+    var scoreClass
+    if (score.min > score.max || score.min < 0 || score.max > 20) {
+        console.warn("Invalid score " + score);
+        return;
+    }
+    if (score.min < 3 && score.max > 17) {
+        scoreClass = 'game';
+    } else if (score.max < 5) {
+        scoreClass = 'bad';
+    } else if (score.min > 15) {
+        scoreClass = 'good';
+    }
+
+    if (!scoreClass) {
+        const average = (score.min + score.max) / 2;
+        if (average > 10) {
+            scoreClass = 'above';
+        } else if (average < 10) {
+            scoreClass = 'below';
+        } else if (average == 10) {
+            scoreClass = 'middle';
+        }
+    }
+
+    if (scoreClass) {
+        element.classList.add(scoreClass);
+    }
+};
+
+var getStepCounts = function(team_member_count, paired_table_count) {
+	if (team_member_count < 3) {
+		throw "Minimum 3 team members";
+	}
+	const minus = team_member_count % 2 == 0 ? 2 : 1; // Remainder count for the last step
+	const totalCount = (team_member_count - minus) / 2; // 2 tables pairs at each step
+	var stepCount;
+	if (paired_table_count >= (team_member_count - minus - 2)) {
+		stepCount = totalCount;
+	}
+	else {
+		stepCount = paired_table_count / 2;
+	}
+	return [ stepCount, totalCount ];
+};
+
 /*
  * Calls a GET request to the API
  */
