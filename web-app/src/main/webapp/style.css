@@ -178,7 +178,7 @@ nav > a, nav > a:visited {
 	padding: var(--link-padding) 10px;
 	border-width: var(--border-width);
 	border-style: solid;
-	border-radius: var(--link-padding);
+	border-radius: var(--link-padding) var(--link-padding) 0 0;
 	border-color: transparent;
 }
 nav > a.selected, nav > a.selected:hover {
@@ -187,8 +187,6 @@ nav > a.selected, nav > a.selected:hover {
 	background-color: var(--bg-color);
 	color: var(--main-em-color);
 	border-color: var(--border-color) var(--border-color) var(--bg-color) var(--border-color);
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
 }
 nav > a:hover {
 	text-decoration: none;
@@ -254,16 +252,16 @@ section > div > div.teams > .name {
 	display: inline-block;
 	padding: 5px;
 	margin: 5px;
-	border: 1px solid var(--border-color);
+	border: 1px solid lightgray;
 	border-radius: var(--border-radius);
 	background-color: var(--army-color);
 }
 #analysis span.army:hover {
 	cursor: pointer;
 	color: white;
-	border-color: red;
-	background-color: orangered;
-	box-shadow: 3px 2px 2px orange;
+	border-color: 	#431f81;
+	background-color: rgb(106, 106, 179);
+	box-shadow: 3px 2px 2px #b596f3;
 }
 /*=== Tables ===
  * 
