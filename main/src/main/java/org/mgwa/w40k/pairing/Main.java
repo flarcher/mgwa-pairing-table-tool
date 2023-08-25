@@ -171,6 +171,16 @@ public final class Main {
 
     public static void main(String[] args) {
 
+        // Prepare logs cleaning
+        Runtime.getRuntime().addShutdownHook(Executors.defaultThreadFactory().newThread(() -> {
+                try {
+                    Files.deleteIfExists(LoggerSupplier.INSTANCE.getLogFilePath());
+                }
+                catch (IOException ioe) {
+                    throw new IllegalStateException(ioe);
+                }
+            }));
+
         // Initialize the application state
         AppState state = new AppState();
         InputUtils.getArgumentAt(args, 0)
