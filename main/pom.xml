@@ -29,6 +29,7 @@
                 <configuration>
                     <mainClass>${dist.main.class}</mainClass>
                     <runtimePathOption>CLASSPATH</runtimePathOption>
+                    <commandlineArgs>../matrix-xls/src/test/resources/example.xlsx</commandlineArgs>
                 </configuration>
             </plugin>
         </plugins>
