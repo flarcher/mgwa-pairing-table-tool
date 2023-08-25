@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  */
 public class Assignment implements Cloneable {
 
-	static Assignment createEmpty(int tableCount) {
+	public static Assignment createEmpty(int tableCount) {
 		return new Assignment(
 				new int[tableCount],  // Filled with 0
 				new int[tableCount]   // Filled with 0

@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 @Immutable
 public class Pair implements Comparable<Pair> {
 
-    private static short MAX_VALUE = 1 << 14;
+    private static final short MAX_VALUE = 1 << 14;
 
     public static Pair of(int row, int column) {
         return of((short) row, (short) column);
@@ -104,5 +104,14 @@ public class Pair implements Comparable<Pair> {
 
     public static Predicate<Pair> isWithColumn(int columnToAssign) {
         return p -> p.getColumn() == columnToAssign;
+    }
+
+    public static Predicate<Pair> isWithArmy(Army army) {
+        return pair -> {
+            if (army.isRow()) {
+                return pair.getRow() == army.getIndex();
+            } else {
+                return pair.getColumn() == army.getIndex();
+            }};
     }
 }
