@@ -3,7 +3,9 @@ package org.mgwa.w40k.pairing.api;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.mgwa.w40k.pairing.api.resource.AnalysisResource;
 import org.mgwa.w40k.pairing.api.resource.MatrixResource;
+import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
@@ -36,10 +38,13 @@ public class AppServer extends Application<AppConfiguration> {
     public void run(AppConfiguration configuration, Environment environment) throws Exception {
         this.environment = environment;
 
+        PairingService service = new PairingService(state);
+
         // ByPass CORS security filtering
         environment.jersey().register(new AllowAllOriginsResponseFilter());
         // Register API resources
-        environment.jersey().register(new MatrixResource(state));
+        environment.jersey().register(new MatrixResource(state, service));
+        environment.jersey().register(new AnalysisResource(service));
 
         // Health checks
         configurationHealthCheck = new ConfigurationHealthCheck(environment, logger);

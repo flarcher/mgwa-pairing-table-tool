@@ -1,6 +1,7 @@
 package org.mgwa.w40k.pairing.api.resource;
 
 import org.mgwa.w40k.pairing.Army;
+import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.api.model.EstimatedScore;
 import org.mgwa.w40k.pairing.api.model.Match;
 import org.mgwa.w40k.pairing.matrix.Matrix;
@@ -11,17 +12,18 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.IntStream;
 
 @Path("")
 public class MatrixResource {
 
-    public MatrixResource(AppState state) {
-        this.state = Objects.requireNonNull(state);
+    public MatrixResource(AppState state, PairingService service) {
+        this.state = state;
+        this.service = service;
     }
 
     private final AppState state;
+    private final PairingService service;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -33,18 +35,11 @@ public class MatrixResource {
                 state.getArmyCount());
     }
 
-    private Matrix getMatrix() {
-        return state.getMatrix()
-            .orElseThrow(() -> new WebApplicationException(
-                    "No matrix defined yet",
-                    Response.Status.INTERNAL_SERVER_ERROR));
-    }
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("match/{rowsOrColumns}")
     public Response getArmies(@PathParam("rowsOrColumns") String rowsOrColumns) {
-        Matrix matrix = getMatrix();
+        Matrix matrix = service.getMatrix();
         boolean isRow;
         switch (rowsOrColumns) {
             case "rows", "row" -> {
@@ -66,7 +61,7 @@ public class MatrixResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("scores")
     public Response getDefault() {
-        Matrix matrix = getMatrix();
+        Matrix matrix = service.getMatrix();
         EstimatedScore DEFAULT_SCORE = EstimatedScore.from(Score.newDefault());
         int size = state.getArmyCount();
         List<List<EstimatedScore>> scores = IntStream.range(0, size)
