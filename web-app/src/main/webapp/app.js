@@ -159,22 +159,35 @@ var refreshAssignmentForm = function() {
     // TODO
 };
 
-var refreshArmyList = function(isRowArmy, parentDiv) {
+var getRemainingArmies = function(isRowArmy) {
     const data = getData();
     const allArmies = isRowArmy ? data.row_armies : data.col_armies;
     const assignedList = data.tables
         ? data.tables.map(t => isRowArmy ? t.row_army : t.col_army)
         : undefined;
-    var filteredList = assignedList
+    return assignedList
         ? allArmies.filter(armyName => ! assignedList.find(assigned => assigned === armyName))
         : [];
+};
 
+var triggerAnalysis = function(isRowArmy, armyName) {
+    const waitingLoop = document.getElementById('analysis').querySelector('.waiting');
+    waitingLoop.classList.remove('hidden');
+
+    // TODO: API call
+}
+
+var refreshArmyList = function(isRowArmy, parentDiv) {
+    var filteredList = getRemainingArmies(isRowArmy);
     emptyElement(parentDiv);
     filteredList.forEach(armyName => {
         var candidateElement = document.createElement('span');
         candidateElement.classList.add('army');
         candidateElement.textContent = armyName;
         parentDiv.appendChild(candidateElement);
+        candidateElement.addEventListener('click', e => {
+            triggerAnalysis(isRowArmy, armyName);
+        });
     });
 };
 
