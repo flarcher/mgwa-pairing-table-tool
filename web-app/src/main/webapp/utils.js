@@ -112,23 +112,51 @@ var getStepCounts = function(team_member_count, paired_table_count) {
 	return [ stepCount, totalCount ];
 };
 
+// API call without payload
+const abstractVoidCall = (url, method, thenFn, errorFn) => {
+    fetch(new Request(url, { method: method }))
+    .then((response) => {
+        if (response.ok) {
+            thenFn();
+        } else {
+            errorFn();
+        }
+    })
+    .catch((error) => {
+        errorFn();
+    });
+};
+
+/*
+ * Utility function related to our error handling conventions
+ * Works only with JSON payloads in responses
+ */
+var abstractJsonCall = (fetchArg, thenFn, errorFn) => {
+    fetch(fetchArg)
+        .then((response) => {
+            if (!response.ok) {
+                response.json().then(errorFn);
+            }
+            else {
+                response.json().then(thenFn);
+            }
+        })
+        .catch((error) => {
+            errorFn({ "cause": "network", "message": error.message });
+        });
+};
+
 /*
  * Calls a GET request to the API
  */
 var getCall = (url, thenFn, errorFn) => {
-	fetch(url)
-		.then((response) => {
-			if (!response.ok) {
-                response.json().then(errorFn);
-			}
-			else {
-				response.json().then(thenFn);
-			}
-		})
-		.catch((error) => {
-			errorFn({ "cause": "network", "message": error.message });
-		});
+	abstractJsonCall(url, thenFn, errorFn);
 };
+
+/* Calls a POST request to the API */
+var postCall = (url, body, thenFn, errorFn) => {
+    abstractJsonCall(new Request(url, {method: "POST", body: JSON.stringify(body)}), thenFn, errorFn);
+}
 
 /*
  * Multiple calls to the API
@@ -147,4 +175,39 @@ var allGetCalls = (manyUrls, thenFn, errorFn) => {
 			// First error (fail fast)
 			errorFn([ { "cause": "network", "message": error.message } ]);
 		});
+};
+
+// Error handling related to API calls
+var errorHandler = function(jsonResponse) {
+    var cause = jsonResponse["cause"];
+    var message = jsonResponse["message"] || "?"
+    if (cause === "network") {
+        var port = getData().port;
+        // Display error
+        var section = switchSection("no_api");
+        section.querySelector('#port').innerHTML = port.toFixed();
+        section.querySelector('#reason').innerHTML = message
+    }
+    else {
+        var section = switchSection("api_error");
+        section.querySelector('#status').innerHTML = (jsonResponse["status"] || 0).toFixed();
+        section.querySelector('#message').innerHTML = message
+    }
+}
+
+// URL hash reading
+const getApiUrl = function(){
+    var port = 8000; // Default value
+    var query = window.location.hash;
+    if (query) {
+        var begin = query.indexOf('#');
+        if (begin >= 0) {
+            port = parseInt(query.substring(begin + 1));
+        }
+    }
+    getData().port = port;
+    var apiUrlPrefix = 'http://localhost:' + port.toFixed() + '/api/';
+    console.info('API URL is ' + apiUrlPrefix);
+    getData().api_url = apiUrlPrefix
+    return apiUrlPrefix
 };
