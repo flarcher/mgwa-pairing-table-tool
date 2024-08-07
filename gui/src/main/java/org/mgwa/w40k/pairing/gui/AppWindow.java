@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -34,17 +35,17 @@ import java.util.stream.IntStream;
  *
  * <p>Here is the method calls sequence for the start of the application:</p>
  * <ol>
- *     <li>At first the {@link #launch(AppState, Runnable, Runnable, Runnable)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
+ *     <li>At first the {@link #launch(AppState, Consumer, Runnable, Runnable)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
  *     <li>Then through the {@link #launch(String...)} method of the JavaFX abstract class...</li>
  *     <li>Our method {@link #start(Stage)} gets finally called</li>
  * </ol>
  */
-public class AppWindow extends Application {
+public class AppWindow extends Application implements AutoCloseable {
 
 	//--- Launch
 
 	private static AppState state;
-	private static Runnable onInit;
+	private static Consumer<AutoCloseable> onInit;
 	private static Runnable onClose;
 	private static Runnable onNext;
 
@@ -54,7 +55,7 @@ public class AppWindow extends Application {
 	 */
 	public static void launch(
 			@Nonnull AppState injectedState,
-			@Nonnull Runnable injectedOnInit,
+			@Nonnull Consumer<AutoCloseable> injectedOnInit,
 			@Nonnull Runnable injectedOnNext,
 			@Nonnull Runnable injectedOnClose) {
 		state   = Objects.requireNonNull(injectedState);
@@ -81,9 +82,9 @@ public class AppWindow extends Application {
 	@Override
 	public void init() throws Exception {
 		logger.info("Initializing ...");
-		onInit.run(); // The important line is here
+		onInit.accept(this); // The important line is here
 
-		// Make sure that the JVM exists properly
+		// Make sure that the JVM exits properly
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 
 			@Override
@@ -100,13 +101,16 @@ public class AppWindow extends Application {
 			logger.info("Stopping ...");
 			Platform.exit();
 			onClose.run(); // The important line is here
-			logger.info("Stopped");
-			System.exit(0);
 		}
 	}
 
 	@Override
 	public void stop() throws Exception {
+		closeAtomically();
+	}
+
+	@Override
+	public void close() throws Exception {
 		closeAtomically();
 	}
 

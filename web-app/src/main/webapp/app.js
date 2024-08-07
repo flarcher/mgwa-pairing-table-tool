@@ -1,40 +1,4 @@
 
-var defaultPort = 8000;
-
-// Error handling related to API calls
-var errorHandler = function(jsonResponse) {
-    var cause = jsonResponse["cause"];
-    var message = jsonResponse["message"] || "?"
-    if (cause === "network") {
-        var port = getData().port;
-        // Display error
-        var section = switchSection("no_api");
-        section.querySelector('#port').innerHTML = port.toFixed();
-        section.querySelector('#reason').innerHTML = message
-    }
-    else {
-        var section = switchSection("api_error");
-        section.querySelector('#status').innerHTML = (jsonResponse["status"] || 0).toFixed();
-        section.querySelector('#message').innerHTML = message
-    }
-}
-
-// URL hash reading
-var getApiUrl = function() {
-    var port = defaultPort;
-    var query = window.location.hash;
-    if (query) {
-        var begin = query.indexOf('#');
-        if (begin >= 0) {
-            port = parseInt(query.substring(begin + 1));
-        }
-    }
-    getData().port = port;
-    var apiUrlPrefix = 'http://localhost:' + port.toFixed() + '/api/';
-    console.info('API URL is ' + apiUrlPrefix);
-    return apiUrlPrefix;
-}
-
 var refreshMatrix = function() {
     var matrixTableBody = document.querySelector("#matrix > table > tbody");
 
@@ -270,14 +234,14 @@ window.addEventListener("load", function() {
         switchSection("loading");
 
         // Getting API URL
-        var apiURl = getApiUrl();
+        var apiUrl = getData().api_url || getApiUrl();
 
         // API calls
         allGetCalls([
-                apiURl + 'match',
-                apiURl + 'match/rows',
-                apiURl + 'match/cols',
-                apiURl + 'scores'
+                apiUrl + 'match',
+                apiUrl + 'match/rows',
+                apiUrl + 'match/cols',
+                apiUrl + 'scores'
             ],
             jsonResults => {
 
