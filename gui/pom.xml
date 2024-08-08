@@ -28,11 +28,6 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mgwa.w40k.pairing</groupId>
-            <artifactId>matrix-xls</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>15-ea+5</version>

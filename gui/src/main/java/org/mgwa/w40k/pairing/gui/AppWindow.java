@@ -4,29 +4,18 @@ import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.LabelGetter;
-import org.mgwa.w40k.pairing.gui.scene.*;
-import org.mgwa.w40k.pairing.matrix.Score;
-import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
-import org.mgwa.w40k.pairing.matrix.Matrix;
-import org.mgwa.w40k.pairing.matrix.MatrixReader;
-import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixReader;
 
 import javax.annotation.Nonnull;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.logging.Level;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * <h1>JavaFX application main class.</h1>
@@ -35,7 +24,7 @@ import java.util.stream.IntStream;
  *
  * <p>Here is the method calls sequence for the start of the application:</p>
  * <ol>
- *     <li>At first the {@link #launch(AppState, Consumer, Runnable, Runnable)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
+ *     <li>At first the {@link #launch(Consumer, Runnable, Runnable)} static method is called from the Java main method {@code Main.main(String[] args)}</li>
  *     <li>Then through the {@link #launch(String...)} method of the JavaFX abstract class...</li>
  *     <li>Our method {@link #start(Stage)} gets finally called</li>
  * </ol>
@@ -44,7 +33,6 @@ public class AppWindow extends Application implements AutoCloseable {
 
 	//--- Launch
 
-	private static AppState state;
 	private static Consumer<AutoCloseable> onInit;
 	private static Runnable onClose;
 	private static Runnable onNext;
@@ -54,11 +42,9 @@ public class AppWindow extends Application implements AutoCloseable {
 	 * It will eventually call the {@link #start(Stage)} method.
 	 */
 	public static void launch(
-			@Nonnull AppState injectedState,
 			@Nonnull Consumer<AutoCloseable> injectedOnInit,
 			@Nonnull Runnable injectedOnNext,
 			@Nonnull Runnable injectedOnClose) {
-		state   = Objects.requireNonNull(injectedState);
 		onInit  = Objects.requireNonNull(injectedOnInit);
 		onClose = Objects.requireNonNull(injectedOnClose);
 		onNext  = Objects.requireNonNull(injectedOnNext);
@@ -83,22 +69,12 @@ public class AppWindow extends Application implements AutoCloseable {
 	public void init() throws Exception {
 		logger.info("Initializing ...");
 		onInit.accept(this); // The important line is here
-
-		// Make sure that the JVM exits properly
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-
-			@Override
-			public void run() {
-				closeAtomically();
-			}
-		});
-
 		logger.info("Initialized");
 	}
 
 	private void closeAtomically() {
 		if (isClosed.compareAndSet(false, true)) {
-			logger.info("Stopping ...");
+			logger.info("Stopping window");
 			Platform.exit();
 			onClose.run(); // The important line is here
 		}
@@ -114,32 +90,29 @@ public class AppWindow extends Application implements AutoCloseable {
 		closeAtomically();
 	}
 
-	private Stage stage;
-
 	/**
 	 * Switch the scene displayed.
-	 * @param newScene The new scene.
+	 * @param supplier The new scene.
 	 */
-	private void goToScene(SceneDefinition newScene) {
+	private void goToScene(Stage stage, Supplier<Scene> supplier) {
 		Objects.requireNonNull(stage);
 		if (stage.isShowing()) {
 			stage.close();
 		}
-		stage.setScene(newScene.getScene(state, stage));
+		stage.setScene(supplier.get());
 		stage.show();
 	}
 
 	//--- Scenes
 
-	private TeamDefinitionScene teamDefinition;
-	private InfoScene continueWithWebApp;
-
     @Override
     public void start(Stage stage) {
 		logger.info("Starting ...");
-		this.stage = stage;
-		teamDefinition = new TeamDefinitionScene(labelGetter, this::toMatrixDisplay);
-		goToScene(teamDefinition);
+		// Opens the web-app
+		onNext.run();
+		// Display new window
+		goToScene(stage, new MessageScene(labelGetter.getLabel("see.webapp")));
+		// Configure the exit button
 		stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent event) {
@@ -152,71 +125,5 @@ public class AppWindow extends Application implements AutoCloseable {
 		});
 		logger.info("Started");
     }
-
-	private void backToTeamDefinition() {
-		goToScene(teamDefinition);
-	}
-
-	private void displayError(String msg, SceneDefinition sceneTarget) {
-		goToScene(new InfoScene(
-			() -> goToScene(sceneTarget),
-			msg, labelGetter.getLabel("ok")));
-	}
-
-	private Matrix loadMatrixDefault() {
-		List<String> names = IntStream.range(0, state.getArmyCount())
-				.mapToObj(Integer::toString)
-				.collect(Collectors.toList());
-		Matrix matrix = Matrix.createWithoutScores(
-				Army.createArmies(names, true),
-				Army.createArmies(names, false));
-		return matrix.setDefaultScore(Score.newDefault());
-	}
-
-	private Optional<Matrix> loadMatrixFile(Path path) {
-		// Waiting loading the file
-		try (MatrixReader matrixReader = XlsMatrixReader.fromFile(path.toFile())) {
-			Matrix matrix = matrixReader.get();
-			logger.info(String.format("Using matrix of size %s", matrix.getSize()));
-			return Optional.of(matrix);
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Impossible to read file", e);
-			displayError(String.format("%s %s", labelGetter.getLabel("can-not-read-file"), path), teamDefinition);
-			return Optional.empty();
-		}
-	}
-
-	private void toMatrixDisplay() {
-
-		Matrix matrix;
-		if (state.getMatrixFilePath().isPresent()) {
-			Path path = state.getMatrixFilePath().get();
-			// Waiting loading the file
-			goToScene(new WaitingScene(String.format("Loading file %s", path)));
-			logger.info("Reading matrix file " + path);
-			matrix = loadMatrixFile(path).orElse(loadMatrixDefault());
-		} else {
-			logger.info("Using empty matrix");
-			matrix = loadMatrixDefault();
-		}
-		state.setMatrix(matrix);
-
-		if (state.getMatrix().isPresent()) {
-			logger.info(String.format("Resizing matrix from %d to %d", matrix.getSize(), state.getArmyCount()));
-			state.forceArmyCountConsistency(Score.newDefault());
-		}
-
-		// Ending the loading
-		if (continueWithWebApp == null) {
-			continueWithWebApp = new InfoScene(
-				this::backToTeamDefinition,
-				labelGetter.apply("see.webapp"),
-				labelGetter.apply("previous"));
-		}
-
-		goToScene(continueWithWebApp);
-
-		onNext.run(); // Calls the web-app
-	}
 
 }
