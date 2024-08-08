@@ -38,7 +38,24 @@
     <section id="ready">
 
       <div id="init">
-        <div>See the desktop application in order to initialize a new pairing.</div>
+        <form data-path="reset" method="post">
+          <fieldset class="teams">
+            <legend>Team names</legend>
+            <div class="name">
+              <label class="left" for="team_row_name">Rows</label>
+              <input id="team_row_name" name="rows_team" type="text" minlength="1" size="20" maxlength="20" class="right" pattern="^[0-9a-zA-Z \\-_]+$" required/>
+            </div>
+            <div class="name">
+              <label class="left" for="team_col_name">Columns</label>
+              <input id="team_col_name" name="cols_team" type="text" minlength="1" size="20" maxlength="20" class="right" pattern="^[0-9a-zA-Z \\-_]+$" required/>
+            </div>
+          </fieldset>
+          <div>
+            <label class="left" for="team_size">Team size</label>
+            <input id="team_size" name="size" type="number" step="1" min="2" max="10" value="8" class="right"/>
+          </div>
+          <input type="submit" value="Reset pairing system"/>
+        </form>
       </div>
 
       <div id="matrix">

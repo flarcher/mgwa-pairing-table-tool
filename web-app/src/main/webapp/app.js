@@ -235,6 +235,7 @@ window.addEventListener("load", function() {
 
         // Getting API URL
         var apiUrl = getData().api_url || getApiUrl();
+        updateFormsAction(apiUrl);
 
         // API calls
         allGetCalls([

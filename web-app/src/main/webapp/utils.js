@@ -211,3 +211,17 @@ const getApiUrl = function(){
     getData().api_url = apiUrlPrefix
     return apiUrlPrefix
 };
+
+const updateFormsAction = function(apiUrl) {
+	var apiUrl = apiUrl || getData().api_url || getApiUrl();
+    document.querySelectorAll('form')
+		.forEach(function(f) {
+            var actionPath = f.dataset.path;
+            if (actionPath) {
+                f.action = apiUrl + actionPath;
+            }
+            else if (!f.action) {
+                console.error("No action for form element " + f);
+            }
+        });
+};
