@@ -4,14 +4,14 @@ import javafx.application.Platform;
 import javafx.application.Preloader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.mgwa.w40k.pairing.gui.scene.WaitingScene;
 import org.mgwa.w40k.pairing.state.AppState;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Splash screen created from {@link AppWindow#launch(AppState, Runnable, Runnable)}.
+ * Splash screen created from {@link AppWindow#launch(AppState, Consumer, Runnable, Runnable)}.
  */
 public class AppPreloader extends Preloader {
 
@@ -38,8 +38,8 @@ public class AppPreloader extends Preloader {
         // If preloader has complex UI it's initialization can be done in MyPreloader#init
         Platform.runLater(() -> {
             Objects.requireNonNull(labelGetter);
-            WaitingScene waitingScene = new WaitingScene(labelGetter.apply("loading"));
-            scene = waitingScene.getScene();
+            MessageScene waitingScene = new MessageScene(labelGetter.apply("loading"));
+            scene = waitingScene.get();
         });
     }
 

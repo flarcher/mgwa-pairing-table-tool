@@ -1,15 +1,17 @@
-package org.mgwa.w40k.pairing.gui.scene;
+package org.mgwa.w40k.pairing.gui;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
-import org.mgwa.w40k.pairing.state.AppState;
-import org.mgwa.w40k.pairing.gui.NodeFactory;
 
-public class WaitingScene implements SimpleSceneBuilder {
+import java.util.function.Supplier;
 
-    public WaitingScene(String initialMessage) {
+/**
+ * A simple scene that displays a text.
+ */
+class MessageScene implements Supplier<Scene> {
+
+    MessageScene(String initialMessage) {
         this.text = NodeFactory.createText(initialMessage);
     }
 
@@ -20,7 +22,7 @@ public class WaitingScene implements SimpleSceneBuilder {
     }
 
     @Override
-    public Scene getScene() {
+    public Scene get() {
         GridPane pane = NodeFactory.createGrid(1);
         pane.addRow(0, this.text);
         return new Scene(pane);

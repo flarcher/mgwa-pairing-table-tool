@@ -239,7 +239,7 @@ public final class Main {
             });
 
             // Launching the user interface
-            AppWindow.launch(state,
+            AppWindow.launch(
                     (closeable) -> { // On init
                         WINDOW_REFERENCE.set(closeable); // So that it can be stopped from the API later
                         prepareWebApp(webAppTargetFolder);
