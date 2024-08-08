@@ -12,7 +12,7 @@
     <artifactId>http-api</artifactId>
 
     <properties>
-        <dropwizard.version>1.3.14</dropwizard.version>
+        <dropwizard.version>1.3.29</dropwizard.version>
     </properties>
 
     <dependencies>
@@ -20,7 +20,10 @@
         <dependency>
             <groupId>org.mgwa.w40k.pairing</groupId>
             <artifactId>core</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mgwa.w40k.pairing</groupId>
+            <artifactId>matrix-xls</artifactId>
         </dependency>
 
         <!-- Dropwizard -->
