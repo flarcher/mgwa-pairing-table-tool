@@ -6,6 +6,7 @@ import io.dropwizard.setup.Environment;
 import org.mgwa.w40k.pairing.api.resource.AnalysisResource;
 import org.mgwa.w40k.pairing.api.resource.AppResource;
 import org.mgwa.w40k.pairing.api.resource.MatrixResource;
+import org.mgwa.w40k.pairing.api.service.MatrixUpdateService;
 import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.api.service.StatusService;
 import org.mgwa.w40k.pairing.state.AppState;
@@ -58,6 +59,7 @@ public class AppServer extends Application<AppConfiguration> {
 
         // Services
         PairingService pairingService = new PairingService(state);
+        MatrixUpdateService matrixUpdateService = new MatrixUpdateService(state);
         StatusService statusService = new StatusService(() -> {
             logger.info("Scheduling stop");
             stopFromAnotherTread();
@@ -68,7 +70,7 @@ public class AppServer extends Application<AppConfiguration> {
         // ByPass CORS security filtering
         environment.jersey().register(new AllowAllOriginsResponseFilter());
         // Register API resources
-        environment.jersey().register(new MatrixResource(state, pairingService));
+        environment.jersey().register(new MatrixResource(state, pairingService, matrixUpdateService));
         environment.jersey().register(new AnalysisResource(pairingService));
         environment.jersey().register(new AppResource(statusService));
 

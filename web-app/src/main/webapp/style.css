@@ -110,6 +110,33 @@ em, .name {
 	display: block;
 	float: right;
 }
+/*=== Matrix setup ===*/
+form {
+	margin-bottom: 0;
+	--fieldset-padding: 16px;
+	--form-spacing: 10px;
+}
+#init > form > input[type = "submit"] {
+	width: calc(100% - (2*var(--fieldset-padding)));
+	float: none;
+	margin: var(--form-spacing) 0;
+}
+#init > form > div, #init > form > fieldset > div {
+	width: 100%;
+	clear: both;
+	padding: var(--form-spacing) 0;
+}
+#init > form > div {
+	width: calc(100% - (2*var(--fieldset-padding)));
+    padding-left: var(--fieldset-padding);
+}
+#init label {
+	float: left;
+	text-align: right;
+}
+#init input {
+	float: right;
+}
 /*=== Score matrix ===*/
 tr > td.name {
 	text-align: center;

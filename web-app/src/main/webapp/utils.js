@@ -112,9 +112,8 @@ var getStepCounts = function(team_member_count, paired_table_count) {
 	return [ stepCount, totalCount ];
 };
 
-// API call without payload
-const abstractVoidCall = (url, method, thenFn, errorFn) => {
-    fetch(new Request(url, { method: method }))
+const abstractCall = (fetchArg, thenFn, errorFn) => {
+    fetch(fetchArg)
     .then((response) => {
         if (response.ok) {
             thenFn();
@@ -125,6 +124,11 @@ const abstractVoidCall = (url, method, thenFn, errorFn) => {
     .catch((error) => {
         errorFn();
     });
+};
+
+// API call without payload
+const abstractVoidCall = (url, method, thenFn, errorFn) => {
+    abstractCall(new Request(url, { method: method }), thenFn, errorFn);
 };
 
 /*
@@ -153,10 +157,13 @@ var getCall = (url, thenFn, errorFn) => {
 	abstractJsonCall(url, thenFn, errorFn);
 };
 
-/* Calls a POST request to the API */
-var postCall = (url, body, thenFn, errorFn) => {
-    abstractJsonCall(new Request(url, {method: "POST", body: JSON.stringify(body)}), thenFn, errorFn);
-}
+/*
+ * Calls a POST request expecting JSON in response
+ * Inputs could be: JSON.stringify(json) or new FormData(formElement)
+ */
+var postCall = (url, input, thenFn, errorFn) => {
+    abstractJsonCall(new Request(url, {method: "POST", body: input}), thenFn, errorFn);
+};
 
 /*
  * Multiple calls to the API
@@ -210,18 +217,4 @@ const getApiUrl = function(){
     console.info('API URL is ' + apiUrlPrefix);
     getData().api_url = apiUrlPrefix
     return apiUrlPrefix
-};
-
-const updateFormsAction = function(apiUrl) {
-	var apiUrl = apiUrl || getData().api_url || getApiUrl();
-    document.querySelectorAll('form')
-		.forEach(function(f) {
-            var actionPath = f.dataset.path;
-            if (actionPath) {
-                f.action = apiUrl + actionPath;
-            }
-            else if (!f.action) {
-                console.error("No action for form element " + f);
-            }
-        });
 };

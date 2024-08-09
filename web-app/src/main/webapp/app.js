@@ -1,4 +1,5 @@
 
+// Refresh the DOM part dedicated to the matrix, using getData()
 var refreshMatrix = function() {
     var matrixTableBody = document.querySelector("#matrix > table > tbody");
 
@@ -58,6 +59,7 @@ var refreshMatrix = function() {
             newRow.appendChild(scoreCell);
         }
     }
+
 };
 
 var refreshTables = function() {
@@ -208,17 +210,80 @@ var checkMatchSetup = function() {
     return null; // No result = OK
 };
 
-var initAll = function() {
-    setupNavBar(document.getElementById('ready'));
-    initAnalysisForm();
-}
+var initBadges = function() {
+    document.querySelectorAll('header .badge').forEach(b => {
+        b.classList.remove('hidden');
+    });
+};
 
-var refreshAll = function() {
-    refreshMatrix();
-    refreshTables();
-    refreshBadges();
-    refreshAssignmentForm();
-    refreshAnalysisForm();
+// Triggered as soon as the teams changed
+var onNewTeams = function() {
+
+    // API calls
+    allGetCalls([
+        apiUrl + 'match',
+        apiUrl + 'match/rows',
+        apiUrl + 'match/cols',
+        apiUrl + 'scores'
+    ],
+    jsonResults => {
+
+        // Assign data
+        getData().match      = jsonResults[0];
+        getData().row_armies = jsonResults[1];
+        getData().col_armies = jsonResults[2];
+        getData().scores     = jsonResults[3];
+        getData().tables     = []; // No table assigned yet
+        getData().attackers  = {
+                "rows"   : [],
+                "columns": []
+            }; // Not assigning yet
+
+        // Initialize the DOM
+        initBadges();
+        setupNavBar(document.getElementById('ready'));
+        initAnalysisForm();
+    
+        // Data check
+        var shownSection;
+        var validationError = checkMatchSetup();
+        if (validationError) {
+            shownSection = switchSection("invalid");
+            shownSection.querySelector("#reason").textContent = validationError;
+        }
+        else {
+            // Refresh the DOM
+            refreshMatrix();
+            refreshTables();
+            refreshBadges();
+            refreshAssignmentForm();
+            refreshAnalysisForm();
+        
+            // Display relevant DOM elements
+            shownSection = switchSection("ready");
+            switchNavTab(shownSection, 'matrix');
+        }
+    },
+    errors => {
+        errors.forEach(error => console.error("API call error: " + error));
+        errorHandler(errors[0]); // We only display the first error for simplicity
+    });
+};
+
+var initMatrixForm = function() {
+    var form = document.querySelector("#init > form");
+    form.addEventListener("submit", event => {
+        event.preventDefault();
+        postCall(
+            getData().api_url + 'reset',
+            new FormData(form),
+            json => {
+                console.log(json); // TODO: process further
+            },
+            json => {
+                errorHandler(json);
+            });
+    });
 };
 
 // Initialization
@@ -232,53 +297,14 @@ window.addEventListener("load", function() {
 
         // Loading screen
         switchSection("loading");
+        // TODO: Add a wait for the API readyness
 
         // Getting API URL
         var apiUrl = getData().api_url || getApiUrl();
-        updateFormsAction(apiUrl);
 
-        // API calls
-        allGetCalls([
-                apiUrl + 'match',
-                apiUrl + 'match/rows',
-                apiUrl + 'match/cols',
-                apiUrl + 'scores'
-            ],
-            jsonResults => {
-
-                // Assign data
-                getData().match      = jsonResults[0];
-                getData().row_armies = jsonResults[1];
-                getData().col_armies = jsonResults[2];
-                getData().scores     = jsonResults[3];
-                getData().tables     = []; // No table assigned yet
-                getData().attackers  = {
-                        "rows"   : [],
-                        "columns": []
-                    }; // Not assigning yet
-
-                // Initialize the DOM
-                initAll();
-
-                // Data check
-                var shownSection;
-                var validationError = checkMatchSetup();
-                if (validationError) {
-                    shownSection = switchSection("invalid");
-                    shownSection.querySelector("#reason").textContent = validationError;
-                }
-                else {
-                    // Refresh the DOM
-                    refreshAll();
-
-                    // Display relevant DOM elements
-                    shownSection = switchSection("ready");
-                    switchNavTab(shownSection, 'matrix');
-                }
-            },
-            errors => {
-                errors.forEach(error => console.error("API call error: " + error));
-                errorHandler(errors[0]); // We only display the first error for simplicity
-            });
+        // Towards the init screen
+        initMatrixForm();
+        var shownSection = switchSection("ready");
+        switchNavTab(shownSection, 'init');
         
 	}, true);

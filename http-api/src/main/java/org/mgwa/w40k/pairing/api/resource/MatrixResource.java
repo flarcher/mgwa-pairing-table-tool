@@ -1,6 +1,7 @@
 package org.mgwa.w40k.pairing.api.resource;
 
 import org.mgwa.w40k.pairing.Army;
+import org.mgwa.w40k.pairing.api.service.MatrixUpdateService;
 import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.api.model.EstimatedScore;
 import org.mgwa.w40k.pairing.api.model.Match;
@@ -17,13 +18,15 @@ import java.util.stream.IntStream;
 @Path("")
 public class MatrixResource {
 
-    public MatrixResource(AppState state, PairingService service) {
+    public MatrixResource(AppState state, PairingService service, MatrixUpdateService matrixUpdateService) {
         this.state = state;
         this.service = service;
+        this.matrixUpdateService = matrixUpdateService;
     }
 
     private final AppState state;
     private final PairingService service;
+    private final MatrixUpdateService matrixUpdateService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -75,4 +78,18 @@ public class MatrixResource {
                 .toList();
         return Response.ok(scores, MediaType.APPLICATION_JSON_TYPE).build();
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("reset")
+    public Response resetMatrix(
+            @FormParam("rows_team") String rowsTeamName,
+            @FormParam("cols_team") String columnsTeamName,
+            @FormParam("size")      Long   armyCount
+    ) {
+        Matrix matrix = matrixUpdateService.resetMatrix(rowsTeamName, columnsTeamName, armyCount);
+        return Response.ok(matrix, MediaType.APPLICATION_JSON_TYPE).build();
+    }
+
 }

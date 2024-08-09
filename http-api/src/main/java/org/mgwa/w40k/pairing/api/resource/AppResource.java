@@ -27,9 +27,12 @@ public class AppResource {
     @GET
     @Path("alive")
     public Response isAlive() {
-        return statusService.getStatus() != AppStatus.EXITING
-            ? Response.ok().build()           // Running (or will be soon)
-            : Response.serverError().build(); // Stopping/stopped
+        AppStatus status = statusService.getStatus();
+        Response.ResponseBuilder builder = status != AppStatus.EXITING
+            ? Response.ok()           // Running (or will be soon)
+            : Response.serverError(); // Stopping/stopped
+        builder.header("X-Status", status.name());
+        return builder.build();
     }
 
     /**
