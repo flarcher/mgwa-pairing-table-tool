@@ -19,7 +19,7 @@ import java.util.List;
 @Path("")
 public class MatrixResource {
 
-    public static final EstimatedScore DEFAULT_SCORE = EstimatedScore.from(Score.newDefault());
+    public static final Score DEFAULT_SCORE = Score.newDefault();
 
     public MatrixResource(AppState state, PairingService service, MatrixUpdateService matrixUpdateService) {
         this.state = state;
@@ -71,7 +71,7 @@ public class MatrixResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("scores")
     public Response getDefault() {
-        List<List<EstimatedScore>> scores = SetupOverview.getScoresFromMatrix(service.getMatrix(), state.getArmyCount(), DEFAULT_SCORE);
+        List<List<EstimatedScore>> scores = SetupOverview.getScoresFromMatrix(service.getMatrix(), state.getArmyCount(), EstimatedScore.from(DEFAULT_SCORE));
         return Response.ok(scores, MediaType.APPLICATION_JSON_TYPE).build();
     }
 
@@ -84,9 +84,9 @@ public class MatrixResource {
             @FormDataParam("cols_team") String columnsTeamName,
             @FormDataParam("size")      Integer armyCount
     ) {
-        Matrix matrix = matrixUpdateService.resetMatrix(rowsTeamName, columnsTeamName, armyCount);
+        Matrix matrix = matrixUpdateService.resetMatrix(rowsTeamName, columnsTeamName, armyCount, DEFAULT_SCORE);
         Match match = getMatchFromState(); // Needs to be called after the reset
-        SetupOverview overview = SetupOverview.from(match, matrix, DEFAULT_SCORE);
+        SetupOverview overview = SetupOverview.from(match, matrix, EstimatedScore.from(DEFAULT_SCORE));
         return Response.ok(overview, MediaType.APPLICATION_JSON_TYPE).build();
     }
 

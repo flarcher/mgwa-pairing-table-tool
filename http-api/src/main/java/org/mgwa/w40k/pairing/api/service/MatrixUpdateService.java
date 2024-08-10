@@ -45,7 +45,7 @@ public class MatrixUpdateService {
         }
     }
 
-    public Matrix resetMatrix(String rowsTeamName, String columnsTeamName, Integer armyCount) {
+    public Matrix resetMatrix(String rowsTeamName, String columnsTeamName, Integer armyCount, Score defaultScore) {
         // Input checks
         if (armyCount == null || armyCount < MIN_ARMY_COUNT || armyCount > MAX_ARMY_COUNT) {
             throw ServiceUtils.badRequest(String.format("Invalid army count (must be between %d and %d)", MIN_ARMY_COUNT, MAX_ARMY_COUNT));
@@ -60,6 +60,7 @@ public class MatrixUpdateService {
         if (trimedRowsTeamName.equalsIgnoreCase(trimedColsTeamName)) {
             throw ServiceUtils.badRequest("Team names must be different");
         }
+        Score internalDefaultScore = Optional.ofNullable(defaultScore).orElse(Score.newDefault());
 
         // State update
         state.setRowTeamName(trimedRowsTeamName);
@@ -68,11 +69,11 @@ public class MatrixUpdateService {
         Optional<Matrix> currentMatrix = state.getMatrix();
         Matrix matrix;
         if (currentMatrix.isPresent()) {
-            state.forceArmyCountConsistency(Score.newDefault());
+            state.forceArmyCountConsistency(internalDefaultScore);
             matrix = currentMatrix.get();
         }
         else {
-            matrix = loadMatrixDefault(armyCount);
+            matrix = loadMatrixDefault(armyCount, internalDefaultScore);
             state.setMatrix(matrix);
         }
         if (matrix.getSize() != armyCount) {
@@ -81,14 +82,14 @@ public class MatrixUpdateService {
         return matrix;
     }
 
-    private static Matrix loadMatrixDefault(int armyCount) {
+    private static Matrix loadMatrixDefault(int armyCount, Score defaultScore) {
         List<String> names = IntStream.range(0, armyCount)
                 .mapToObj(Integer::toString)
                 .collect(Collectors.toList());
         Matrix matrix = Matrix.createWithoutScores(
                 Army.createArmies(names, true),
                 Army.createArmies(names, false));
-        return matrix.setDefaultScore(Score.newDefault());
+        return matrix.setDefaultScore(defaultScore);
     }
 
 }
