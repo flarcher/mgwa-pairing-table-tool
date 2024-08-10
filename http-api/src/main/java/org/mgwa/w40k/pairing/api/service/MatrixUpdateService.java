@@ -45,18 +45,26 @@ public class MatrixUpdateService {
         }
     }
 
-    public Matrix resetMatrix(String rowsTeamName, String columnsTeamName, Long armyCount) {
+    public Matrix resetMatrix(String rowsTeamName, String columnsTeamName, Integer armyCount) {
+        // Input checks
         if (armyCount == null || armyCount < MIN_ARMY_COUNT || armyCount > MAX_ARMY_COUNT) {
             throw ServiceUtils.badRequest(String.format("Invalid army count (must be between %d and %d)", MIN_ARMY_COUNT, MAX_ARMY_COUNT));
         }
-        Stream.of(rowsTeamName, columnsTeamName).forEach(name -> {
-            if (name == null || name.isBlank() || name.length() > MAX_ARMY_NAME_LENGTH) {
+        String trimedRowsTeamName = Optional.ofNullable(rowsTeamName).orElse("").trim();
+        String trimedColsTeamName = Optional.ofNullable(columnsTeamName).orElse("").trim();
+        Stream.of(trimedRowsTeamName, trimedColsTeamName).forEach(name -> {
+            if (name.isBlank() || name.length() > MAX_ARMY_NAME_LENGTH) {
                 throw ServiceUtils.badRequest(String.format("Invalid army name (max length is %d)", MAX_ARMY_NAME_LENGTH));
             }
         });
-        state.setRowTeamName(rowsTeamName);
-        state.setColTeamName(columnsTeamName);
-        state.setArmyCount(armyCount.intValue());
+        if (trimedRowsTeamName.equalsIgnoreCase(trimedColsTeamName)) {
+            throw ServiceUtils.badRequest("Team names must be different");
+        }
+
+        // State update
+        state.setRowTeamName(trimedRowsTeamName);
+        state.setColTeamName(trimedColsTeamName);
+        state.setArmyCount(armyCount);
         Optional<Matrix> currentMatrix = state.getMatrix();
         Matrix matrix;
         if (currentMatrix.isPresent()) {
@@ -64,8 +72,11 @@ public class MatrixUpdateService {
             matrix = currentMatrix.get();
         }
         else {
-            matrix = loadMatrixDefault(armyCount.intValue());
+            matrix = loadMatrixDefault(armyCount);
             state.setMatrix(matrix);
+        }
+        if (matrix.getSize() != armyCount) {
+            throw ServiceUtils.internalError("Inconsistent army count");
         }
         return matrix;
     }
