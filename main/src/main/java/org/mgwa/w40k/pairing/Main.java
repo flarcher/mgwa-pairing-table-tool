@@ -3,7 +3,6 @@ package org.mgwa.w40k.pairing;
 import org.mgwa.w40k.pairing.api.AppServer;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
-import org.mgwa.w40k.pairing.gui.AppWindow;
 import org.mgwa.w40k.pairing.web.WebAppUtils;
 
 import java.io.File;
@@ -13,9 +12,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -83,19 +79,13 @@ public final class Main {
         }
     }
 
-    private static final AtomicBoolean STOPPING_SERVER = new AtomicBoolean(false);
-
     private static void stopServer(AppServer server) {
-        if (STOPPING_SERVER.compareAndSet(false, true)) {
-            try {
-                LOGGER.info("Stopping the server");
-                server.stop();
-            } catch (Exception e) {
-                LOGGER.severe("Unable to stop the server");
-                throw new IllegalStateException(e);
-            }
-        } else {
-            LOGGER.info("Server is already stopping");
+        try {
+            LOGGER.info("Stopping the server");
+            server.stop();
+        } catch (Exception e) {
+            LOGGER.severe("Unable to stop the server");
+            throw new IllegalStateException(e);
         }
     }
 
@@ -171,23 +161,6 @@ public final class Main {
         InputUtils.deleteDirectoryRecursively(webAppTargetFolder);
     }
 
-    private static final AtomicReference<AutoCloseable> WINDOW_REFERENCE = new AtomicReference<>();
-
-    private static void stopWindow() {
-        WINDOW_REFERENCE.getAndUpdate((closeable) -> {
-            if (closeable != null) {
-                try {
-                    closeable.close();
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Failed to close application window", e);
-                }
-            } else {
-                LOGGER.info("Application window not started or already stopped");
-            }
-            return null; // No need to stop it again
-        });
-    }
-
     private static Path prepareLocalDirectory() {
         String userHomeFolder = System.getProperty("user.home");
         Path localFolder = Paths.get(userHomeFolder)
@@ -202,11 +175,6 @@ public final class Main {
             }
         }
         return localFolder;
-    }
-
-    private static void finalStop() {
-        LOGGER.info("Stopped");
-        System.exit(0);
     }
 
     public static void main(String[] args) {
@@ -225,41 +193,24 @@ public final class Main {
             .or(() -> Optional.ofNullable(System.getenv("WEBAPP_TMP_FOLDER")))
             .map(Paths::get)
             .orElse(appDir);
+        prepareWebApp(webAppTargetFolder);
 
-        try {
-            // Preparing the HTTP server
-            String serverConfigurationPath = InputUtils.getArgumentAt(args, 1)
-                    .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
-                    .orElse(appDir.resolve("server.yml").toString());
-            prepareServerConfiguration(serverConfigurationPath);
-            AppServer server = new AppServer(state, () -> {
-                STOPPING_SERVER.set(true); // In order to avoid a loop
-                stopWindow();
-                finalStop();
-            });
-
-            // Launching the user interface
-            AppWindow.launch(
-                    (closeable) -> { // On init
-                        WINDOW_REFERENCE.set(closeable); // So that it can be stopped from the API later
-                        prepareWebApp(webAppTargetFolder);
-                        startServer(serverConfigurationPath, server);
-                    },
-                    () -> { // On next
-                        openWebApp(webAppTargetFolder, server.getServerPort());
-                    },
-                    () -> { // On stop
-                        stopServer(server);
-                        finalStop();
-                    }
-            );
-        }
-        finally {
+        // Preparing the HTTP server
+        String serverConfigurationPath = InputUtils.getArgumentAt(args, 1)
+                .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
+                .orElse(appDir.resolve("server.yml").toString());
+        prepareServerConfiguration(serverConfigurationPath);
+        AppServer server = new AppServer(state, () -> {
             // Cleans the web-app files up
             cleanUpWebApp(webAppTargetFolder);
             // Logs cleaning
             cleanUpLogFile();
-        }
+            // Done
+            LOGGER.info("Stopped");
+        });
+        startServer(serverConfigurationPath, server);
+        openWebApp(webAppTargetFolder, server.getServerPort());
+
     }
 
 }
