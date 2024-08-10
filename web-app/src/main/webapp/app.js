@@ -281,8 +281,8 @@ var initMatrixForm = function() {
             json => {
                 // Refresh the state
                 getData().match      = json.match;
-                getData().row_armies = json.row_armies;
-                getData().col_armies = json.col_armies;
+                getData().row_armies = json.row_armies.map(a => a.name);
+                getData().col_armies = json.col_armies.map(a => a.name);
                 getData().scores     = json.scores;
                 getData().tables     = []; // No table assigned yet
                 getData().attackers  = {
