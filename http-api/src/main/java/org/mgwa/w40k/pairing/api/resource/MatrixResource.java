@@ -9,9 +9,9 @@ import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.Score;
 import org.mgwa.w40k.pairing.state.AppState;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.stream.IntStream;
 

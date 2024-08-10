@@ -2,7 +2,7 @@ package org.mgwa.w40k.pairing.api;
 
 import com.codahale.metrics.health.HealthCheck;
 import io.dropwizard.lifecycle.ServerLifecycleListener;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.setup.Environment;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 

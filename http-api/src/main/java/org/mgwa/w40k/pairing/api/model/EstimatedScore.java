@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.mgwa.w40k.pairing.matrix.Score;
 
 import javax.annotation.concurrent.Immutable;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @Immutable
 public class EstimatedScore {

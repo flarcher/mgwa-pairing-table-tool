@@ -1,7 +1,7 @@
 package org.mgwa.w40k.pairing.api.service;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Utility class for services.
