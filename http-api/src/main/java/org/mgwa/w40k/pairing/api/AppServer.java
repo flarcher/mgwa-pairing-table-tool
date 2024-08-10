@@ -3,6 +3,7 @@ package org.mgwa.w40k.pairing.api;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
+import io.dropwizard.forms.MultiPartBundle;
 import org.mgwa.w40k.pairing.api.resource.AnalysisResource;
 import org.mgwa.w40k.pairing.api.resource.AppResource;
 import org.mgwa.w40k.pairing.api.resource.MatrixResource;
@@ -38,6 +39,7 @@ public class AppServer extends Application<AppConfiguration> {
 
     @Override
     public void initialize(Bootstrap<AppConfiguration> bootstrap) {
+        bootstrap.addBundle(new MultiPartBundle());
         logger.info("HTTP API initialized");
     }
 

@@ -217,9 +217,7 @@ var initBadges = function() {
 };
 
 // Triggered as soon as the teams changed
-var onNewTeams = function() {
-
-    // API calls
+/*var onNewTeams = function() {
     allGetCalls([
         apiUrl + 'match',
         apiUrl + 'match/rows',
@@ -238,47 +236,73 @@ var onNewTeams = function() {
                 "rows"   : [],
                 "columns": []
             }; // Not assigning yet
-
-        // Initialize the DOM
-        initBadges();
-        setupNavBar(document.getElementById('ready'));
-        initAnalysisForm();
-    
-        // Data check
-        var shownSection;
-        var validationError = checkMatchSetup();
-        if (validationError) {
-            shownSection = switchSection("invalid");
-            shownSection.querySelector("#reason").textContent = validationError;
-        }
-        else {
-            // Refresh the DOM
-            refreshMatrix();
-            refreshTables();
-            refreshBadges();
-            refreshAssignmentForm();
-            refreshAnalysisForm();
-        
-            // Display relevant DOM elements
-            shownSection = switchSection("ready");
-            switchNavTab(shownSection, 'matrix');
-        }
+        // ...
     },
     errors => {
         errors.forEach(error => console.error("API call error: " + error));
         errorHandler(errors[0]); // We only display the first error for simplicity
     });
+};*/
+
+var teamNameInputValidation = function(thisInput, otherInput) {
+    thisInput.addEventListener("change", event => {
+        var validityState = event.target.validity;
+        if (validityState.customError || validityState.valid /* Built-in validation check */) {
+            // Custom validation
+            var thisValue = event.target.value;
+            var otherValue = otherInput.value;
+            var areSimilar = thisValue && otherValue && thisValue.trim().toUpperCase() == otherValue.trim().toUpperCase();
+            if (validityState.customError && !areSimilar) {
+                event.target.setCustomValidity(""); // Reset custom error
+            } else if (validityState.valid && areSimilar) {
+                event.target.setCustomValidity("Must be different"); // Add custom error
+            }
+        }
+    });
 };
 
 var initMatrixForm = function() {
+    // Input validation
     var form = document.querySelector("#init > form");
+    var rowTeamNameInput = form.querySelector("#team_row_name");
+    var colTeamNameInput = form.querySelector("#team_col_name");
+    teamNameInputValidation(rowTeamNameInput, colTeamNameInput);
+    teamNameInputValidation(colTeamNameInput, rowTeamNameInput);
+    // Form submission
     form.addEventListener("submit", event => {
+        if (!form.checkValidity()) {
+            return;
+        }
         event.preventDefault();
-        postCall(
+        switchSection("loading");
+        postFormCall(
             getData().api_url + 'reset',
-            new FormData(form),
+            form,
             json => {
-                console.log(json); // TODO: process further
+                // Refresh the state
+                getData().match      = json.match;
+                getData().row_armies = json.row_armies;
+                getData().col_armies = json.col_armies;
+                getData().scores     = json.scores;
+                getData().tables     = []; // No table assigned yet
+                getData().attackers  = {
+                        "rows"   : [],
+                        "columns": []
+                    }; // Not assignment yet
+
+                // Initialize the DOM
+                initBadges();
+                initAnalysisForm();
+                // Refresh the DOM
+                refreshMatrix();
+                refreshTables();
+                refreshBadges();
+                refreshAssignmentForm();
+                refreshAnalysisForm();
+                // Display relevant DOM elements
+                var shownSection = switchSection("ready");
+                setupNavBar(shownSection);
+                switchNavTab(shownSection, 'matrix');
             },
             json => {
                 errorHandler(json);

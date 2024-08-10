@@ -112,7 +112,8 @@ em, .name {
 }
 /*=== Matrix setup ===*/
 form {
-	margin-bottom: 0;
+	max-width: 320px;
+	margin: 0 auto;
 	--fieldset-padding: 16px;
 	--form-spacing: 10px;
 }
@@ -120,6 +121,12 @@ form {
 	width: calc(100% - (2*var(--fieldset-padding)));
 	float: none;
 	margin: var(--form-spacing) 0;
+	padding: 8px;
+	border-radius: var(--link-padding);
+	background-color: green;
+	color: var(--revert-em-color);
+	border: 1px lightgreen;
+	box-shadow: 3px 2px 2px darkgreen;
 }
 #init > form > div, #init > form > fieldset > div {
 	width: 100%;

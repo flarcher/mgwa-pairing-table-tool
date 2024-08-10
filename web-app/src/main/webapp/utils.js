@@ -158,11 +158,31 @@ var getCall = (url, thenFn, errorFn) => {
 };
 
 /*
- * Calls a POST request expecting JSON in response
- * Inputs could be: JSON.stringify(json) or new FormData(formElement)
+ * Calls a POST request expecting JSON as request and in response
  */
-var postCall = (url, input, thenFn, errorFn) => {
-    abstractJsonCall(new Request(url, {method: "POST", body: input}), thenFn, errorFn);
+var postJsonCall = (url, jsonRequest, thenFn, errorFn) => {
+    abstractJsonCall(
+        new Request(url, {
+            method: "POST",
+            body: JSON.stringify(jsonRequest),
+            headers: {
+                "Content-Type": "application/json",
+            }}),
+        thenFn, errorFn);
+};
+
+/*
+ * Calls a POST request expecting JSON in response with a form as an input
+ */
+var postFormCall = (url, formElement, thenFn, errorFn) => {
+    formElement.enctype = "multipart/form-data"
+    abstractJsonCall(
+        new Request(url, {
+            method: "POST",
+            body: new FormData(formElement),
+            //headers: { "Content-Type": "multipart/form-data" } // DO NOT PROVIDE THE CONTENT-TYPE
+        }),
+        thenFn, errorFn);
 };
 
 /*
