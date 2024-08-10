@@ -1,6 +1,6 @@
 package org.mgwa.w40k.pairing.api;
 
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Configuration;
 
 /**
  * Describes the YAML configuration file format.
