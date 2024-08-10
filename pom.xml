@@ -8,7 +8,6 @@
     <modules>
         <module>core</module>
         <module>matrix-xls</module>
-        <module>gui</module>
         <module>package</module>
         <module>main</module>
         <module>http-api</module>

@@ -11,7 +11,6 @@ Here is a description of the Maven modules:
 | Module     | Description                                                                                |
 |------------|--------------------------------------------------------------------------------------------|
 | main       | Entrypoint of the program. It handles arguments and launches both the UI and the HTTP API. |
-| gui        | The JavaFX based heavy-weight _User Interface_.                                            |
 | http-api   | The HTTP API that would be used by HTML pages.                                             |
 | web-app    | The _Web-Application_ source code. See [the corresponding README](web-app/README.md).      |
 | core       | It contains the pairing algorithms, the shared model and utilities.                        |

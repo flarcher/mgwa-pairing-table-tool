@@ -21,29 +21,16 @@
                 <filtering>false</filtering>
             </resource>
         </resources>
-        <plugins>
+        <!--plugins>
             <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
-                <configuration>
-                    <mainClass>${dist.main.class}</mainClass>
-                    <runtimePathOption>CLASSPATH</runtimePathOption>
-                    <commandlineArgs>../matrix-xls/src/test/resources/example.xlsx</commandlineArgs>
-                </configuration>
             </plugin>
-        </plugins>
+        </plugins-->
     </build>
 
     <dependencies>
         <dependency>
             <groupId>org.mgwa.w40k.pairing</groupId>
             <artifactId>http-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mgwa.w40k.pairing</groupId>
-            <artifactId>gui</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
