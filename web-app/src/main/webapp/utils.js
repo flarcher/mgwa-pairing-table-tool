@@ -116,19 +116,14 @@ const abstractCall = (fetchArg, thenFn, errorFn) => {
     fetch(fetchArg)
     .then((response) => {
         if (response.ok) {
-            thenFn();
+            thenFn(response);
         } else {
-            errorFn();
+            errorFn(response);
         }
     })
     .catch((error) => {
-        errorFn();
+        errorFn({ "cause": "network", "message": error.message });
     });
-};
-
-// API call without payload
-const abstractVoidCall = (url, method, thenFn, errorFn) => {
-    abstractCall(new Request(url, { method: method }), thenFn, errorFn);
 };
 
 /*

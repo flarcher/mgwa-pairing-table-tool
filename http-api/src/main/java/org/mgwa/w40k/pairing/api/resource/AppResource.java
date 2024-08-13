@@ -14,6 +14,8 @@ import jakarta.ws.rs.core.Response;
 @Path("app")
 public class AppResource {
 
+    private static final String STATUS_HTTP_HEADER = "X-Status";
+
     public AppResource(StatusService statusService) {
         this.statusService = statusService;
     }
@@ -31,7 +33,8 @@ public class AppResource {
         Response.ResponseBuilder builder = status != AppStatus.EXITING
             ? Response.ok()           // Running (or will be soon)
             : Response.serverError(); // Stopping/stopped
-        builder.header("X-Status", status.name());
+        builder.header("Access-Control-Expose-Headers", STATUS_HTTP_HEADER);
+        builder.header(STATUS_HTTP_HEADER, status.name().toLowerCase());
         return builder.build();
     }
 
