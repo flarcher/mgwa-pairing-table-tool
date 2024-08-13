@@ -321,14 +321,18 @@ window.addEventListener("load", function() {
 
         // Loading screen
         switchSection("loading");
-        // TODO: Add a wait for the API readyness
+        // See status.js about the wait for the API readyness
 
         // Getting API URL
-        var apiUrl = getData().api_url || getApiUrl();
+        getApiUrl(); // Store the URL in `getData().api_url`
 
-        // Towards the init screen
-        initMatrixForm();
-        var shownSection = switchSection("ready");
-        switchNavTab(shownSection, 'init');
+        watchForStatus(() => { // On start
+                // Towards the init screen
+                initMatrixForm();
+                var shownSection = switchSection("ready");
+                switchNavTab(shownSection, 'init');
+            }, () => { // On stop
+                switchSection("exited");
+            });
         
 	}, true);

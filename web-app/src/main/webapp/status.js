@@ -2,49 +2,88 @@
 
 var intervalId = null; // Interval used for API presence checks
 
-// Actions after exit request
-var afterExit = () => {
-    switchSection("exited");
-    if (intervalId) {
-        clearInterval(intervalId);
-    }
-};
+// Statuses
+var started = false;
+var exited = false;
 
 // API call without payload
 const triggerApi = (method, path, thenFn, errorFn) => {
-    abstractVoidCall(
+    fetch(new Request(
         (getData().api_url || getApiUrl()) + path,
-        method, thenFn, errorFn);
+        { method: method })
+    ).then((response) => {
+        if (response.ok) {
+            thenFn(response);
+        } else {
+            errorFn();
+        }
+    })
+    .catch((error) => {
+        console.error("API call error " + error.message);
+        errorFn();
+    });
 };
 
-window.addEventListener("load", function() {
+const watchForStatus = function(onStart, onExit) {
+    // onExit wrapper
+    const exiting = () => {
+        if (!exited) {
+            exited = true;
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+            onExit();
+        }
+    };
+
+    // Preparing exit path with handling of the tab/browser closing
+    window.addEventListener('beforeunload', function (e) {
+        e.preventDefault(); // Will prompt the confirmation window
+        e.returnValue = false; // Legacy browser support
+
+        /*
+        var confirmed = confirm("Are you sure to stop the application?");
+        if (confirmed) {
+        */
+        // Request to stop the API server
+        triggerApi('POST', 'app/exit',
+            {}, // No request body
+            () => { // Exit ok
+                exiting();
+                console.log("Stopped the API");
+            },
+            () => { // Exit fails
+                exiting();
+                console.warn("Failed to ask for API stop");
+            });
+        /*}*/
+    });
+
     // Checking for API presence on a regular basis
     intervalId = setInterval(() => {
         triggerApi('GET', 'app/alive',
-            () => { /* Nothing to do */ },
-            () => { afterExit(); })
-        }, 3000); // 3 seconds delay
-});
+            (response) => {
+                var status = response.headers.get("X-Status");
+                if (!status) {
+                    console.error("No status header found in response");
+                } else {
+                    switch (status) {
+                        case "initializing":
+                            console.log("Not ready yet ...")
+                            break; // We should still wait
+                        case "running":
+                            if (!started) {
+                                started = true;
+                                onStart();
+                            }
+                            break;
+                        case "exiting":
+                            exiting();
+                            break;
+                    }
+                }
+            },
+            (response) => { exiting(); })
+        }, 5000); // Delay in milliseconds
+};
 
-// Handling of the tab/browser closing
-window.addEventListener('beforeunload', function (e) {
-    e.preventDefault(); // Will prompt the confirmation window
-    e.returnValue = false; // Legacy browser support
-
-    /*
-    var confirmed = confirm("Are you sure to stop the application?");
-    if (confirmed) {
-    */
-    // Request to stop the API server
-    triggerApi('POST', 'app/exit',
-        {}, // No request body
-        () => { // Exit ok
-            afterExit();
-            console.log("Stopping the API");
-        },
-        () => { // Exit fails
-            afterExit();
-            console.warn("Failed to ask for API stop");
-        });
-    /*}*/
-});

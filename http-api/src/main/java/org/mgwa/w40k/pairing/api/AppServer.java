@@ -79,6 +79,10 @@ public class AppServer extends Application<AppConfiguration> {
         // Health checks
         configurationHealthCheck = new ConfigurationHealthCheck(environment, logger);
         environment.healthChecks().register("configuration", configurationHealthCheck);
+
+        // Configuration done: Change the API Status
+        logger.info("HTTP API Configured");
+        statusService.initialized();
     }
 
     public void stop() throws Exception {
