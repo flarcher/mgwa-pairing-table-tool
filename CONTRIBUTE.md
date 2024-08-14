@@ -11,7 +11,6 @@ Here is a description of the Maven modules:
 | Module     | Description                                                                                |
 |------------|--------------------------------------------------------------------------------------------|
 | main       | Entrypoint of the program. It handles arguments and launches both the UI and the HTTP API. |
-| gui        | The JavaFX based heavy-weight _User Interface_.                                            |
 | http-api   | The HTTP API that would be used by HTML pages.                                             |
 | web-app    | The _Web-Application_ source code. See [the corresponding README](web-app/README.md).      |
 | core       | It contains the pairing algorithms, the shared model and utilities.                        |
@@ -28,11 +27,10 @@ In order to build the project, you will need:
 
 In the development process, we can quickly run the application with the following steps:
 
-1. Run `mvn install` (if not already done)
-2. Go to the `main` folder
-3. Run `mvn javafx:run`
+1. Run `mvn package` (if not already done)
+2. Run `java -jar target/table-pairing.jar`
 
-The last two steps can be replaced with the launch of the `launch.sh` script from the root folder.
+The last step can be replaced with the launch of the `launch.sh` script from the root folder.
 
 If a code update is only related to [the web application files](web-app/src/main/webapp) then the script `update-web-app.sh` would update the web files in the local cache folder. A page reload would then show the result, as long as the API is still running.  
 

@@ -9,8 +9,6 @@ import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,23 +27,15 @@ public class PairingService {
 
     private final AppState state;
 
-    private static RuntimeException internalError(String message) {
-        return new WebApplicationException(message, Response.Status.INTERNAL_SERVER_ERROR);
-    }
-
-    private static RuntimeException badRequest(String message) {
-        return new WebApplicationException(message, Response.Status.BAD_REQUEST);
-    }
-
     private static Optional<Army> getArmy(Matrix matrix, ArmyReference ref) {
         if (!ref.isValid()) {
-            throw badRequest("Invalid army reference");
+            throw ServiceUtils.badRequest("Invalid army reference");
         }
         else if (ref.getIndex().isPresent()) {
-            List<Army> armies = matrix.getArmies(ref.isRow().orElseThrow(() -> badRequest("Missing row information in army reference")));
+            List<Army> armies = matrix.getArmies(ref.isRow().orElseThrow(() -> ServiceUtils.badRequest("Missing row information in army reference")));
             int listIndex = ref.getIndex().get();
             if (listIndex >= armies.size()) {
-                throw badRequest("Army reference index too big");
+                throw ServiceUtils.badRequest("Army reference index too big");
             }
             return Optional.ofNullable(armies.get(listIndex));
         }
@@ -65,14 +55,14 @@ public class PairingService {
                     .findAny();
         }
         else {
-            throw badRequest("Invalid army reference: no way to find army");
+            throw ServiceUtils.badRequest("Invalid army reference: no way to find army");
         }
     }
 
     private static Predicate<Pair> nextAssignmentPredicate(Matrix matrix, ArmyReference ref) {
         Optional<Army> optionalArmy = getArmy(matrix, ref);
         if (optionalArmy.isEmpty()) {
-            throw badRequest(String.format("Army %s not found", ref));
+            throw ServiceUtils.badRequest(String.format("Army %s not found", ref));
         }
         return Pair.isWithArmy(optionalArmy.get());
     }
@@ -80,7 +70,7 @@ public class PairingService {
     private static Assignment getAssignment(Matrix matrix, Collection<AssignedPair> pairs) {
         Assignment assignment = Assignment.createEmpty(matrix.getSize());
         SortedSet<Integer> tableIndexes = new TreeSet<>(Comparator.reverseOrder());
-        Function<ArmyReference, RuntimeException> onMissingArmy = ref -> badRequest(String.format("Army %s is not found", ref));
+        Function<ArmyReference, RuntimeException> onMissingArmy = ref -> ServiceUtils.badRequest(String.format("Army %s is not found", ref));
         pairs.forEach(pair -> {
             pair.getTableIndex().ifPresent(tableIndexes::add);
             int tableIndex = pair.getTableIndex().orElseGet(() -> {
@@ -96,7 +86,7 @@ public class PairingService {
             Army rowArmy = leftArmy.isRow() ? leftArmy : rightArmy;
             Army columnArmy = rightArmy.isRow() ? leftArmy : rightArmy;
             if (!rowArmy.isRow() || columnArmy.isRow()) {
-                throw badRequest("Missing row or column army in an assigned pair");
+                throw ServiceUtils.badRequest("Missing row or column army in an assigned pair");
             }
             assignment.assign(tableIndex, rowArmy, columnArmy);
         });
@@ -130,6 +120,6 @@ public class PairingService {
 
     public Matrix getMatrix() {
         return state.getMatrix()
-            .orElseThrow(() -> internalError("No matrix defined yet"));
+            .orElseThrow(() -> ServiceUtils.internalError("No matrix defined yet"));
     }
 }

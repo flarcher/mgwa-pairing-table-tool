@@ -20,13 +20,21 @@
         <dependency>
             <groupId>org.mgwa.w40k.pairing</groupId>
             <artifactId>core</artifactId>
-            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mgwa.w40k.pairing</groupId>
+            <artifactId>matrix-xls</artifactId>
         </dependency>
 
         <!-- Dropwizard -->
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
+            <version>${dropwizard.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-forms</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
 

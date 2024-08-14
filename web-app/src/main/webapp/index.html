@@ -10,9 +10,9 @@
   </head>
   <body>
     <header>
-      <span class="left badge"><span>Step: </span><span id="steps"></span></span>
+      <span class="left badge hidden"><span>Step: </span><span id="steps"></span></span>
       <span class="title">Table Pairing Tool</span>
-      <span class="right badge"><span>Table: </span><span id="pairs"></span></span>
+      <span class="right badge hidden"><span>Table: </span><span id="pairs"></span></span>
     </header>
 
     <nav class="hidden">
@@ -29,7 +29,10 @@
 
     <section id="api_error" class="error">Error: the API returned an error <span id="status"></span>: <span id="message"></span></section>
 
-    <section id="loading">Loading...</section>
+    <section id="loading">
+      <div class="loader"><span></span></div>
+      <div>Loading...</div>
+    </section>
 
     <section id="exited" class="error">The application was terminated</section>
 
@@ -38,7 +41,32 @@
     <section id="ready">
 
       <div id="init">
-        <div>See the desktop application in order to initialize a new pairing.</div>
+        <form>
+          <fieldset>
+            <legend>Team names</legend>
+            <div>
+              <label for="team_row_name">Rows</label>
+              <input id="team_row_name" name="rows_team" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \\-_]+$" required/>
+            </div>
+            <div>
+              <label for="team_col_name">Columns</label>
+              <input id="team_col_name" name="cols_team" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \\-_]+$" required/>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Scores</legend>
+            <div>
+              <label for="team_size">Team size</label>
+              <input id="team_size" name="size" type="number" step="1" min="2" max="10" value="8" />
+            </div>
+            <hr class="or">
+            <div>
+              <label for="matrix_file">Matrix file</label>
+              <input type="file" id="matrix_file" name="file" accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            </div>
+          </fieldset>
+          <input type="submit" formenctype="multipart/form-data" value="Reset pairing system"/>
+        </form>
       </div>
 
       <div id="matrix">
