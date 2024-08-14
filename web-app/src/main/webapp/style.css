@@ -145,13 +145,15 @@ em, .name {
 }
 /*=== Matrix setup ===*/
 form {
-	max-width: 320px;
+	max-width: 480px;
 	margin: 0 auto;
-	--fieldset-padding: 16px;
 	--form-spacing: 10px;
 }
+form > fieldset {
+	margin: var(--form-spacing) auto;
+}
 #init > form > input[type = "submit"] {
-	width: calc(100% - (2*var(--fieldset-padding)));
+	width: 100%;
 	float: none;
 	margin: var(--form-spacing) 0;
 	padding: 8px;
@@ -161,14 +163,29 @@ form {
 	border: 1px lightgreen;
 	box-shadow: 3px 2px 2px darkgreen;
 }
-#init > form > div, #init > form > fieldset > div {
+#init > form > input[type = "submit"]:hover {
+	font-weight: bold;
+	background-color: darkgreen;
+	box-shadow: 3px 2px 2px var(--border-color) inset;
+}
+#init > form > fieldset > div {
 	width: 100%;
 	clear: both;
 	padding: var(--form-spacing) 0;
 }
-#init > form > div {
-	width: calc(100% - (2*var(--fieldset-padding)));
-    padding-left: var(--fieldset-padding);
+form hr {
+	position: relative;
+	clear: both;
+    margin-top: 30px;
+	overflow: visible;
+}
+form hr.or:after {
+	position: absolute;
+	content: 'or';
+	left: 40%;
+	width: 20%;
+	top: -10px;
+	background-color: var(--bg-color);
 }
 #init label {
 	float: left;
