@@ -1,6 +1,7 @@
 package org.mgwa.w40k.pairing.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.mgwa.w40k.pairing.matrix.Matrix;
 
 import javax.annotation.concurrent.Immutable;
 

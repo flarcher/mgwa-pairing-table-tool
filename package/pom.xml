@@ -81,6 +81,7 @@
         <profile>
             <id>pack</id>
             <activation>
+                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>make.installer</name>
                 </property>

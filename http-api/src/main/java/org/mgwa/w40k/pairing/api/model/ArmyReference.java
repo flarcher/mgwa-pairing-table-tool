@@ -1,11 +1,20 @@
 package org.mgwa.w40k.pairing.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.mgwa.w40k.pairing.Army;
 
 import java.util.Objects;
 import java.util.Optional;
 
 public class ArmyReference {
+
+    public static ArmyReference from(Army army) {
+        ArmyReference ar = new ArmyReference();
+        ar.setIsRow(army.isRow());
+        ar.setIndex(army.getIndex());
+        ar.setName(army.getName());
+        return ar;
+    }
 
     @JsonProperty(value = "is_row", required = false)
     private Boolean isRow;

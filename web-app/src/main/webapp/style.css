@@ -63,6 +63,7 @@ header > .badge {
     background-color: var(--bg-color);
     color: var(--main-em-color);
     font-size: 1em;
+    font-family: monospace;
     padding: 0.25em;
     line-height: 1em;
     margin-top: calc(var(--frame-padding) * -1);
@@ -108,6 +109,90 @@ em, .name {
 }
 .right {
 	display: block;
+	float: right;
+}
+/*=== Loading ===*/
+@keyframes spin {
+	100% { transform: rotate(360deg); }
+}
+.loader {
+	position: relative;
+	height: 120px;
+	width: 100%;
+	/*background-color: var(--bg-color);*/
+	--spinner-size: 50px;
+	--spinner-padding: 10px;
+	--spinner-width: 3px;
+	--spinner-color: var(--main-color);
+}
+.loader > span {
+	position: absolute;
+	top: calc(50% - (var(--spinner-size) / 2) - var(--spinner-padding) - var(--spinner-width));
+    left: calc(50% - (var(--spinner-size) / 2) - var(--spinner-padding) - var(--spinner-width));
+    width: var(--spinner-size);
+	line-height: var(--spinner-size);
+    margin: calc(-(var(--spinner-size) / 2)) 0 0 calc(-(var(--spinner-size) / 2));
+	border-width: var(--spinner-width);
+	border-style: solid;
+	border-radius: 50%;
+	border-color: var(--bg-color) var(--spinner-color) var(--bg-color) var(--spinner-color);
+	color: var(--spinner-color);
+	font-size: calc(var(--spinner-size) / 2);
+	padding: var(--spinner-padding);
+	animation: spin 10s linear infinite;
+}
+.loader > span:after {
+	content: "+"
+}
+/*=== Matrix setup ===*/
+form {
+	max-width: 480px;
+	margin: 0 auto;
+	--form-spacing: 10px;
+}
+form > fieldset {
+	margin: var(--form-spacing) auto;
+}
+#init > form > input[type = "submit"] {
+	width: 100%;
+	float: none;
+	margin: var(--form-spacing) 0;
+	padding: 8px;
+	border-radius: var(--link-padding);
+	background-color: green;
+	color: var(--revert-em-color);
+	border: 1px lightgreen;
+	box-shadow: 3px 2px 2px darkgreen;
+}
+#init > form > input[type = "submit"]:hover {
+	font-weight: bold;
+	background-color: darkgreen;
+	box-shadow: 3px 2px 2px var(--border-color) inset;
+}
+#init > form > fieldset > div {
+	width: 100%;
+	clear: both;
+	padding: var(--form-spacing) 0;
+}
+form hr {
+	position: relative;
+	clear: both;
+    margin-top: 30px;
+	overflow: visible;
+}
+form hr.or:after {
+	position: absolute;
+	content: 'or';
+	left: 40%;
+	width: 20%;
+	top: -10px;
+	background-color: var(--bg-color);
+}
+#init label {
+	float: left;
+	text-align: right;
+}
+#init input {
 	float: right;
 }
 /*=== Score matrix ===*/

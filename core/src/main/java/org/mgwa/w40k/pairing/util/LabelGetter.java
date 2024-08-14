@@ -1,6 +1,4 @@
-package org.mgwa.w40k.pairing;
-
-import org.mgwa.w40k.pairing.util.LoggerSupplier;
+package org.mgwa.w40k.pairing.util;
 
 import javax.annotation.Nonnull;
 import java.util.*;

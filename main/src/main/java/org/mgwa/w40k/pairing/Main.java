@@ -1,20 +1,23 @@
 package org.mgwa.w40k.pairing;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.mgwa.w40k.pairing.api.AppServer;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
-import org.mgwa.w40k.pairing.gui.AppWindow;
 import org.mgwa.w40k.pairing.web.WebAppUtils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,8 +58,7 @@ public final class Main {
     }
 
     // Check and auto-setup of server configuration file
-    private static void prepareServerConfiguration(String serverConfigurationLocation) {
-        Path serverConfigurationPath = Path.of(serverConfigurationLocation);
+    private static void prepareServerConfiguration(Path serverConfigurationPath) {
         File serverConfigurationFile = serverConfigurationPath.toFile();
         if (!serverConfigurationFile.isFile() || !serverConfigurationFile.canRead()) {
             LOGGER.info("Using default server configuration");
@@ -73,9 +75,9 @@ public final class Main {
         }
     }
 
-    private static void startServer(String serverConfigurationLocation, AppServer server) {
+    private static void startServer(Path serverConfigurationLocation, AppServer server) {
         try {
-            server.run("server", serverConfigurationLocation);
+            server.run("server", serverConfigurationLocation.toString());
         }
         catch (Exception e) {
             LOGGER.severe("Unable to start the server (" + e.getMessage() + ")");
@@ -83,19 +85,13 @@ public final class Main {
         }
     }
 
-    private static final AtomicBoolean STOPPING_SERVER = new AtomicBoolean(false);
-
     private static void stopServer(AppServer server) {
-        if (STOPPING_SERVER.compareAndSet(false, true)) {
-            try {
-                LOGGER.info("Stopping the server");
-                server.stop();
-            } catch (Exception e) {
-                LOGGER.severe("Unable to stop the server");
-                throw new IllegalStateException(e);
-            }
-        } else {
-            LOGGER.info("Server is already stopping");
+        try {
+            LOGGER.info("Stopping the server");
+            server.stop();
+        } catch (Exception e) {
+            LOGGER.severe("Unable to stop the server");
+            throw new IllegalStateException(e);
         }
     }
 
@@ -171,23 +167,6 @@ public final class Main {
         InputUtils.deleteDirectoryRecursively(webAppTargetFolder);
     }
 
-    private static final AtomicReference<AutoCloseable> WINDOW_REFERENCE = new AtomicReference<>();
-
-    private static void stopWindow() {
-        WINDOW_REFERENCE.getAndUpdate((closeable) -> {
-            if (closeable != null) {
-                try {
-                    closeable.close();
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Failed to close application window", e);
-                }
-            } else {
-                LOGGER.info("Application window not started or already stopped");
-            }
-            return null; // No need to stop it again
-        });
-    }
-
     private static Path prepareLocalDirectory() {
         String userHomeFolder = System.getProperty("user.home");
         Path localFolder = Paths.get(userHomeFolder)
@@ -204,9 +183,27 @@ public final class Main {
         return localFolder;
     }
 
-    private static void finalStop() {
-        LOGGER.info("Stopped");
-        System.exit(0);
+    private static Optional<Integer> readPortFromServerYamlFile(Path serverYamlFile) {
+        final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        JsonNode rootNode;
+        try (InputStream is = new BufferedInputStream(
+                Files.newInputStream(serverYamlFile, StandardOpenOption.READ))) {
+            rootNode = mapper.readTree(is);
+        }
+        catch (IOException ioe) {
+            LOGGER.log(Level.SEVERE, "Unable to parse " + serverYamlFile, ioe);
+            return Optional.empty();
+        }
+        return               Optional.ofNullable(rootNode.get("server"))
+                .flatMap(node -> Optional.ofNullable(node.get("connector")))
+                .flatMap(node -> Optional.ofNullable(node.get("port")))
+                .flatMap(field -> {
+                    if (field.getNodeType() == JsonNodeType.NUMBER) {
+                        return Optional.of(field.asInt(-1));
+                    } else {
+                        return Optional.empty();
+                    }
+                });
     }
 
     public static void main(String[] args) {
@@ -225,40 +222,41 @@ public final class Main {
             .or(() -> Optional.ofNullable(System.getenv("WEBAPP_TMP_FOLDER")))
             .map(Paths::get)
             .orElse(appDir);
+        prepareWebApp(webAppTargetFolder);
 
-        try {
-            // Preparing the HTTP server
-            String serverConfigurationPath = InputUtils.getArgumentAt(args, 1)
-                    .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
-                    .orElse(appDir.resolve("server.yml").toString());
-            prepareServerConfiguration(serverConfigurationPath);
-            AppServer server = new AppServer(state, () -> {
-                STOPPING_SERVER.set(true); // In order to avoid a loop
-                stopWindow();
-                finalStop();
-            });
+        // Preparing the HTTP server
+        Path serverConfigurationPath = InputUtils.getArgumentAt(args, 1)
+                .or(() -> Optional.ofNullable(System.getenv("API_SERVER_FILE")))
+                .map(Path::of)
+                .orElse(appDir.resolve("server.yml"));
+        prepareServerConfiguration(serverConfigurationPath);
 
-            // Launching the user interface
-            AppWindow.launch(state,
-                    (closeable) -> { // On init
-                        WINDOW_REFERENCE.set(closeable); // So that it can be stopped from the API later
-                        prepareWebApp(webAppTargetFolder);
-                        startServer(serverConfigurationPath, server);
-                    },
-                    () -> { // On next
-                        openWebApp(webAppTargetFolder, server.getServerPort());
-                    },
-                    () -> { // On stop
-                        stopServer(server);
-                        finalStop();
-                    }
-            );
-        }
-        finally {
+        // Starting the Web-App if possible
+        Optional<Integer> readServerPort = readPortFromServerYamlFile(serverConfigurationPath);
+        readServerPort.ifPresent(port -> {
+            LOGGER.info("Starting Web-app early with API port " + port);
+            openWebApp(webAppTargetFolder, port);
+        });
+
+        // Start the server API
+        AppServer server = new AppServer(state, () -> {
             // Cleans the web-app files up
             cleanUpWebApp(webAppTargetFolder);
             // Logs cleaning
             cleanUpLogFile();
+            // Done
+            LOGGER.info("Stopped");
+        });
+        startServer(serverConfigurationPath, server);
+
+        // Starting the Web-App, if not done already
+        if (readServerPort.isPresent()) {
+            if (server.getServerPort() != readServerPort.get()) {
+                LOGGER.severe(String.format("Read port %d is not the API port %d", server.getServerPort(), readServerPort.get()));
+            }
+        }
+        else {
+            openWebApp(webAppTargetFolder, server.getServerPort());
         }
     }
 

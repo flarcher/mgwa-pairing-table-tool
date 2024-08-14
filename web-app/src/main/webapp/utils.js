@@ -112,18 +112,17 @@ var getStepCounts = function(team_member_count, paired_table_count) {
 	return [ stepCount, totalCount ];
 };
 
-// API call without payload
-const abstractVoidCall = (url, method, thenFn, errorFn) => {
-    fetch(new Request(url, { method: method }))
+const abstractCall = (fetchArg, thenFn, errorFn) => {
+    fetch(fetchArg)
     .then((response) => {
         if (response.ok) {
-            thenFn();
+            thenFn(response);
         } else {
-            errorFn();
+            errorFn(response);
         }
     })
     .catch((error) => {
-        errorFn();
+        errorFn({ "cause": "network", "message": error.message });
     });
 };
 
@@ -153,10 +152,33 @@ var getCall = (url, thenFn, errorFn) => {
 	abstractJsonCall(url, thenFn, errorFn);
 };
 
-/* Calls a POST request to the API */
-var postCall = (url, body, thenFn, errorFn) => {
-    abstractJsonCall(new Request(url, {method: "POST", body: JSON.stringify(body)}), thenFn, errorFn);
-}
+/*
+ * Calls a POST request expecting JSON as request and in response
+ */
+var postJsonCall = (url, jsonRequest, thenFn, errorFn) => {
+    abstractJsonCall(
+        new Request(url, {
+            method: "POST",
+            body: JSON.stringify(jsonRequest),
+            headers: {
+                "Content-Type": "application/json",
+            }}),
+        thenFn, errorFn);
+};
+
+/*
+ * Calls a POST request expecting JSON in response with a form as an input
+ */
+var postFormCall = (url, formElement, thenFn, errorFn) => {
+    formElement.enctype = "multipart/form-data"
+    abstractJsonCall(
+        new Request(url, {
+            method: "POST",
+            body: new FormData(formElement),
+            //headers: { "Content-Type": "multipart/form-data" } // DO NOT PROVIDE THE CONTENT-TYPE
+        }),
+        thenFn, errorFn);
+};
 
 /*
  * Multiple calls to the API
