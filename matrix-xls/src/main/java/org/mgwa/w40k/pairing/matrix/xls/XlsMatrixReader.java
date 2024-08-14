@@ -78,7 +78,7 @@ public class XlsMatrixReader implements MatrixReader {
 	}
 
 	private static void printArmies(List<Army> armies) {
-		System.out.println(armies.toString());
+		LOGGER.finer(String.format("Read armies: %s", armies.toString()));
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package org.mgwa.w40k.pairing.api.resource;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.api.model.SetupOverview;
@@ -14,6 +15,8 @@ import org.mgwa.w40k.pairing.state.AppState;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.io.InputStream;
 import java.util.List;
 
 @Path("")
@@ -82,9 +85,12 @@ public class MatrixResource {
     public Response resetMatrix(
             @FormDataParam("rows_team") String rowsTeamName,
             @FormDataParam("cols_team") String columnsTeamName,
-            @FormDataParam("size")      Integer armyCount
+            @FormDataParam("size")      Integer armyCount,
+            @FormDataParam("file")      FormDataContentDisposition contentDisposition,
+            @FormDataParam("file")      InputStream inputStream
     ) {
-        Matrix matrix = matrixUpdateService.resetMatrix(rowsTeamName, columnsTeamName, armyCount, DEFAULT_SCORE);
+        matrixUpdateService.setTeamNames(rowsTeamName, columnsTeamName);
+        Matrix matrix = matrixUpdateService.setupMatrix(contentDisposition, inputStream, armyCount, DEFAULT_SCORE);
         Match match = getMatchFromState(); // Needs to be called after the reset
         SetupOverview overview = SetupOverview.from(match, matrix, EstimatedScore.from(DEFAULT_SCORE));
         return Response.ok(overview, MediaType.APPLICATION_JSON_TYPE).build();

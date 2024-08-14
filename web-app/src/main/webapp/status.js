@@ -19,7 +19,7 @@ const triggerApi = (method, path, thenFn, errorFn) => {
         }
     })
     .catch((error) => {
-        console.error("API call error " + error.message);
+        console.error("API call error");
         errorFn();
     });
 };
