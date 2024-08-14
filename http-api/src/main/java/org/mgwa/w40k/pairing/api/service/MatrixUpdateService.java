@@ -1,5 +1,6 @@
 package org.mgwa.w40k.pairing.api.service;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
@@ -8,8 +9,10 @@ import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixReader;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,11 +48,7 @@ public class MatrixUpdateService {
         }
     }
 
-    public Matrix resetMatrix(String rowsTeamName, String columnsTeamName, Integer armyCount, Score defaultScore) {
-        // Input checks
-        if (armyCount == null || armyCount < MIN_ARMY_COUNT || armyCount > MAX_ARMY_COUNT) {
-            throw ServiceUtils.badRequest(String.format("Invalid army count (must be between %d and %d)", MIN_ARMY_COUNT, MAX_ARMY_COUNT));
-        }
+    public void setTeamNames(String rowsTeamName, String columnsTeamName) {
         String trimedRowsTeamName = Optional.ofNullable(rowsTeamName).orElse("").trim();
         String trimedColsTeamName = Optional.ofNullable(columnsTeamName).orElse("").trim();
         Stream.of(trimedRowsTeamName, trimedColsTeamName).forEach(name -> {
@@ -60,11 +59,18 @@ public class MatrixUpdateService {
         if (trimedRowsTeamName.equalsIgnoreCase(trimedColsTeamName)) {
             throw ServiceUtils.badRequest("Team names must be different");
         }
+        state.setRowTeamName(trimedRowsTeamName);
+        state.setColTeamName(trimedColsTeamName);
+    }
+
+    private Matrix resetMatrix(Integer armyCount, Score defaultScore) {
+        // Input checks
+        if (armyCount == null || armyCount < MIN_ARMY_COUNT || armyCount > MAX_ARMY_COUNT) {
+            throw ServiceUtils.badRequest(String.format("Invalid army count (must be between %d and %d)", MIN_ARMY_COUNT, MAX_ARMY_COUNT));
+        }
         Score internalDefaultScore = Optional.ofNullable(defaultScore).orElse(Score.newDefault());
 
         // State update
-        state.setRowTeamName(trimedRowsTeamName);
-        state.setColTeamName(trimedColsTeamName);
         state.setArmyCount(armyCount);
         Optional<Matrix> currentMatrix = state.getMatrix();
         Matrix matrix;
@@ -90,6 +96,47 @@ public class MatrixUpdateService {
                 Army.createArmies(names, true),
                 Army.createArmies(names, false));
         return matrix.setDefaultScore(defaultScore);
+    }
+
+    private static Matrix readMatrix(InputStream excelFileData) {
+        try (MatrixReader reader = XlsMatrixReader.fromStream(excelFileData)) {
+            return reader.get();
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Unable to parse matrix file", e);
+            throw ServiceUtils.badRequest("Invalid matrix file content");
+        }
+    }
+
+    private Matrix uploadMatrix(FormDataContentDisposition contentDisposition, InputStream excelFileData) {
+        String fileName = contentDisposition.getFileName();
+        Objects.requireNonNull(fileName);
+        Objects.requireNonNull(excelFileData);
+        if (fileName.isBlank()) {
+            throw ServiceUtils.badRequest("File name is mandatory for upload");
+        }
+        LOGGER.info(String.format("Reading file %s", fileName));
+        Matrix newMatrix = readMatrix(excelFileData);
+        state.setMatrix(newMatrix);
+        state.setArmyCount(newMatrix.getSize());
+        state.setMatrixFilePath(Path.of(fileName)); // Does not provide the folder :/
+        return newMatrix;
+    }
+
+    public Matrix setupMatrix(
+            FormDataContentDisposition contentDisposition, InputStream excelFileData,
+            Integer armyCount, Score defaultScore) {
+        LOGGER.info(String.format("Got file <%s> of type <%s> (%d bytes) (stream %s)",
+                Objects.toString(contentDisposition.getFileName(), "-"),
+                Objects.toString(contentDisposition.getType(), "-"),
+                contentDisposition.getSize(),
+                excelFileData != null ? "ok" : "null"));
+        if (ServiceUtils.hasFileAttached(contentDisposition)) {
+            return uploadMatrix(contentDisposition, excelFileData);
+        }
+        else {
+            LOGGER.info(String.format("No file provided: using default %s with %d armies", defaultScore, armyCount));
+            return resetMatrix(armyCount, defaultScore);
+        }
     }
 
 }

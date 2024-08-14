@@ -63,6 +63,7 @@ header > .badge {
     background-color: var(--bg-color);
     color: var(--main-em-color);
     font-size: 1em;
+    font-family: monospace;
     padding: 0.25em;
     line-height: 1em;
     margin-top: calc(var(--frame-padding) * -1);
@@ -141,7 +142,7 @@ em, .name {
 	animation: spin 10s linear infinite;
 }
 .loader > span:after {
-	content: "┋"
+	content: "+"
 }
 /*=== Matrix setup ===*/
 form {

@@ -261,14 +261,56 @@ var teamNameInputValidation = function(thisInput, otherInput) {
     });
 };
 
-var initMatrixForm = function() {
-    // Input validation
+// Applying the result of a new pairing configuration
+var onNewState = function(json) {
+    // Refresh the state
+    getData().match      = json.match;
+    getData().row_armies = json.row_armies.map(a => a.name);
+    getData().col_armies = json.col_armies.map(a => a.name);
+    getData().scores     = json.scores;
+    getData().tables     = []; // No table assigned yet
+    getData().attackers  = {
+            "rows"   : [],
+            "columns": []
+        }; // Not assignment yet
+
+    // Initialize the DOM
+    initBadges();
+    initAnalysisForm();
+    // Refresh the DOM
+    refreshMatchForm();
+    refreshMatrix();
+    refreshTables();
+    refreshBadges();
+    refreshAssignmentForm();
+    refreshAnalysisForm();
+    // Display relevant DOM elements
+    var shownSection = switchSection("ready");
+    setupNavBar(shownSection);
+    switchNavTab(shownSection, 'matrix');
+};
+
+var refreshMatchForm = function() {
+    var matchForm = document.querySelector("#init > form");
+    var rowTeamNameInput = matchForm.querySelector("#team_row_name");
+    var colTeamNameInput = matchForm.querySelector("#team_col_name");
+    var teamSizeInput    = matchForm.querySelector("#team_size");
+
+    var matchData = getData().match;
+    rowTeamNameInput.value = matchData.row_team;
+    colTeamNameInput.value = matchData.column_team;
+    teamSizeInput.value    = matchData.team_member_count;
+};
+
+var initMatchForm = function() {
+    // Team names input validation
     var form = document.querySelector("#init > form");
     var rowTeamNameInput = form.querySelector("#team_row_name");
     var colTeamNameInput = form.querySelector("#team_col_name");
     teamNameInputValidation(rowTeamNameInput, colTeamNameInput);
     teamNameInputValidation(colTeamNameInput, rowTeamNameInput);
-    // Form submission
+
+    // Submit listener
     form.addEventListener("submit", event => {
         if (!form.checkValidity()) {
             return;
@@ -278,35 +320,8 @@ var initMatrixForm = function() {
         postFormCall(
             getData().api_url + 'reset',
             form,
-            json => {
-                // Refresh the state
-                getData().match      = json.match;
-                getData().row_armies = json.row_armies.map(a => a.name);
-                getData().col_armies = json.col_armies.map(a => a.name);
-                getData().scores     = json.scores;
-                getData().tables     = []; // No table assigned yet
-                getData().attackers  = {
-                        "rows"   : [],
-                        "columns": []
-                    }; // Not assignment yet
-
-                // Initialize the DOM
-                initBadges();
-                initAnalysisForm();
-                // Refresh the DOM
-                refreshMatrix();
-                refreshTables();
-                refreshBadges();
-                refreshAssignmentForm();
-                refreshAnalysisForm();
-                // Display relevant DOM elements
-                var shownSection = switchSection("ready");
-                setupNavBar(shownSection);
-                switchNavTab(shownSection, 'matrix');
-            },
-            json => {
-                errorHandler(json);
-            });
+            json => onNewState(json),
+            json => errorHandler(json));
     });
 };
 
@@ -328,7 +343,7 @@ window.addEventListener("load", function() {
 
         watchForStatus(() => { // On start
                 // Towards the init screen
-                initMatrixForm();
+                initMatchForm();
                 var shownSection = switchSection("ready");
                 switchNavTab(shownSection, 'init');
             }, () => { // On stop
