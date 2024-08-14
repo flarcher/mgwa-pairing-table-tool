@@ -110,6 +110,39 @@ em, .name {
 	display: block;
 	float: right;
 }
+/*=== Loading ===*/
+@keyframes spin {
+	100% { transform: rotate(360deg); }
+}
+.loader {
+	position: relative;
+	height: 120px;
+	width: 100%;
+	/*background-color: var(--bg-color);*/
+	--spinner-size: 50px;
+	--spinner-padding: 10px;
+	--spinner-width: 3px;
+	--spinner-color: var(--main-color);
+}
+.loader > span {
+	position: absolute;
+	top: calc(50% - (var(--spinner-size) / 2) - var(--spinner-padding) - var(--spinner-width));
+    left: calc(50% - (var(--spinner-size) / 2) - var(--spinner-padding) - var(--spinner-width));
+    width: var(--spinner-size);
+	line-height: var(--spinner-size);
+    margin: calc(-(var(--spinner-size) / 2)) 0 0 calc(-(var(--spinner-size) / 2));
+	border-width: var(--spinner-width);
+	border-style: solid;
+	border-radius: 50%;
+	border-color: var(--bg-color) var(--spinner-color) var(--bg-color) var(--spinner-color);
+	color: var(--spinner-color);
+	font-size: calc(var(--spinner-size) / 2);
+	padding: var(--spinner-padding);
+	animation: spin 10s linear infinite;
+}
+.loader > span:after {
+	content: "┋"
+}
 /*=== Matrix setup ===*/
 form {
 	max-width: 320px;
