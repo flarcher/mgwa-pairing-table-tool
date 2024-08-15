@@ -112,6 +112,20 @@ em, .name {
 	display: block;
 	float: right;
 }
+.hint {
+	border: 1px solid grey;
+	border-radius: calc( var(--border-radius) / 2 );
+	font-size: 10px;
+    position: relative;
+    font-variant: normal;
+    color: grey;
+}
+.hint:before {
+	content: "🛈";
+	position: absolute;
+    left: 3px;
+    top: -1px;
+}
 /*=== Loading ===*/
 @keyframes spin {
 	100% { transform: rotate(360deg); }
@@ -155,7 +169,7 @@ form > fieldset {
 	margin: var(--form-spacing) auto;
 	border-radius: var(--border-radius);
 }
-#init > form > input[type = "submit"] {
+form > input[type = "submit"] {
 	width: 100%;
 	float: none;
 	margin: var(--form-spacing) 0;
@@ -192,7 +206,7 @@ form input[type = "file"]:hover,
 form label.file-label:hover {
 	cursor: pointer;
 }
-#init > form > fieldset > div {
+form > fieldset > div {
 	width: 100%;
 	clear: both;
 	padding: var(--form-spacing) 0;
@@ -211,11 +225,11 @@ form hr.or:after {
 	top: -10px;
 	background-color: var(--bg-color);
 }
-#init label {
+form div > label {
 	float: left;
 	text-align: right;
 }
-#init input {
+form div > input {
 	float: right;
 }
 /*=== Score matrix ===*/
@@ -250,6 +264,7 @@ table {
 	text-align: center;
 	white-space: nowrap;
 	color: var(--main-color);
+	cursor: pointer;
 }
 .score.game {
 	background-color: purple;
@@ -270,7 +285,13 @@ table {
 }
 .score.good {
 	background-color: blue;
-	color: white;
+	color: var(--main-em-color);
+}
+/*=== Score edit ===*/
+form span.score {
+	padding: 2px 5px;
+    border-radius: var(--border-radius);
+    min-width: 50px;
 }
 /*=== Navigation bar ===*/
 .hidden {

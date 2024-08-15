@@ -30,6 +30,7 @@ var _switchNavTab = function(section, tabId, sourceAnchors) {
 	});
 	sourceAnchors.forEach(a => a.classList.add('selected'))
 	targetedElement.classList.add('current');
+    switchSection(section.id);
 };
 
 // Forces navigation using the tab ID
@@ -52,6 +53,16 @@ var setupNavBar = function(section) {
 	});
 };
 
+const startLoading = function() {
+    document.querySelector('nav').classList.add('hidden');
+    switchSection("loading");
+};
+const endLoading = function(tabId) {
+    var section = switchSection("ready");
+    switchNavTab(section, tabId);
+    document.querySelector('nav').classList.remove('hidden');
+};
+
 function emptyElement(element) {
 	while (element.firstElementChild) {
 	   element.firstElementChild.remove();
@@ -62,38 +73,6 @@ var addTableCornerCell = function(row) {
     var cornerCell = document.createElement("td");
     cornerCell.classList.add('corner');
     row.appendChild(cornerCell);
-};
-
-var setupScoreElement = function(element, score) {
-    element.classList.add('score');
-    element.textContent = score.min.toFixed() + "-" + score.max.toFixed();
-    var scoreClass
-    if (score.min > score.max || score.min < 0 || score.max > 20) {
-        console.warn("Invalid score " + score);
-        return;
-    }
-    if (score.min < 3 && score.max > 17) {
-        scoreClass = 'game';
-    } else if (score.max < 5) {
-        scoreClass = 'bad';
-    } else if (score.min > 15) {
-        scoreClass = 'good';
-    }
-
-    if (!scoreClass) {
-        const average = (score.min + score.max) / 2;
-        if (average > 10) {
-            scoreClass = 'above';
-        } else if (average < 10) {
-            scoreClass = 'below';
-        } else if (average == 10) {
-            scoreClass = 'middle';
-        }
-    }
-
-    if (scoreClass) {
-        element.classList.add(scoreClass);
-    }
 };
 
 var getStepCounts = function(team_member_count, paired_table_count) {
