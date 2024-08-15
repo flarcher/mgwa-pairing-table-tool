@@ -1,67 +1,4 @@
 
-// Refresh the DOM part dedicated to the matrix, using getData()
-var refreshMatrix = function() {
-    var matrixTableBody = document.querySelector("#matrix > table > tbody");
-
-    emptyElement(matrixTableBody); // reset
-
-    const memberCount = getData().match.team_member_count;
-    var newRow = document.createElement("tr");
-    matrixTableBody.appendChild(newRow);
-    addTableCornerCell(newRow);
-    addTableCornerCell(newRow);
-    const columnTeamCell = document.createElement("td");
-    columnTeamCell.classList.add('name');
-    columnTeamCell.setAttribute("colspan", memberCount.toFixed());
-    const columnTeamSpan = document.createElement("span");
-    columnTeamSpan.textContent = getData().match.column_team;
-    columnTeamCell.appendChild(columnTeamSpan);
-    newRow.appendChild(columnTeamCell);
-
-    newRow = document.createElement("tr");
-    matrixTableBody.appendChild(newRow);
-    addTableCornerCell(newRow);
-    addTableCornerCell(newRow);
-
-    var columnArmies = getData().col_armies; // Column armies names
-    var rowArmies    = getData().row_armies; // Row armies names
-    if (memberCount != rowArmies.length || memberCount != columnArmies.length) {
-        throw "Inconsistent matrix size"
-    }
-
-    for (let i = 0; i < columnArmies.length; i++) {
-        let colArmyCell = document.createElement("td");
-        colArmyCell.classList.add('name');
-        colArmyCell.textContent = columnArmies[i];
-        newRow.appendChild(colArmyCell);
-    }
-
-    var scores = getData().scores;     // Matrix values
-    for (let i = 0; i < rowArmies.length; i++) {
-        newRow = document.createElement("tr");
-        matrixTableBody.appendChild(newRow);
-        if (i == 0) {
-            const rowTeamCell = document.createElement("td");
-            rowTeamCell.setAttribute("rowspan", memberCount.toFixed());
-            rowTeamCell.classList.add('name');
-            const rowTeamSpan = document.createElement("span");
-            rowTeamSpan.textContent = getData().match.row_team;
-            rowTeamCell.appendChild(rowTeamSpan);
-            newRow.appendChild(rowTeamCell);
-        }
-        let rowArmyCell = document.createElement("td");
-        rowArmyCell.classList.add('name');
-        rowArmyCell.textContent = rowArmies[i];
-        newRow.appendChild(rowArmyCell);
-        for (let j = 0; j < columnArmies.length; j++) {
-            let scoreCell = document.createElement("td");
-            setupScoreElement(scoreCell, scores[i][j]);
-            newRow.appendChild(scoreCell);
-        }
-    }
-
-};
-
 var refreshTables = function() {
     var tablesDiv = document.getElementById("tables");
     var teamNamesRow = tablesDiv.querySelectorAll(".teams .name > span");
@@ -276,6 +213,7 @@ var onNewState = function(json) {
 
     // Initialize the DOM
     initBadges();
+    initScoreEdit();
     initAnalysisForm();
     // Refresh the DOM
     refreshMatchForm();
@@ -316,7 +254,7 @@ var initMatchForm = function() {
             return;
         }
         event.preventDefault();
-        switchSection("loading");
+        startLoading();
         postFormCall(
             getData().api_url + 'reset',
             form,
@@ -335,7 +273,7 @@ window.addEventListener("load", function() {
 		}
 
         // Loading screen
-        switchSection("loading");
+        startLoading();
         // See status.js about the wait for the API readyness
 
         // Getting API URL

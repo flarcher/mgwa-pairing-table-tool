@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="./style.css">
     <script src="./utils.js"></script>
     <script src="./status.js"></script>
+    <script src="./matrix.js"></script>
     <script src="./app.js"></script>
   </head>
   <body>
@@ -57,7 +58,7 @@
             <legend>Scores</legend>
             <div>
               <label for="team_size">Team size</label>
-              <input id="team_size" name="size" type="number" step="1" min="2" max="10" value="8" />
+              <input id="team_size" name="size" type="number" step="1" min="3" max="10" value="8" />
             </div>
             <hr class="or">
             <div>
@@ -70,6 +71,7 @@
       </div>
 
       <div id="matrix">
+          <div class="hint">Click on a cell in order to edit the score</div>
           <table>
             <tbody><!-- (See `refreshMatrix`) --> </tbody>
           </table>
@@ -147,6 +149,42 @@
         -->
       </div>
 
+    </section>
+
+    <section id="edit_score">
+      <form>
+        <fieldset>
+          <legend>Context</legend>
+          <div>
+            <span class="left">Row</span>
+            <span class="right name" id="row_name"></span>
+          </div>
+          <div>
+            <span class="left">Column</span>
+            <span class="right name" id="col_name"></span>
+          </div>
+          <div>
+            <span class="left">Previous score</span>
+            <span class="right score" id="score_prev"></span>
+          </div>
+          <div>
+            <span class="left">New score</span>
+            <span class="right score" id="score_next"></span>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>New score values</legend>
+          <div>
+            <label for="new_score_min">Minimum</label>
+            <input id="new_score_min" name="size" type="number" step="1" min="0" max="20" value="0" />
+          </div>
+          <div>
+            <label for="new_score_max">Maximum</label>
+            <input id="new_score_max" name="size" type="number" step="1" min="0" max="20" value="20" />
+          </div>
+        </fieldset>
+        <input type="submit" formenctype="application/x-www-form-urlencoded" value="Set new score"/>
+      </form>
     </section>
 
 		<footer>

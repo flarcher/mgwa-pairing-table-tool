@@ -74,14 +74,14 @@ public class MatrixUpdateService {
         state.setArmyCount(armyCount);
         Optional<Matrix> currentMatrix = state.getMatrix();
         Matrix matrix;
-        if (currentMatrix.isPresent()) {
+        /*if (currentMatrix.isPresent()) {
             state.forceArmyCountConsistency(internalDefaultScore);
             matrix = currentMatrix.get();
         }
-        else {
-            matrix = loadMatrixDefault(armyCount, internalDefaultScore);
-            state.setMatrix(matrix);
-        }
+        else {*/
+        matrix = loadMatrixDefault(armyCount, internalDefaultScore);
+        state.setMatrix(matrix);
+        /*}*/
         if (matrix.getSize() != armyCount) {
             throw ServiceUtils.internalError("Inconsistent army count");
         }
