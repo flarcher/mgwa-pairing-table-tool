@@ -4,7 +4,8 @@ body {
 	font-size: 1em;
 	font-variant: small-caps;
 	text-align: center;
-	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+	--font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+	font-family: var(--font-family);
 	--revert-color: rgb(192, 192, 192);
 	--revert-em-color: #FFFFFF;
 	--main-color: #242424;
@@ -152,22 +153,44 @@ form {
 }
 form > fieldset {
 	margin: var(--form-spacing) auto;
+	border-radius: var(--border-radius);
 }
 #init > form > input[type = "submit"] {
 	width: 100%;
 	float: none;
 	margin: var(--form-spacing) 0;
-	padding: 8px;
-	border-radius: var(--link-padding);
-	background-color: green;
-	color: var(--revert-em-color);
-	border: 1px lightgreen;
-	box-shadow: 3px 2px 2px darkgreen;
 }
-#init > form > input[type = "submit"]:hover {
-	font-weight: bold;
-	background-color: darkgreen;
-	box-shadow: 3px 2px 2px var(--border-color) inset;
+form input[type = "submit"] {
+	padding: calc(2 * var(--link-padding));
+	color: var(--main-color);
+	font-size: 1em;
+	font-variant: small-caps;
+	font-family: var(--font-family); /* Overriding needed */
+	border-width: var(--border-width);
+	border-style: solid;
+	background-color: yellowgreen;
+	border-color: lightgreen darkgreen darkgreen lightgreen;
+}
+form input[type = "submit"]:hover {
+	color: var(--main-em-color);
+	border-color: var(--link-color);
+	background-color: var(--link-color);
+	box-shadow: 3px 2px 2px var(--border-color);
+}
+form input[type = "file"] {
+	padding: var(--link-padding);
+	border-width: 1px;
+	border-style: dotted;
+	border-color: var(--border-color);
+}
+form input[type = "submit"],
+form input[type = "file"] {
+	border-radius: var(--border-radius);
+}
+form input[type = "submit"]:hover,
+form input[type = "file"]:hover,
+form label.file-label:hover {
+	cursor: pointer;
 }
 #init > form > fieldset > div {
 	width: 100%;
