@@ -88,9 +88,19 @@ const initScoreEdit = function() {
         }
         event.preventDefault();
         startLoading();
-        // TODO 
-        console.log("Submit score edit")
-        endLoading('matrix');
+        var row = formElement.dataset.row;
+        var col = formElement.dataset.col;
+        var tableCell = findScoreCell(row, col);
+        postFormCall(
+            getData().api_url + 'update/' + row + '/' + col,
+            formElement,
+            newScore => {
+                getData().scores[parseInt(row)][parseInt(col)] = newScore;
+                setupScoreElement(tableCell, newScore);
+                endLoading('matrix');
+            },
+            json => errorHandler(json),
+            false); // Not multi-part
     });
 }
 
@@ -99,6 +109,10 @@ const refreshScoreEditForm = function(row, col) {
     console.log("Current score is: " + score.min.toFixed() + "-" + score.max.toFixed());
     
     var formElement = _getScoreEditFormElement();
+
+    // Apply data context
+    formElement.dataset.row = row;
+    formElement.dataset.col = col;
 
     // Display competitors
     var rowNameElement = formElement.querySelector("#row_name");
@@ -132,9 +146,26 @@ const initScoreLink = function(tableCell, i, j) {
     });
 };
 
+var _getScoreTableElement = function() {
+    return document.querySelector("#matrix > table > tbody");
+};
+
+var findScoreCell = function(row, col) { // Arguments must be strings
+    var matrixTableBody = _getScoreTableElement();
+    return Array.from(matrixTableBody.querySelectorAll('tr'))
+        .filter(tr => !tr.classList.contains('corner') && !tr.classList.contains('name'))
+        .flatMap(tr => {
+            var match = Array.from(tr.querySelectorAll('td'))
+                .find(td => td.dataset.col === col );
+            return match ? [ match ] : [];
+        })
+        .filter(td => !td.classList.contains('corner') && !td.classList.contains('name'))
+        .find(td => td.dataset.row === row );
+};
+
 // Refresh the DOM part dedicated to the matrix, using getData()
 var refreshMatrix = function() {
-    var matrixTableBody = document.querySelector("#matrix > table > tbody");
+    var matrixTableBody = _getScoreTableElement();
 
     emptyElement(matrixTableBody); // reset
 
