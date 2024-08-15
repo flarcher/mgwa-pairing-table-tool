@@ -139,4 +139,15 @@ public class MatrixUpdateService {
         }
     }
 
+    public void updateScore(int row, int column, Score newScore) {
+        int armyCount = state.getArmyCount();
+        Stream.of( row, column ).forEach( index -> {
+            if (index < 0 || index >= armyCount) {
+                throw ServiceUtils.badRequest("Invalid index " + index);
+            }
+        });
+        state.getMatrix().ifPresent(m -> {
+            m.setScore(row, column, newScore);
+        });
+    }
 }

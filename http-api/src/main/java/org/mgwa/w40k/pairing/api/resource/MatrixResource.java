@@ -95,4 +95,25 @@ public class MatrixResource {
         return Response.ok(overview, MediaType.APPLICATION_JSON_TYPE).build();
     }
 
+    private static int expectUnsignedInteger(String value) {
+        try {
+            return Integer.parseUnsignedInt(value);
+        } catch (NumberFormatException nfe) {
+            throw new WebApplicationException("Expected an integer, got <"+value+">", Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("update/{row}/{column}")
+    public Response updateScore(
+            @PathParam("row") String rowIndex, @PathParam("column") String columnIndex,
+            @FormParam("minimum") String minimum, @FormParam("maximum") String maximum
+    ) {
+        Score rq = Score.of(expectUnsignedInteger(minimum), expectUnsignedInteger(maximum));
+        matrixUpdateService.updateScore(expectUnsignedInteger(rowIndex), expectUnsignedInteger(columnIndex), rq);
+        EstimatedScore rs = EstimatedScore.from(rq);
+        return Response.ok(rs, MediaType.APPLICATION_JSON).build();
+    }
 }

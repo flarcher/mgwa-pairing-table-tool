@@ -53,10 +53,12 @@ var setupNavBar = function(section) {
 	});
 };
 
+// Show the loading section
 const startLoading = function() {
     document.querySelector('nav').classList.add('hidden');
     switchSection("loading");
 };
+// Comes back to the given tab, after loading
 const endLoading = function(tabId) {
     var section = switchSection("ready");
     switchNavTab(section, tabId);
@@ -91,20 +93,6 @@ var getStepCounts = function(team_member_count, paired_table_count) {
 	return [ stepCount, totalCount ];
 };
 
-const abstractCall = (fetchArg, thenFn, errorFn) => {
-    fetch(fetchArg)
-    .then((response) => {
-        if (response.ok) {
-            thenFn(response);
-        } else {
-            errorFn(response);
-        }
-    })
-    .catch((error) => {
-        errorFn({ "cause": "network", "message": error.message });
-    });
-};
-
 /*
  * Utility function related to our error handling conventions
  * Works only with JSON payloads in responses
@@ -125,13 +113,6 @@ var abstractJsonCall = (fetchArg, thenFn, errorFn) => {
 };
 
 /*
- * Calls a GET request to the API
- */
-var getCall = (url, thenFn, errorFn) => {
-	abstractJsonCall(url, thenFn, errorFn);
-};
-
-/*
  * Calls a POST request expecting JSON as request and in response
  */
 var postJsonCall = (url, jsonRequest, thenFn, errorFn) => {
@@ -147,14 +128,24 @@ var postJsonCall = (url, jsonRequest, thenFn, errorFn) => {
 
 /*
  * Calls a POST request expecting JSON in response with a form as an input
+ * Inputs are sent using either "Multipart Form Data" or "URL Encoding".
  */
-var postFormCall = (url, formElement, thenFn, errorFn) => {
-    formElement.enctype = "multipart/form-data"
+var postFormCall = (url, formElement, thenFn, errorFn, multipart = true) => {
+    var submitInput = formElement.querySelector("input[type = 'submit']");
+    if (!submitInput) {
+        console.error("No submit input found in " + formElement);
+        return;
+    }
+    var encoding = multipart ? "multipart/form-data" : "application/x-www-form-urlencoded";
+    formElement.enctype = encoding;
+    submitInput.formenctype =  encoding;
+    var formData = new FormData(formElement);
+    var body = multipart ? formData : new URLSearchParams(formData);
     abstractJsonCall(
         new Request(url, {
             method: "POST",
-            body: new FormData(formElement),
-            //headers: { "Content-Type": "multipart/form-data" } // DO NOT PROVIDE THE CONTENT-TYPE
+            body: body,
+            //headers: { "Content-Type": "..." } // DO NOT PROVIDE THE CONTENT-TYPE
         }),
         thenFn, errorFn);
 };
