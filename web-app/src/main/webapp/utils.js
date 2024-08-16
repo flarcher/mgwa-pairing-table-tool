@@ -207,3 +207,18 @@ const getApiUrl = function(){
     return apiUrlPrefix
 };
 
+// Triggers a download of a JSON file
+const downloadJSON = function(jsonData, fileName = 'data.json') {
+    const jsonStr = JSON.stringify(jsonData);
+    let element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(jsonStr));
+    element.setAttribute('download', fileName);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+};
+
+const downloadJsonState = function() {
+    downloadJSON(getData());
+};
