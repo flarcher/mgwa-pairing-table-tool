@@ -126,6 +126,35 @@ em, .name {
     left: 3px;
     top: -1px;
 }
+a.download {
+	display: inline-block;
+	padding-left: 30px;
+	position: relative;
+}
+a.download::before {
+	position: absolute;
+	content: '\2B07'; /*'\2913';*/
+	font-size: 1.5em;
+	top: 2px;
+	left: 6px;
+}
+button, input[type = "submit"], .download {
+	border-width: var(--border-width);
+	border-style: solid;
+	background-color: yellowgreen;
+	border-color: lightgreen darkgreen darkgreen lightgreen;
+	border-radius: var(--border-radius);
+	padding: calc(2 * var(--link-padding));
+	color: var(--main-color);
+	font-size: 1em;
+}
+button:hover, input[type = "submit"]:hover, .download:hover {
+	color: var(--main-em-color);
+	border-color: var(--link-color);
+	background-color: var(--link-color);
+	box-shadow: 3px 2px 2px var(--border-color);
+	cursor: pointer;
+}
 /*=== Loading ===*/
 @keyframes spin {
 	100% { transform: rotate(360deg); }
@@ -169,39 +198,21 @@ form > fieldset {
 	margin: var(--form-spacing) auto;
 	border-radius: var(--border-radius);
 }
-form > input[type = "submit"] {
+form input[type = "submit"] {
 	width: 100%;
 	float: none;
 	margin: var(--form-spacing) 0;
-}
-form input[type = "submit"] {
-	padding: calc(2 * var(--link-padding));
-	color: var(--main-color);
-	font-size: 1em;
+	/* Overriding needed */
 	font-variant: small-caps;
-	font-family: var(--font-family); /* Overriding needed */
-	border-width: var(--border-width);
-	border-style: solid;
-	background-color: yellowgreen;
-	border-color: lightgreen darkgreen darkgreen lightgreen;
-}
-form input[type = "submit"]:hover {
-	color: var(--main-em-color);
-	border-color: var(--link-color);
-	background-color: var(--link-color);
-	box-shadow: 3px 2px 2px var(--border-color);
+	font-family: var(--font-family); 
 }
 form input[type = "file"] {
 	padding: var(--link-padding);
 	border-width: 1px;
 	border-style: dotted;
 	border-color: var(--border-color);
-}
-form input[type = "submit"],
-form input[type = "file"] {
 	border-radius: var(--border-radius);
 }
-form input[type = "submit"]:hover,
 form input[type = "file"]:hover,
 form label.file-label:hover {
 	cursor: pointer;
@@ -448,3 +459,4 @@ section > div > div.teams > .name {
 #tables .table > span.right {
 	border-left-color: var(--border-color);
 }
+/*=== Download links ===*/
