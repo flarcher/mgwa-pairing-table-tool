@@ -66,12 +66,12 @@
               <input type="file" id="matrix_file" name="file" accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
             </div>
           </fieldset>
-          <input type="submit" formenctype="multipart/form-data" value="Reset pairing system"/>
+          <input type="submit" value="Reset pairing system"/>
         </form>
       </div>
 
       <div id="matrix">
-          <div class="hint">Click on a cell in order to edit the score</div>
+          <div class="hint">Click on a cell in order to edit the score, or on a name in order to udpate it</div>
           <table>
             <tbody><!-- (See `refreshMatrix`) --> </tbody>
           </table>
@@ -157,11 +157,19 @@
           <legend>Context</legend>
           <div>
             <span class="left">Row</span>
-            <span class="right name" id="row_name"></span>
+            <span class="right name">
+              <span id="row_team"></span>
+              <span>—</span>
+              <span id="row_army"></span>
+            </span>
           </div>
           <div>
             <span class="left">Column</span>
-            <span class="right name" id="col_name"></span>
+            <span class="right name">
+              <span id="col_team"></span>
+              <span>—</span>
+              <span id="col_army"></span>
+            </span>
           </div>
           <div>
             <span class="left">Previous score</span>
@@ -183,7 +191,39 @@
             <input id="new_score_max" name="maximum" type="number" step="1" min="0" max="20" value="20" />
           </div>
         </fieldset>
-        <input type="submit" formenctype="application/x-www-form-urlencoded" value="Set new score"/>
+        <input type="submit" value="Set new score"/>
+      </form>
+    </section>
+
+    <section id="edit_team">
+      <form>
+        <div>
+          <span class="left">Current team name</span>
+          <span class="right name" id="current_team_name"></span>
+        </div>
+        <div>
+          <label for="new_team_name">New army name</label>
+          <input id="new_team_name" name="name" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \\-_]+$" required/>
+        </div>
+        <input type="submit" value="Update team name"/>
+      </form>
+    </section>
+
+    <section id="edit_army">
+      <form>
+        <div>
+          <span class="left">Team name</span>
+          <span class="right name" id="team_name"></span>
+        </div>
+        <div>
+          <span class="left">Current army name</span>
+          <span class="right name" id="army_name"></span>
+        </div>
+        <div>
+          <label for="new_army_name">New army name</label>
+          <input id="new_army_name" name="name" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \\-_]+$" required/>
+        </div>
+        <input type="submit" value="Update army name"/>
       </form>
     </section>
 

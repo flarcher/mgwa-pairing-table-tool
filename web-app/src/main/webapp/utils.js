@@ -65,6 +65,9 @@ const endLoading = function(tabId) {
     document.querySelector('nav').classList.remove('hidden');
 };
 
+const _boolToStr = (bool) => bool ? 'true' : 'false';
+const _strToBool = (str)  => str === 'true';
+
 function emptyElement(element) {
 	while (element.firstElementChild) {
 	   element.firstElementChild.remove();
@@ -203,3 +206,4 @@ const getApiUrl = function(){
     getData().api_url = apiUrlPrefix
     return apiUrlPrefix
 };
+

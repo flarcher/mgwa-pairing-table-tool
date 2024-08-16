@@ -48,9 +48,13 @@ public class MatrixUpdateService {
         }
     }
 
+    private static String trimName(String name) {
+        return Optional.ofNullable(name).orElse("").trim();
+    }
+
     public void setTeamNames(String rowsTeamName, String columnsTeamName) {
-        String trimedRowsTeamName = Optional.ofNullable(rowsTeamName).orElse("").trim();
-        String trimedColsTeamName = Optional.ofNullable(columnsTeamName).orElse("").trim();
+        String trimedRowsTeamName = trimName(rowsTeamName);
+        String trimedColsTeamName = trimName(columnsTeamName);
         Stream.of(trimedRowsTeamName, trimedColsTeamName).forEach(name -> {
             if (name.isBlank() || name.length() > MAX_ARMY_NAME_LENGTH) {
                 throw ServiceUtils.badRequest(String.format("Invalid army name (max length is %d)", MAX_ARMY_NAME_LENGTH));
@@ -149,5 +153,27 @@ public class MatrixUpdateService {
         state.getMatrix().ifPresent(m -> {
             m.setScore(row, column, newScore);
         });
+    }
+
+    public void updateTeamName(boolean isRow, String givenName) {
+        String newName = trimName(givenName);
+        Optional.of(newName).ifPresent(isRow ? state::setRowTeamName : state::setColTeamName);
+    }
+
+    public Optional<Army> updateArmyName(boolean isRow, int index, String givenName) {
+        String newName = trimName(givenName);
+        Optional<Army> newArmy = state.getMatrix()
+                .map(m -> m.getArmies(isRow))
+                .filter(list -> list.size() > index)
+                .map(list -> list.get(index))
+                .map(oldArmy -> Army.renamed(oldArmy, newName));
+        newArmy.ifPresent(army -> {
+                List<Army> armies = state.getMatrix().get().getArmies(isRow);
+                List<Army> collect = IntStream.range(0, armies.size())
+                        .mapToObj(i -> i == index ? army : armies.get(i))
+                        .collect(Collectors.toList());
+                state.getMatrix().get().setArmies(isRow, collect);
+            });
+        return newArmy;
     }
 }
