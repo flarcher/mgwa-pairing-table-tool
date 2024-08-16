@@ -206,7 +206,7 @@ form input[type = "file"]:hover,
 form label.file-label:hover {
 	cursor: pointer;
 }
-form > fieldset > div {
+form div {
 	width: 100%;
 	clear: both;
 	padding: var(--form-spacing) 0;
@@ -255,9 +255,19 @@ tr > td.name[rowspan] > span {
 	position: relative;
 	top: 22px;
 }
+tr > td.name:hover {
+	cursor: pointer;
+	color: var(--main-color);
+	text-shadow: 1px 1px grey;
+	background-color: var(--link-color);
+	border-color: var(--border-color);
+}
 table {
 	width: 100%;
 	font-variant: small-caps;
+}
+tr > td.score:hover {
+	cursor: pointer;
 }
 /*=== Score cell ===*/
 .score {

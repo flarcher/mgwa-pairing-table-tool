@@ -213,8 +213,10 @@ var onNewState = function(json) {
 
     // Initialize the DOM
     initBadges();
-    initScoreEdit();
+    initScoreEditForm();
     initAnalysisForm();
+    initTeamNameEditForm();
+    initArmyNameEditForm();
     // Refresh the DOM
     refreshMatchForm();
     refreshMatrix();

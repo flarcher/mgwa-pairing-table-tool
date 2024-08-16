@@ -38,7 +38,7 @@ const _getScoreEditFormElement = function() {
     return document.getElementById("edit_score").querySelector('form');
 };
 
-const initScoreEdit = function() {
+const initScoreEditForm = function() {
     var formElement = _getScoreEditFormElement();
     var scoreMinInput = formElement.querySelector("#new_score_min");
     var scoreMaxInput = formElement.querySelector("#new_score_max");
@@ -115,10 +115,14 @@ const refreshScoreEditForm = function(row, col) {
     formElement.dataset.col = col;
 
     // Display competitors
-    var rowNameElement = formElement.querySelector("#row_name");
-    rowNameElement.textContent = getData().match.row_team + " / " + getData().row_armies[row];
-    var colNameElement = formElement.querySelector("#col_name");
-    colNameElement.textContent = getData().match.column_team + " / " + getData().col_armies[col];
+    var rowNameElement = formElement.querySelector("#row_team");
+    rowNameElement.textContent = getData().match.row_team;
+    var rowArmyElement = formElement.querySelector("#row_army");
+    rowArmyElement.textContent = getData().row_armies[row];
+    var colNameElement = formElement.querySelector("#col_team");
+    colNameElement.textContent = getData().match.column_team;
+    var colArmyElement = formElement.querySelector("#col_army");
+    colArmyElement.textContent = getData().col_armies[col];
 
     // Display scores
     var prevScoreElement = formElement.querySelector("#score_prev");
@@ -131,6 +135,96 @@ const refreshScoreEditForm = function(row, col) {
     scoreMinInput.value = score.min;
     var scoreMaxInput = formElement.querySelector("#new_score_max");
     scoreMaxInput.value = score.max;
+};
+
+const _getTeamNameEditForm = () => document.getElementById('edit_team').querySelector('form');
+
+const initTeamLink = function(spanElement, isRow = true) {
+    spanElement.dataset.is_row = _boolToStr(isRow);
+    var form = _getTeamNameEditForm();
+    spanElement.addEventListener("click", (e) => {
+        e.preventDefault();
+        const isRow = _strToBool(e.target.dataset.is_row);
+        switchSection('edit_team');
+        // Refresh form values
+        form.dataset.is_row = _boolToStr(isRow);
+        var teamName = isRow ? getData().match.row_team : getData().match.column_team;
+        form.querySelector("#current_team_name").textContent = teamName;
+        form.querySelector('#new_team_name').value = teamName; // default
+    });
+};
+const initTeamNameEditForm = function() {
+    var form = _getTeamNameEditForm();
+    form.addEventListener("submit", event => {
+        if (!form.checkValidity()) {
+            return;
+        }
+        event.preventDefault();
+        startLoading();
+        const isRow = _strToBool(form.dataset.is_row);
+        postFormCall(
+            getData().api_url + 'match/' + (isRow ? 'row' : 'col') + '/army',
+            form,
+            newMatch => {
+                getData().match = newMatch;
+                const newName = isRow ? newMatch.row_team : newMatch.column_team;
+                findTeamNameElement(isRow).textContent = newName;
+                _getScoreEditFormElement().querySelector(isRow ? '#row_team' : '#col_team').textContent = newName;
+                // TODO: update other places
+                endLoading('matrix');
+            },
+            json => errorHandler(json),
+            false); // Not multi-part
+    });
+};
+
+const _getArmyNameEditForm = () => document.getElementById('edit_army').querySelector('form');
+
+const initArmyLink = function(spanElement, isRow, index) {
+    spanElement.dataset.is_row = _boolToStr(isRow);
+    spanElement.dataset.index  = index.toFixed();
+    var form = _getArmyNameEditForm();
+    spanElement.addEventListener("click", (e) => {
+        e.preventDefault();
+        const isRow = _strToBool(e.target.dataset.is_row);
+        const index = parseInt(e.target.dataset.index);
+        switchSection('edit_army');
+        // Refresh form values
+        form.dataset.is_row = _boolToStr(isRow);
+        form.dataset.index  = index.toFixed();
+        var teamName = isRow ? getData().match.row_team : getData().match.column_team;
+        form.querySelector("#team_name").textContent = teamName;
+        var armyName = isRow ? getData().row_armies[index] : getData().col_armies[index];
+        form.querySelector('#army_name').textContent = armyName;
+        form.querySelector('#new_army_name').value = armyName; // default
+    });
+};
+const initArmyNameEditForm = function() {
+    var form = _getArmyNameEditForm();
+    form.addEventListener("submit", event => {
+        if (!form.checkValidity()) {
+            return;
+        }
+        event.preventDefault();
+        startLoading();
+        const isRow = _strToBool(form.dataset.is_row);
+        const index = parseInt(form.dataset.index);
+        postFormCall(
+            getData().api_url + 'army/' + (isRow ? 'row' : 'col') + '/' + index.toFixed(),
+            form,
+            newArmy => {
+                if (newArmy.row) {
+                    getData().row_armies[newArmy.index] = newArmy.name;
+                } else {
+                    getData().col_armies[newArmy.index] = newArmy.name;
+                }
+                findArmyNameCell(newArmy.row, newArmy.index).textContent = newArmy.name;
+                // TODO: update other places
+                endLoading('matrix');
+            },
+            json => errorHandler(json),
+            false); // Not multi-part
+    });
 };
 
 // Initializes the edition of a score from the matrix table
@@ -150,16 +244,40 @@ var _getScoreTableElement = function() {
     return document.querySelector("#matrix > table > tbody");
 };
 
+var findTeamNameElement = function(isRow) {
+    var matrixTableBody = _getScoreTableElement();
+    var teamNameTableCell;
+    if (isRow) {
+        teamNameTableCell = matrixTableBody.querySelector('tr > td.name:first-child');
+    } else {
+        teamNameTableCell = matrixTableBody.querySelector('tr:first-child td.name');
+    }
+    return teamNameTableCell.querySelector('span');
+};
+
+var findArmyNameCell = function(isRow, index) {
+    var matrixTableBody = _getScoreTableElement();
+    var isRowMatch =_boolToStr(isRow);
+    var indexMatch = index.toFixed();
+    return Array.from(matrixTableBody.querySelectorAll('tr'))
+        .flatMap(tr => {
+            var match = Array.from(tr.querySelectorAll('td'))
+                .filter(td => td.classList.contains('name'))
+                .find(td => td.dataset.is_row === isRowMatch && td.dataset.index  === indexMatch);
+            return match ? [ match ] : [];
+        })
+        .find(() => true);
+};
+
 var findScoreCell = function(row, col) { // Arguments must be strings
     var matrixTableBody = _getScoreTableElement();
     return Array.from(matrixTableBody.querySelectorAll('tr'))
-        .filter(tr => !tr.classList.contains('corner') && !tr.classList.contains('name'))
         .flatMap(tr => {
             var match = Array.from(tr.querySelectorAll('td'))
+                .filter(td => !td.classList.contains('corner') && !td.classList.contains('name'))
                 .find(td => td.dataset.col === col );
             return match ? [ match ] : [];
         })
-        .filter(td => !td.classList.contains('corner') && !td.classList.contains('name'))
         .find(td => td.dataset.row === row );
 };
 
@@ -179,6 +297,7 @@ var refreshMatrix = function() {
     columnTeamCell.setAttribute("colspan", memberCount.toFixed());
     const columnTeamSpan = document.createElement("span");
     columnTeamSpan.textContent = getData().match.column_team;
+    initTeamLink(columnTeamSpan, false);
     columnTeamCell.appendChild(columnTeamSpan);
     newRow.appendChild(columnTeamCell);
 
@@ -197,6 +316,7 @@ var refreshMatrix = function() {
         let colArmyCell = document.createElement("td");
         colArmyCell.classList.add('name');
         colArmyCell.textContent = columnArmies[i];
+        initArmyLink(colArmyCell, false, i);
         newRow.appendChild(colArmyCell);
     }
 
@@ -211,11 +331,13 @@ var refreshMatrix = function() {
             const rowTeamSpan = document.createElement("span");
             rowTeamSpan.textContent = getData().match.row_team;
             rowTeamCell.appendChild(rowTeamSpan);
+            initTeamLink(rowTeamCell, true);
             newRow.appendChild(rowTeamCell);
         }
         let rowArmyCell = document.createElement("td");
         rowArmyCell.classList.add('name');
         rowArmyCell.textContent = rowArmies[i];
+        initArmyLink(rowArmyCell, true, i);
         newRow.appendChild(rowArmyCell);
         for (let j = 0; j < columnArmies.length; j++) {
             let scoreCell = document.createElement("td");
