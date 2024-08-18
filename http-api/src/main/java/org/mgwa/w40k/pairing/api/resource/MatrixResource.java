@@ -1,10 +1,11 @@
 package org.mgwa.w40k.pairing.api.resource;
 
+import jakarta.ws.rs.core.StreamingOutput;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.api.model.SetupOverview;
-import org.mgwa.w40k.pairing.api.service.MatrixUpdateService;
+import org.mgwa.w40k.pairing.api.service.MatrixService;
 import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.api.model.EstimatedScore;
 import org.mgwa.w40k.pairing.api.model.Match;
@@ -15,24 +16,27 @@ import org.mgwa.w40k.pairing.state.AppState;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
 
 @Path("")
 public class MatrixResource {
 
-    public static final Score DEFAULT_SCORE = Score.newDefault();
+    private static final Score DEFAULT_SCORE = Score.newDefault();
+    private static final String DEFAULT_XLS_FILENAME = "matrix.xlsx";
 
-    public MatrixResource(AppState state, PairingService service, MatrixUpdateService matrixUpdateService) {
+    public MatrixResource(AppState state, PairingService pairingService, MatrixService matrixService) {
         this.state = state;
-        this.service = service;
-        this.matrixUpdateService = matrixUpdateService;
+        this.pairingService = pairingService;
+        this.matrixService = matrixService;
     }
 
     private final AppState state;
-    private final PairingService service;
-    private final MatrixUpdateService matrixUpdateService;
+    private final PairingService pairingService;
+    private final MatrixService matrixService;
 
     private Match getMatchFromState() {
         return new Match(
@@ -67,7 +71,7 @@ public class MatrixResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("match/{rowsOrColumns}")
     public Response getArmies(@PathParam("rowsOrColumns") String rowsOrColumns) {
-        Matrix matrix = service.getMatrix();
+        Matrix matrix = pairingService.getMatrix();
         boolean isRow = isRow(rowsOrColumns);
         List<String> armyNames = matrix.getArmies(isRow).stream().map(Army::getName).toList();
         return Response.ok(armyNames, MediaType.APPLICATION_JSON_TYPE).build();
@@ -77,7 +81,7 @@ public class MatrixResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("scores")
     public Response getDefault() {
-        List<List<EstimatedScore>> scores = SetupOverview.getScoresFromMatrix(service.getMatrix(), state.getArmyCount(), EstimatedScore.from(DEFAULT_SCORE));
+        List<List<EstimatedScore>> scores = SetupOverview.getScoresFromMatrix(pairingService.getMatrix(), state.getArmyCount(), EstimatedScore.from(DEFAULT_SCORE));
         return Response.ok(scores, MediaType.APPLICATION_JSON_TYPE).build();
     }
 
@@ -92,8 +96,8 @@ public class MatrixResource {
             @FormDataParam("file")      FormDataContentDisposition contentDisposition,
             @FormDataParam("file")      InputStream inputStream
     ) {
-        matrixUpdateService.setTeamNames(rowsTeamName, columnsTeamName);
-        Matrix matrix = matrixUpdateService.setupMatrix(contentDisposition, inputStream, armyCount, DEFAULT_SCORE);
+        matrixService.setTeamNames(rowsTeamName, columnsTeamName);
+        Matrix matrix = matrixService.setupMatrix(contentDisposition, inputStream, armyCount, DEFAULT_SCORE);
         Match match = getMatchFromState(); // Needs to be called after the reset
         SetupOverview overview = SetupOverview.from(match, matrix, EstimatedScore.from(DEFAULT_SCORE));
         return Response.ok(overview, MediaType.APPLICATION_JSON_TYPE).build();
@@ -116,7 +120,7 @@ public class MatrixResource {
             @FormParam("minimum") String minimum, @FormParam("maximum") String maximum
     ) {
         Score rq = Score.of(expectUnsignedInteger(minimum), expectUnsignedInteger(maximum));
-        matrixUpdateService.updateScore(expectUnsignedInteger(rowIndex), expectUnsignedInteger(columnIndex), rq);
+        matrixService.updateScore(expectUnsignedInteger(rowIndex), expectUnsignedInteger(columnIndex), rq);
         EstimatedScore rs = EstimatedScore.from(rq);
         return Response.ok(rs, MediaType.APPLICATION_JSON).build();
     }
@@ -129,7 +133,7 @@ public class MatrixResource {
             @PathParam("rowsOrColumns") String rowsOrColumns,
             @FormParam("name") String newName) {
         boolean isRow = isRow(rowsOrColumns);
-        matrixUpdateService.updateTeamName(isRow, newName);
+        matrixService.updateTeamName(isRow, newName);
         return Response.ok(getMatchFromState(), MediaType.APPLICATION_JSON_TYPE).build();
     }
 
@@ -142,10 +146,25 @@ public class MatrixResource {
             @FormParam("index") int index,
             @FormParam("name") String newName) {
         boolean isRow = isRow(rowsOrColumns);
-        Optional<Army> army = matrixUpdateService.updateArmyName(isRow, index, newName);
+        Optional<Army> army = matrixService.updateArmyName(isRow, index, newName);
         return army
             .map(a -> Response.ok(a, MediaType.APPLICATION_JSON).build())
             .orElse(Response.status(Response.Status.NOT_FOUND).build());
+    }
+
+    @GET
+    @Path("download/xlsx")
+    public Response downloadMatrix() {
+        StreamingOutput streamingOutput = new StreamingOutput() {
+            @Override
+            public void write(OutputStream outputStream) throws IOException, WebApplicationException {
+                matrixService.writeExcelFile(outputStream);
+            }
+        };
+        return Response.ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
+            //.header("content-type", "application/vnd.ms-excel")
+            .header("content-disposition","attachment; filename = " + DEFAULT_XLS_FILENAME)
+            .build();
     }
 
 }

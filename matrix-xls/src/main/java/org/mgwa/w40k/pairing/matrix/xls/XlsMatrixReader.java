@@ -81,30 +81,44 @@ public class XlsMatrixReader implements MatrixReader {
 		LOGGER.finer(String.format("Read armies: %s", armies.toString()));
 	}
 
-	@Override
-	public Matrix get() {
-		XSSFCell origin = getOrigin();
+	private static List<Army> getColumnArmies(XSSFCell origin) {
 		XSSFCell cell = origin;
-
-		// Reading column armies
 		int index = 0;
 		List<Army> columnArmies = new ArrayList<>();
 		do {
 			columnArmies.add(new Army(cell.getStringCellValue(), index++, false));
 			cell = cell.getRow().getCell(cell.getColumnIndex() + 1);
 		} while (notEmptyCell(cell));
+		return columnArmies;
+	}
+
+	private static List<Army> getRowArmies(XSSFCell origin) {
+		List<Army> rowArmies = new ArrayList<>();
+		XSSFRow row = origin.getSheet()
+				.getRow(origin.getRowIndex() + 1);
+		if (row == null) {
+			return rowArmies; // Empty list
+		}
+		int index = 0;
+		XSSFCell cell = row.getCell(origin.getColumnIndex() - 1);
+		do {
+			rowArmies.add(new Army(cell.getStringCellValue(), index++, true));
+			row = cell.getSheet().getRow(cell.getRowIndex() + 1);
+			cell = row != null ? row.getCell(cell.getColumnIndex()) : null;
+		} while (notEmptyCell(cell));
+		return rowArmies;
+	}
+
+	@Override
+	public Matrix read() {
+		XSSFCell origin = getOrigin();
+
+		// Reading column armies
+		List<Army> columnArmies = getColumnArmies(origin);
 		printArmies(columnArmies);
 
 		// Reading row armies
-		index = 0;
-		List<Army> rowArmies = new ArrayList<>();
-		cell = origin.getSheet()
-				.getRow(origin.getRowIndex() + 1)
-				.getCell(origin.getColumnIndex() - 1);
-		do {
-			rowArmies.add(new Army(cell.getStringCellValue(), index++, true));
-			cell = cell.getSheet().getRow(cell.getRowIndex() + 1).getCell(cell.getColumnIndex());
-		} while (notEmptyCell(cell));
+		List<Army> rowArmies = getRowArmies(origin);
 		printArmies(rowArmies);
 
 		if (rowArmies.size() != columnArmies.size()) {

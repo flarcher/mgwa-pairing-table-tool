@@ -56,4 +56,8 @@ public class ScoreParser implements Function<String, Score> {
         }
         return null;
     }
+
+    public static Function<Score, String> reverse() {
+        return Score::toString;
+    }
 }

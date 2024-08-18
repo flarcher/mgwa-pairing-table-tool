@@ -115,6 +115,10 @@ var abstractJsonCall = (fetchArg, thenFn, errorFn) => {
         });
 };
 
+var getJsonCall = (url, thenFn, errorFn = errorHandler) => {
+    abstractJsonCall(url, thenFn, errorFn);
+};
+
 /*
  * Calls a POST request expecting JSON as request and in response
  */
@@ -207,6 +211,18 @@ const getApiUrl = function(){
     return apiUrlPrefix
 };
 
+// Triggers a download
+const downloadURL = function(url, fileName) {
+    let element = document.createElement('a');
+    element.setAttribute('href', url);
+    element.setAttribute('download', fileName);
+    element.setAttribute('target', '_blank');
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+};
+
 // Triggers a download of a JSON file
 const downloadJSON = function(jsonData, fileName = 'data.json') {
     const jsonStr = JSON.stringify(jsonData);
@@ -217,8 +233,4 @@ const downloadJSON = function(jsonData, fileName = 'data.json') {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-};
-
-const downloadJsonState = function() {
-    downloadJSON(getData());
 };

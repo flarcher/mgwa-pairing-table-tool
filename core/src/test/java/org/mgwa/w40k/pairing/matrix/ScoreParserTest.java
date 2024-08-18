@@ -67,4 +67,10 @@ public class ScoreParserTest {
         parser.applyOrFail("A-14");
     }
 
+    @Test
+    public void testReverse() {
+        Score initialScore = Score.of(0, 4);
+        String scoreAsString = ScoreParser.reverse().apply(initialScore);
+        Assert.assertEquals(initialScore, parser.apply(scoreAsString));
+    }
 }
