@@ -4,12 +4,14 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
+import org.mgwa.w40k.pairing.matrix.MatrixWriter;
 import org.mgwa.w40k.pairing.matrix.Score;
 import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixReader;
+import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixWriter;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -23,14 +25,14 @@ import java.util.stream.Stream;
 /**
  * Service about score matrix update.
  */
-public class MatrixUpdateService {
+public class MatrixService {
 
     private static final Logger LOGGER = LoggerSupplier.INSTANCE.getLogger();
     private static final int MIN_ARMY_COUNT = 0;
     private static final int MAX_ARMY_COUNT = 10;
     private static final int MAX_ARMY_NAME_LENGTH = 25;
 
-    public MatrixUpdateService(AppState state) {
+    public MatrixService(AppState state) {
         this.state = state;
     }
 
@@ -103,7 +105,7 @@ public class MatrixUpdateService {
     }
 
     private static Matrix readMatrix(InputStream excelFileData) {
-        try (MatrixReader reader = XlsMatrixReader.fromStream(excelFileData)) {
+        try (MatrixReader reader = XlsMatrixReader.fromStream(new BufferedInputStream(excelFileData))) {
             return reader.get();
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Unable to parse matrix file", e);
@@ -175,5 +177,15 @@ public class MatrixUpdateService {
                 state.getMatrix().get().setArmies(isRow, collect);
             });
         return newArmy;
+    }
+
+    public void writeExcelFile(OutputStream os) throws IOException {
+        if (state.getMatrix().isPresent()) {
+            BufferedOutputStream bos = new BufferedOutputStream(os);
+            MatrixWriter xlsMatrixWriter = XlsMatrixWriter.fromStream(bos);
+            xlsMatrixWriter.write(state.getMatrix().get());
+            bos.flush();
+            // No `bos.close()`
+        }
     }
 }

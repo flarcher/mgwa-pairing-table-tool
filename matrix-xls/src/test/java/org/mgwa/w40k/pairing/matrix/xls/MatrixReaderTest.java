@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.mgwa.w40k.pairing.matrix.Score;
 import org.mgwa.w40k.pairing.matrix.ScoreParser;
 
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.Optional;
 
@@ -19,10 +20,30 @@ public class MatrixReaderTest {
 		Assert.assertEquals(parsedScore, readScore.get());
 	}
 
+	private static XlsMatrixReader getReader(String resourcePath) {
+		InputStream resourceAsStream = MatrixReaderTest.class.getResourceAsStream("/" + resourcePath);
+		Assert.assertNotNull(resourceAsStream);
+		return XlsMatrixReader.fromStream(new BufferedInputStream(resourceAsStream));
+	}
+
 	@Test
 	public void testXlsRead() {
-		InputStream resourceAsStream = MatrixReaderTest.class.getResourceAsStream("/example.xlsx");
-		try (XlsMatrixReader reader = XlsMatrixReader.fromStream(resourceAsStream)) {
+		try (XlsMatrixReader reader = getReader("example.xlsx")) {
+			Matrix matrix = reader.get();
+			Assert.assertEquals(8, matrix.getSize());
+			expectScoreString(matrix.getScore(0,0), "10");
+			expectScoreString(matrix.getScore(2,0), "0");
+			expectScoreString(matrix.getScore(3,1), "20");
+			expectScoreString(matrix.getScore(3, 7), "G");
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			Assert.fail();
+		}
+	}
+
+	@Test
+	public void testXlsExportRead() {
+		try (XlsMatrixReader reader = getReader("export.xlsx")) {
 			Matrix matrix = reader.get();
 			Assert.assertEquals(8, matrix.getSize());
 			expectScoreString(matrix.getScore(0,0), "10");

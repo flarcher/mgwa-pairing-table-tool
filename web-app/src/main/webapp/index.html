@@ -7,6 +7,7 @@
     <script src="./utils.js"></script>
     <script src="./status.js"></script>
     <script src="./matrix.js"></script>
+    <script src="./tables.js"></script>
     <script src="./app.js"></script>
   </head>
   <body>
@@ -149,7 +150,8 @@
       </div>
 
       <div id="export">
-        <a class="download" onclick="downloadJsonState();">Download JSON state</a>
+        <a class="download type-json" onclick="downloadJsonState();" download="data.json">Download JSON state</a>
+        <a class="download type-xlsx" onclick="downloadXlsxState();" download="matrix.xlsx">Download Excel file</a>
       </div>
 
     </section>
