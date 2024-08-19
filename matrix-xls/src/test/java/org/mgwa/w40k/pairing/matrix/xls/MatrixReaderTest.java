@@ -7,6 +7,7 @@ import org.mgwa.w40k.pairing.matrix.Score;
 import org.mgwa.w40k.pairing.matrix.ScoreParser;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
@@ -20,7 +21,7 @@ public class MatrixReaderTest {
 		Assert.assertEquals(parsedScore, readScore.get());
 	}
 
-	private static XlsMatrixReader getReader(String resourcePath) {
+	private static XlsMatrixReader getReader(String resourcePath) throws IOException {
 		InputStream resourceAsStream = MatrixReaderTest.class.getResourceAsStream("/" + resourcePath);
 		Assert.assertNotNull(resourceAsStream);
 		return XlsMatrixReader.fromStream(new BufferedInputStream(resourceAsStream));

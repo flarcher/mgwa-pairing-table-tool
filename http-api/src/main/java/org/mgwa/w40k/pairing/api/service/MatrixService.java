@@ -50,13 +50,9 @@ public class MatrixService {
         }
     }
 
-    private static String trimName(String name) {
-        return Optional.ofNullable(name).orElse("").trim();
-    }
-
     public void setTeamNames(String rowsTeamName, String columnsTeamName) {
-        String trimedRowsTeamName = trimName(rowsTeamName);
-        String trimedColsTeamName = trimName(columnsTeamName);
+        String trimedRowsTeamName = ServiceUtils.trimName(rowsTeamName);
+        String trimedColsTeamName = ServiceUtils.trimName(columnsTeamName);
         Stream.of(trimedRowsTeamName, trimedColsTeamName).forEach(name -> {
             if (name.isBlank() || name.length() > MAX_ARMY_NAME_LENGTH) {
                 throw ServiceUtils.badRequest(String.format("Invalid army name (max length is %d)", MAX_ARMY_NAME_LENGTH));
@@ -77,20 +73,12 @@ public class MatrixService {
         Score internalDefaultScore = Optional.ofNullable(defaultScore).orElse(Score.newDefault());
 
         // State update
-        state.setArmyCount(armyCount);
-        Optional<Matrix> currentMatrix = state.getMatrix();
-        Matrix matrix;
-        /*if (currentMatrix.isPresent()) {
-            state.forceArmyCountConsistency(internalDefaultScore);
-            matrix = currentMatrix.get();
-        }
-        else {*/
-        matrix = loadMatrixDefault(armyCount, internalDefaultScore);
-        state.setMatrix(matrix);
-        /*}*/
+        Matrix matrix = loadMatrixDefault(armyCount, internalDefaultScore);
         if (matrix.getSize() != armyCount) {
             throw ServiceUtils.internalError("Inconsistent army count");
         }
+        state.setArmyCount(armyCount);
+        state.setMatrix(matrix);
         return matrix;
     }
 
@@ -104,24 +92,36 @@ public class MatrixService {
         return matrix.setDefaultScore(defaultScore);
     }
 
-    private static Matrix readMatrix(InputStream excelFileData) {
-        try (MatrixReader reader = XlsMatrixReader.fromStream(new BufferedInputStream(excelFileData))) {
-            return reader.get();
+    private static Matrix readMatrix(InputStream stream, String fileName) {
+        FileExtensionSupport support = ServiceUtils.getFileSupport(fileName)
+                .orElseThrow(() -> ServiceUtils.badRequest("Unsupported file extension for " + fileName));
+
+        MatrixReader reader;
+        try {
+            reader = support.getFactory().getReaderBuilder().newReader(new BufferedInputStream(stream));
+        }
+        catch (IOException ioe) {
+            LOGGER.log(Level.WARNING, "Unable to read file " + fileName, ioe);
+            throw ServiceUtils.badRequest(String.format("Unable to read file %s of format %s", fileName, support));
+        }
+
+        try (reader) {
+            return reader.read();
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Unable to parse matrix file", e);
-            throw ServiceUtils.badRequest("Invalid matrix file content");
+            LOGGER.log(Level.WARNING, String.format("Unable to parse matrix file %s of format %s", fileName, support), e);
+            throw ServiceUtils.badRequest(String.format("Unable to parse file %s of format %s", fileName, support));
         }
     }
 
-    private Matrix uploadMatrix(FormDataContentDisposition contentDisposition, InputStream excelFileData) {
+    private Matrix uploadMatrix(FormDataContentDisposition contentDisposition, InputStream fileStream) {
         String fileName = contentDisposition.getFileName();
         Objects.requireNonNull(fileName);
-        Objects.requireNonNull(excelFileData);
+        Objects.requireNonNull(fileStream);
         if (fileName.isBlank()) {
             throw ServiceUtils.badRequest("File name is mandatory for upload");
         }
         LOGGER.info(String.format("Reading file %s", fileName));
-        Matrix newMatrix = readMatrix(excelFileData);
+        Matrix newMatrix = readMatrix(fileStream, fileName);
         state.setMatrix(newMatrix);
         state.setArmyCount(newMatrix.getSize());
         state.setMatrixFilePath(Path.of(fileName)); // Does not provide the folder :/
@@ -158,12 +158,12 @@ public class MatrixService {
     }
 
     public void updateTeamName(boolean isRow, String givenName) {
-        String newName = trimName(givenName);
+        String newName = ServiceUtils.trimName(givenName);
         Optional.of(newName).ifPresent(isRow ? state::setRowTeamName : state::setColTeamName);
     }
 
     public Optional<Army> updateArmyName(boolean isRow, int index, String givenName) {
-        String newName = trimName(givenName);
+        String newName = ServiceUtils.trimName(givenName);
         Optional<Army> newArmy = state.getMatrix()
                 .map(m -> m.getArmies(isRow))
                 .filter(list -> list.size() > index)
@@ -179,10 +179,10 @@ public class MatrixService {
         return newArmy;
     }
 
-    public void writeExcelFile(OutputStream os) throws IOException {
+    public void writeExcelFile(OutputStream os, FileExtensionSupport support) throws IOException {
         if (state.getMatrix().isPresent()) {
             BufferedOutputStream bos = new BufferedOutputStream(os);
-            MatrixWriter xlsMatrixWriter = XlsMatrixWriter.fromStream(bos);
+            MatrixWriter xlsMatrixWriter = support.getFactory().getWriterBuilder().newWriter(bos);
             xlsMatrixWriter.write(state.getMatrix().get());
             bos.flush();
             // No `bos.close()`

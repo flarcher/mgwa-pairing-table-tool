@@ -58,14 +58,16 @@
           </fieldset>
           <fieldset>
             <legend>Scores</legend>
+            <div class="hint">Without a file, all scores will have a default value</div>
             <div>
               <label for="team_size">Team size</label>
               <input id="team_size" name="size" type="number" step="1" min="3" max="10" value="8" />
             </div>
             <hr class="or">
+            <div class="hint">You can provide either an Excel file or a JSON file. See <a href="#" onclick="toExportSection();">the download section</a>.</div>
             <div>
               <label for="matrix_file" class="file-label">Matrix file</label>
-              <input type="file" id="matrix_file" name="file" accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+              <input type="file" id="matrix_file" name="file" accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json" />
             </div>
           </fieldset>
           <input type="submit" value="Reset pairing system"/>
@@ -150,6 +152,7 @@
       </div>
 
       <div id="export">
+        <div class="hint">The downloaded files can be used in order to reset the data later on. See <a href="#" onclick="toInitSection();">the reset form</a>.</div>
         <a class="download type-json" onclick="downloadJsonState();" download="data.json">Download JSON state</a>
         <a class="download type-xlsx" onclick="downloadXlsxState();" download="matrix.xlsx">Download Excel file</a>
       </div>

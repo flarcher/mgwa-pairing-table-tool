@@ -1,5 +1,6 @@
 package org.mgwa.w40k.pairing.api.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.mgwa.w40k.pairing.matrix.Score;
 
@@ -16,7 +17,10 @@ public class EstimatedScore {
             score.getMaxValue());
     }
 
-    private EstimatedScore(int minimum, int maximum) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public EstimatedScore(
+            @JsonProperty("min") @Min(0L) @Max(20L) int minimum,
+            @JsonProperty("max") @Min(0L) @Max(20L) int maximum) {
         this.minimum = minimum;
         this.maximum = maximum;
     }
@@ -36,5 +40,9 @@ public class EstimatedScore {
 
     public int getMaximum() {
         return maximum;
+    }
+
+    public Score toScore() {
+        return Score.of(minimum, maximum);
     }
 }

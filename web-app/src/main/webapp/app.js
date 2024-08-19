@@ -1,13 +1,27 @@
+//==--- Links from HTML ---==//
+
 // Download link: JSON
-const downloadJsonState = function(e) {
+const downloadJsonState = function() {
     const link = document.getElementById('export').querySelector('.download.type-json');
-    downloadJSON(getData(), link.download);
+    //downloadJSON(getData(), link.download);
+    downloadURL(getData().api_url + 'download/json', link.download);
 };
 // Download link: Excel
-const downloadXlsxState = function(e) {
+const downloadXlsxState = function() {
     const link = document.getElementById('export').querySelector('.download.type-xlsx');
     downloadURL(getData().api_url + 'download/xlsx', link.download);
 };
+
+const toExportSection = function() {
+    var section = document.getElementById('ready');
+    switchNavTab(section, 'export');
+};
+const toInitSection = function() {
+    var section = document.getElementById('ready');
+    switchNavTab(section, 'init');
+};
+
+//==--- Application logic ---==//
 
 var refreshBadges = function() {
     const memberCount = getData().match.team_member_count;

@@ -1,14 +1,18 @@
 package org.mgwa.w40k.pairing.api.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.mgwa.w40k.pairing.matrix.Matrix;
 
 import javax.annotation.concurrent.Immutable;
 
 @Immutable
 public class Match {
 
-    public Match(String rowTeamName, String columnTeamName, int teamMemberCount) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public Match(
+            @JsonProperty("row_team") String rowTeamName,
+            @JsonProperty("column_team") String columnTeamName,
+            @JsonProperty("team_member_count") int teamMemberCount) {
         this.rowTeamName = rowTeamName;
         this.columnTeamName = columnTeamName;
         this.teamMemberCount = teamMemberCount;
