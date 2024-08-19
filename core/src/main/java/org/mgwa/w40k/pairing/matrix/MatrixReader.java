@@ -1,5 +1,6 @@
 package org.mgwa.w40k.pairing.matrix;
 
+import java.io.IOException;
 import java.util.function.Supplier;
 
 /**
@@ -10,10 +11,14 @@ public interface MatrixReader
 		AutoCloseable,
 		Supplier<Matrix> {
 
-	Matrix read();
+	Matrix read() throws IOException;
 
 	@Override
 	default Matrix get() {
-		return read();
+		try {
+			return read();
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
 	}
 }

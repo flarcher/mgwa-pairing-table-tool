@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 public class XlsMatrixReader implements MatrixReader {
 
-	public static XlsMatrixReader fromFile(File inputFile) {
+	public static XlsMatrixReader fromFile(File inputFile) throws IOException {
 		if (!inputFile.canRead()) {
 			throw new IllegalArgumentException(String.format("Can not read %s", inputFile.getAbsolutePath()));
 		}
@@ -32,24 +32,15 @@ public class XlsMatrixReader implements MatrixReader {
 		}
 	}
 
-	public static XlsMatrixReader fromStream(InputStream inputStream) {
+	public static XlsMatrixReader fromStream(InputStream inputStream) throws IOException {
 		if (inputStream == null) {
 			throw new IllegalArgumentException("No stream");
 		}
 		return new XlsMatrixReader(inputStream);
 	}
 
-	private XlsMatrixReader(InputStream inputStream) {
-		try {
-			this.document = new XSSFWorkbook(inputStream);
-		}
-		catch (IOException ioe) {
-			try {
-				inputStream.close();
-			}
-			catch (IOException ioe2) {}
-			throw new IllegalStateException(ioe);
-		}
+	private XlsMatrixReader(InputStream inputStream) throws IOException {
+		this.document = new XSSFWorkbook(inputStream);
 	}
 
 	private final XSSFWorkbook document;

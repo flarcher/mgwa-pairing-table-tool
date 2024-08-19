@@ -119,12 +119,13 @@ em, .name {
     position: relative;
     font-variant: normal;
     color: grey;
+	padding: 3px 0;
 }
 .hint:before {
 	content: "🛈";
 	position: absolute;
-    left: 3px;
-    top: -1px;
+	left: 5px;
+	top: 1px;
 }
 a.download {
 	display: inline-block;

@@ -5,6 +5,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.api.model.SetupOverview;
+import org.mgwa.w40k.pairing.api.service.FileExtensionSupport;
 import org.mgwa.w40k.pairing.api.service.MatrixService;
 import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.api.model.EstimatedScore;
@@ -26,7 +27,7 @@ import java.util.Optional;
 public class MatrixResource {
 
     private static final Score DEFAULT_SCORE = Score.newDefault();
-    private static final String DEFAULT_XLS_FILENAME = "matrix.xlsx";
+    private static final String DEFAULT_FILENAME = "matrix";
 
     public MatrixResource(AppState state, PairingService pairingService, MatrixService matrixService) {
         this.state = state;
@@ -152,19 +153,29 @@ public class MatrixResource {
             .orElse(Response.status(Response.Status.NOT_FOUND).build());
     }
 
-    @GET
-    @Path("download/xlsx")
-    public Response downloadMatrix() {
+    private Response writeMatrix(FileExtensionSupport support) {
         StreamingOutput streamingOutput = new StreamingOutput() {
             @Override
             public void write(OutputStream outputStream) throws IOException, WebApplicationException {
-                matrixService.writeExcelFile(outputStream);
+                matrixService.writeExcelFile(outputStream, support);
             }
         };
         return Response.ok(streamingOutput, MediaType.APPLICATION_OCTET_STREAM)
-            //.header("content-type", "application/vnd.ms-excel")
-            .header("content-disposition","attachment; filename = " + DEFAULT_XLS_FILENAME)
-            .build();
+                //.header("content-type", "application/vnd.ms-excel")
+                .header("content-disposition","attachment; filename = " + DEFAULT_FILENAME + "." + support.getDefaultExtension())
+                .build();
+    }
+
+    @GET
+    @Path("download/xlsx")
+    public Response downloadMatrixAsXLS() {
+        return writeMatrix(FileExtensionSupport.EXCEL_SPREADSHEET);
+    }
+
+    @GET
+    @Path("download/json")
+    public Response downloadMatrixAsJSON() {
+        return writeMatrix(FileExtensionSupport.JSON);
     }
 
 }

@@ -1,6 +1,9 @@
 package org.mgwa.w40k.pairing.api.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.mgwa.w40k.pairing.Army;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 
 import javax.annotation.concurrent.Immutable;
@@ -41,7 +44,12 @@ public class SetupOverview {
         );
     }
 
-    public SetupOverview(Match match, List<ArmyReference> rowArmies, List<ArmyReference> colArmies, List<List<EstimatedScore>> scores) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public SetupOverview(
+            @JsonProperty(value = "match") Match match,
+            @JsonProperty(value = "row_armies") List<ArmyReference> rowArmies,
+            @JsonProperty(value = "col_armies") List<ArmyReference> colArmies,
+            @JsonProperty(value = "scores") List<List<EstimatedScore>> scores) {
         this.match = match;
         this.rowArmies = rowArmies;
         this.colArmies = colArmies;
@@ -74,5 +82,20 @@ public class SetupOverview {
 
     public List<List<EstimatedScore>> getScores() {
         return scores;
+    }
+
+    private static List<Army> mapArmies(List<ArmyReference> references) {
+        return references.stream().map(ArmyReference::toArmy).collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public Matrix getMatrix() {
+        Matrix matrix = Matrix.createWithoutScores(mapArmies(rowArmies), mapArmies(colArmies));
+        IntStream.range(0, rowArmies.size()).forEach(row -> {
+            IntStream.range(0, colArmies.size()).forEach(col -> {
+                matrix.setScore(row, col, scores.get(row).get(col).toScore());
+            });
+        });
+        return matrix;
     }
 }
