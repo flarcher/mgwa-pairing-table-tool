@@ -269,7 +269,8 @@ tr > td.name[rowspan] > span {
 	position: relative;
 	top: 22px;
 }
-tr > td.name:hover {
+tr > td.name:hover,
+tr > td.score:hover {
 	cursor: pointer;
 	color: var(--main-color);
 	text-shadow: 1px 1px grey;
@@ -280,15 +281,11 @@ table {
 	width: 100%;
 	font-variant: small-caps;
 }
-tr > td.score:hover {
-	cursor: pointer;
-}
 /*=== Score cell ===*/
 .score {
 	text-align: center;
 	white-space: nowrap;
 	color: var(--main-color);
-	cursor: pointer;
 }
 .score.game {
 	background-color: purple;
