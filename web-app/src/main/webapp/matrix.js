@@ -227,10 +227,30 @@ const initArmyNameEditForm = function() {
     });
 };
 
+const _highlightNamesListener = (enable, e) => {
+    const row = e.target.dataset.row;
+    const col = e.target.dataset.col;
+    var colArmyCell = findArmyNameCell(false, parseInt(col));
+    var rowArmyCell = findArmyNameCell(true,  parseInt(row));
+    [ colArmyCell, rowArmyCell ].forEach(cell => {
+        if (enable) {
+            cell.classList.add('light');
+        } else {
+            cell.classList.remove('light');
+        }
+    });
+};
+
 // Initializes the edition of a score from the matrix table
 const initScoreLink = function(tableCell, i, j) {
     tableCell.dataset.row = i.toFixed();
     tableCell.dataset.col = j.toFixed();
+    tableCell.addEventListener("mouseenter", (e) => {
+        _highlightNamesListener(true, e);
+    });
+    tableCell.addEventListener("mouseleave", (e) => {
+        _highlightNamesListener(false, e);
+    });
     tableCell.addEventListener("click", (e) => {
         e.preventDefault();
         const row = e.target.dataset.row;

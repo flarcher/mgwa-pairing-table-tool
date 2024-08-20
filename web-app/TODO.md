@@ -1,8 +1,5 @@
 # TODO list
 
-## New pairing
-
-- Provide a way to create a new pairing without file (needs score editing in matrix and a field of the team member count)
 
 ## Score matrix
 

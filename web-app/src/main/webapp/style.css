@@ -269,6 +269,11 @@ tr > td.name[rowspan] > span {
 	position: relative;
 	top: 22px;
 }
+tr > td.name.light {
+	color: var(--revert-em-color);
+	background-color: var(--main-color);
+	border-color: var(--main-color);
+}
 tr > td.name:hover,
 tr > td.score:hover {
 	cursor: pointer;
