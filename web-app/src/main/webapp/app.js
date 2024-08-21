@@ -25,8 +25,8 @@ const toInitSection = function() {
 
 var refreshBadges = function() {
     const memberCount = getData().match.team_member_count;
-    const pairCount = getData().tables.length;
-    const stepCounts = getStepCounts(memberCount, pairCount)
+    const pairCount   = getPairCount(getData().tables);
+    const stepCounts  = getStepCounts(memberCount, pairCount)
 
     const stepsLabel = stepCounts[0].toFixed() + "/" + stepCounts[1].toFixed();
     const pairsLabel = pairCount.toFixed() + "/" + memberCount.toFixed();
@@ -62,7 +62,7 @@ var initBadges = function() {
         getData().row_armies = jsonResults[1];
         getData().col_armies = jsonResults[2];
         getData().scores     = jsonResults[3];
-        getData().tables     = []; // No table assigned yet
+        getData().tables     = newTablesList(jsonResults[0].team_member_count); // No table assigned yet
         getData().attackers  = {
                 "rows"   : [],
                 "columns": []
@@ -99,7 +99,7 @@ var onNewState = function(json) {
     getData().row_armies = json.row_armies.map(a => a.name);
     getData().col_armies = json.col_armies.map(a => a.name);
     getData().scores     = json.scores;
-    getData().tables     = []; // No table assigned yet
+    getData().tables     = newTablesList(json.match.team_member_count); // No table assigned yet
     getData().attackers  = {
             "rows"   : [],
             "columns": []

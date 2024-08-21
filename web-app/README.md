@@ -21,10 +21,11 @@ Here is a description of attributes of the result of the `getData()` function, t
     - `min` : minimum estimated score (between 0 and 20)
     - `max` : maximum estimated score (between 0 and 20)
 
-* `tables` is a list of table assignment. Each table is described with:
+* `tables` is a list of table assignment. Each table assignment is described with:
 
-    - `row_army`: Name of the army on the _row_ side
-    - `col_army`: Name of the army on the _column_ side
+    - `index`   : Index of the table
+    - `row_army`: Index of the army on the _row_ side, if known
+    - `col_army`: Index of the army on the _column_ side, if known
 
 * `defenders` stores the defender army attributes:
 

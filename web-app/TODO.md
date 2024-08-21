@@ -1,11 +1,6 @@
 # TODO list
 
 
-## Score matrix
-
-- Add a button below the score matrix so that it inverts the rows and the columns
-- Highlight the row+column armies related to a cell when the cursor hovers a cell
-
 ## Tables listing
 
 - Display expected score on the right, as soon as an assignment is done
@@ -14,4 +9,5 @@
 
 ## Assignment
 
-- TODO: finish the implementation with defender and attacker choices
+- finish the implementation with defender and attacker choices
+- Export the WTC sheet (HTML/PDF)
