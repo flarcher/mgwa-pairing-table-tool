@@ -38,12 +38,17 @@ const _getScoreEditFormElement = function() {
     return document.getElementById("edit_score").querySelector('form');
 };
 
-const initScoreEditForm = function() {
-    var formElement = _getScoreEditFormElement();
-    var scoreMinInput = formElement.querySelector("#new_score_min");
-    var scoreMaxInput = formElement.querySelector("#new_score_max");
-    var nextScoreElement = formElement.querySelector("#score_next");
+const setupScoreBasedOnInputs = function(scoreMinInput, scoreMaxInput, scoreElement) {
+    var nextScore = {
+        min: parseInt(scoreMinInput.value),
+        max: parseInt(scoreMaxInput.value)
+    };
+    if ((nextScore.min != NaN) && (nextScore.max != NaN)) {
+        setupScoreElement(scoreElement, nextScore);
+    }
+};
 
+const initScoreInputs = function(scoreMinInput, scoreMaxInput, scoreElement) {
     const valuesRequirement = () => {
         var minimum = scoreMinInput.value;
         var maximum = scoreMaxInput.value;
@@ -53,14 +58,8 @@ const initScoreEditForm = function() {
     [ scoreMinInput, scoreMaxInput ].forEach(input => {
         input.addEventListener("change", event => {
             // Refresh the next score element
-            var nextScore = {
-                min: parseInt(scoreMinInput.value), 
-                max: parseInt(scoreMaxInput.value)
-            };
-            if ((nextScore.min != NaN) && (nextScore.max != NaN)) {
-                setupScoreElement(nextScoreElement, nextScore);
-            }
-            // Handle form validation            
+            setupScoreBasedOnInputs(scoreMinInput, scoreMaxInput, scoreElement);
+            // Handle form validation
             var thisInput = event.target;
             var constraintFine = valuesRequirement();
             var validityState = thisInput.validity;
@@ -80,6 +79,16 @@ const initScoreEditForm = function() {
             }
         });
     });
+};
+
+const initScoreEditForm = function() {
+    var formElement = _getScoreEditFormElement();
+
+    // Handling of score display/inputs
+    var scoreMinInput = formElement.querySelector("#new_score_min");
+    var scoreMaxInput = formElement.querySelector("#new_score_max");
+    var nextScoreElement = formElement.querySelector("#score_next");
+    initScoreInputs(scoreMinInput, scoreMaxInput, nextScoreElement);
 
     // Submission of the form
     formElement.addEventListener("submit", event => {

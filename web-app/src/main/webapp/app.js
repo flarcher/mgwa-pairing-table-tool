@@ -141,6 +141,13 @@ var initMatchForm = function() {
     teamNameInputValidation(rowTeamNameInput, colTeamNameInput);
     teamNameInputValidation(colTeamNameInput, rowTeamNameInput);
 
+    // Default score inputs
+    var scoreMinInput = form.querySelector("#def_score_min");
+    var scoreMaxInput = form.querySelector("#def_score_max");
+    var scoreDefSpan  = form.querySelector("#score_def");
+    initScoreInputs(scoreMinInput, scoreMaxInput, scoreDefSpan);
+    setupScoreBasedOnInputs(scoreMinInput, scoreMaxInput, scoreDefSpan);
+
     // Submit listener
     form.addEventListener("submit", event => {
         if (!form.checkValidity()) {
@@ -161,9 +168,9 @@ window.addEventListener("load", function() {
 
         // Browser support check
         if (!isBrowserSupported()) {
-			switchSection("not_supported"); // Warning about non compatible browser
+            switchSection("not_supported"); // Warning about non compatible browser
             return;
-		}
+        }
 
         // Loading screen
         startLoading();
@@ -180,5 +187,5 @@ window.addEventListener("load", function() {
             }, () => { // On stop
                 switchSection("exited");
             });
-        
-	}, true);
+
+    }, true);

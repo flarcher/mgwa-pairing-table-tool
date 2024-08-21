@@ -53,27 +53,12 @@ public class MatrixResource {
         return getMatchFromState();
     }
 
-    private static boolean isRow(String rowsOrColumn) {
-        switch (rowsOrColumn) {
-            case "rows", "row" -> {
-                return true;
-            }
-            case "columns", "column", "col", "cols" -> {
-                return false;
-            }
-            default ->
-                    throw new WebApplicationException(
-                            "Unknown kind of army " + rowsOrColumn,
-                            Response.Status.BAD_REQUEST);
-        }
-    }
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("match/{rowsOrColumns}")
     public Response getArmies(@PathParam("rowsOrColumns") String rowsOrColumns) {
         Matrix matrix = pairingService.getMatrix();
-        boolean isRow = isRow(rowsOrColumns);
+        boolean isRow = WebInputUtils.isRow(rowsOrColumns);
         List<String> armyNames = matrix.getArmies(isRow).stream().map(Army::getName).toList();
         return Response.ok(armyNames, MediaType.APPLICATION_JSON_TYPE).build();
     }
@@ -94,22 +79,17 @@ public class MatrixResource {
             @FormDataParam("rows_team") String rowsTeamName,
             @FormDataParam("cols_team") String columnsTeamName,
             @FormDataParam("size")      Integer armyCount,
+            @FormDataParam("minimum")   String minimum,
+            @FormDataParam("maximum")   String maximum,
             @FormDataParam("file")      FormDataContentDisposition contentDisposition,
             @FormDataParam("file")      InputStream inputStream
     ) {
+        Score defaultScore = WebInputUtils.considerScore(minimum, maximum, DEFAULT_SCORE);
         matrixService.setTeamNames(rowsTeamName, columnsTeamName);
-        Matrix matrix = matrixService.setupMatrix(contentDisposition, inputStream, armyCount, DEFAULT_SCORE);
+        Matrix matrix = matrixService.setupMatrix(contentDisposition, inputStream, armyCount, defaultScore);
         Match match = getMatchFromState(); // Needs to be called after the reset
-        SetupOverview overview = SetupOverview.from(match, matrix, EstimatedScore.from(DEFAULT_SCORE));
+        SetupOverview overview = SetupOverview.from(match, matrix, EstimatedScore.from(defaultScore));
         return Response.ok(overview, MediaType.APPLICATION_JSON_TYPE).build();
-    }
-
-    private static int expectUnsignedInteger(String value) {
-        try {
-            return Integer.parseUnsignedInt(value);
-        } catch (NumberFormatException nfe) {
-            throw new WebApplicationException("Expected an integer, got <"+value+">", Response.Status.BAD_REQUEST);
-        }
     }
 
     @POST
@@ -120,8 +100,8 @@ public class MatrixResource {
             @PathParam("row") String rowIndex, @PathParam("column") String columnIndex,
             @FormParam("minimum") String minimum, @FormParam("maximum") String maximum
     ) {
-        Score rq = Score.of(expectUnsignedInteger(minimum), expectUnsignedInteger(maximum));
-        matrixService.updateScore(expectUnsignedInteger(rowIndex), expectUnsignedInteger(columnIndex), rq);
+        Score rq = Score.of(WebInputUtils.expectUnsignedInteger(minimum), WebInputUtils.expectUnsignedInteger(maximum));
+        matrixService.updateScore(WebInputUtils.expectUnsignedInteger(rowIndex), WebInputUtils.expectUnsignedInteger(columnIndex), rq);
         EstimatedScore rs = EstimatedScore.from(rq);
         return Response.ok(rs, MediaType.APPLICATION_JSON).build();
     }
@@ -133,7 +113,7 @@ public class MatrixResource {
     public Response updateTeam(
             @PathParam("rowsOrColumns") String rowsOrColumns,
             @FormParam("name") String newName) {
-        boolean isRow = isRow(rowsOrColumns);
+        boolean isRow = WebInputUtils.isRow(rowsOrColumns);
         matrixService.updateTeamName(isRow, newName);
         return Response.ok(getMatchFromState(), MediaType.APPLICATION_JSON_TYPE).build();
     }
@@ -146,7 +126,7 @@ public class MatrixResource {
             @PathParam("rowsOrColumns") String rowsOrColumns,
             @FormParam("index") int index,
             @FormParam("name") String newName) {
-        boolean isRow = isRow(rowsOrColumns);
+        boolean isRow = WebInputUtils.isRow(rowsOrColumns);
         Optional<Army> army = matrixService.updateArmyName(isRow, index, newName);
         return army
             .map(a -> Response.ok(a, MediaType.APPLICATION_JSON).build())

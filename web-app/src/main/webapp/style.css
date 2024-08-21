@@ -196,6 +196,8 @@ form {
 	max-width: 480px;
 	margin: 0 auto;
 	--form-spacing: 10px;
+	--score-input-width: 50px;
+	--score-input-height: 20px;
 }
 form > fieldset {
 	margin: var(--form-spacing) auto;
@@ -245,6 +247,17 @@ form div > label {
 }
 form div > input {
 	float: right;
+}
+form input[type = "number"] {
+	text-align: right;
+}
+form div > input[type = "number"],
+form span.score {
+	width: var(--score-input-width);
+	height: var(--score-input-height);
+}
+form span.score {
+	font-family: auto; /* For consistency with inputs */
 }
 /*=== Score matrix ===*/
 tr > td.name {
@@ -312,12 +325,6 @@ table {
 .score.good {
 	background-color: blue;
 	color: var(--main-em-color);
-}
-/*=== Score edit ===*/
-form span.score {
-	padding: 2px 5px;
-    border-radius: var(--border-radius);
-    min-width: 50px;
 }
 /*=== Navigation bar ===*/
 .hidden {
