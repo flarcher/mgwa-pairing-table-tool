@@ -1,6 +1,8 @@
 package org.mgwa.w40k.pairing.util;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 

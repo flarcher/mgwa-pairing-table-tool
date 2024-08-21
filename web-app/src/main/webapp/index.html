@@ -63,6 +63,18 @@
               <label for="team_size">Team size</label>
               <input id="team_size" name="size" type="number" step="1" min="3" max="10" value="8" />
             </div>
+            <div>
+              <span class="left">Default score</span>
+              <span class="right score" id="score_def"></span>
+            </div>
+            <div>
+              <label for="def_score_min">Minimum</label>
+              <input id="def_score_min" name="minimum" type="number" step="1" min="0" max="20" value="0" />
+            </div>
+            <div>
+              <label for="def_score_max">Maximum</label>
+              <input id="def_score_max" name="maximum" type="number" step="1" min="0" max="20" value="20" />
+            </div>
             <hr class="or">
             <div class="hint">You can provide either an Excel file or a JSON file. See <a href="#" onclick="toExportSection();">the download section</a>.</div>
             <div>
