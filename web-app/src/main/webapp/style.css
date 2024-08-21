@@ -17,6 +17,7 @@ body {
 	--bg-color: #FDFDFD;
 	--border-radius: 5px;
 	--army-color: #ffef9c;
+	--submit-padding: 6px;
 	background-color: var(--main-color);
 }
 /*=== Switchable sections ===*/
@@ -138,19 +139,19 @@ a.download::before {
 	content: '\2B07'; /*'\2913';*/
 	font-size: 1.5em;
 	top: 2px;
-	left: 6px;
+	left: var(--submit-padding);
 }
-button, input[type = "submit"], .download {
+button, input[type = "submit"], .submit, .download {
 	border-width: var(--border-width);
 	border-style: solid;
 	background-color: yellowgreen;
 	border-color: lightgreen darkgreen darkgreen lightgreen;
 	border-radius: var(--border-radius);
-	padding: 6px;
+	padding: var(--submit-padding);
 	color: var(--main-color);
 	font-size: 1em;
 }
-button:hover, input[type = "submit"]:hover, .download:hover {
+button:hover, input[type = "submit"]:hover, .submit:hover, .download:hover {
 	color: var(--main-em-color);
 	border-color: var(--link-color);
 	background-color: var(--link-color);
@@ -345,16 +346,14 @@ nav > a, nav > a:visited {
 }
 nav > a.selected, nav > a.selected:hover {
 	cursor: default;
-	text-decoration: none;
 	background-color: var(--bg-color);
 	color: var(--main-em-color);
-	border-color: var(--border-color) var(--border-color) var(--bg-color) var(--border-color);
+	/*border-color: var(--border-color) var(--border-color) var(--bg-color) var(--border-color);*/
 }
 nav > a:hover {
 	text-decoration: none;
 	background-color: var(--link-color);
 	color: var(--main-color);
-	border-style: dotted;
 	border-color: var(--link-color);
 }
 #ready > div {
@@ -363,42 +362,10 @@ nav > a:hover {
 #ready > div.current {
 	display: block;
 }
-/*=== Shared display ===*/
-section > div > div {
-	--row-width: 60%;
-	--row-height: 40px;
-	margin-bottom: 15px;
-}
-section > div > div::after {
-	clear: both;
-}
-section > div > div > label {
-	display: block;
-	line-height: var(--row-height);
-	float: left;
-	width: 100px; /* Fix width is needed for alignment */
-	text-align: left;
-}
-section > div > div.teams > label,
-section > div > div.teams > .name {
-	height: 1em;
-}
-.teams {
-	margin-bottom: 20px;
-}
-.teams > .name {
-	line-height: var(--row-height);
-	min-width: var(--row-width);
-	display: inline-block;
-}
-.teams > .name > .left,
-.teams > .name > .right {
-	width: 50%;
-}
 /*=== Assignment screen ===*/
 #assign > div > .choice {
-	line-height: var(--row-height);
-	min-width: var(--row-width);
+	line-height: 1.5em;
+	min-width: 60%;
 	display: inline-block;
 }
 /*=== Analysis screen ===*/
@@ -438,13 +405,46 @@ section > div > div.teams > .name {
  *   </div>
  * </div>
  */
+#tables {
+	--label-col-w: 72px; /* Fix width is needed for alignment */
+	--table-col-w: 360px;
+	--link-col-w:  24px; /* Fix width is needed for alignment */
+	min-width: 500px;
+	--row-height: 1.5em;
+}
+#tables > div {
+	margin-bottom: 15px;
+}
+#tables > div::after {
+	clear: both;
+}
+#tables > div > label {
+	display: block;
+	line-height: var(--row-height);
+	float: left;
+	width: var(--label-col-w);
+	text-align: left;
+}
+#tables > div.teams > label,
+#tables > div.teams > .name {
+	height: 1em;
+}
+#tables > .teams > .name {
+	line-height: var(--row-height);
+	min-width: var(--table-col-w);
+	display: inline-block;
+}
+#tables > .teams > .name > .left,
+#tables > .teams > .name > .right {
+	width: 50%;
+}
 #tables > div > .table {
 	--table-bw: 1px;
 	display: inline-block;
 }
 #tables > div > .table {
 	height: var(--row-height);
-	min-width: var(--row-width);
+	width: var(--table-col-w);
 	border: calc(2 * var(--table-bw)) solid var(--border-color);
 	box-shadow: 5px 3px 3px grey;
 	background-color: var(--army-color);
@@ -455,8 +455,8 @@ section > div > div.teams > .name {
 #tables > div > .table.unassigned > span::before {
 	content: "?";
 	position: relative;
-	font-size: calc(var(--row-height) / 2);
-	top: calc(50% - 10px);
+	font-size: 1em;
+	top: calc((100% - 1em) / 2);
 	left: 0;
 }
 #tables .table > span {
@@ -471,4 +471,26 @@ section > div > div.teams > .name {
 #tables .table > span.right {
 	border-left-color: var(--border-color);
 }
-/*=== Download links ===*/
+#tables > div > .assign {
+	/*
+	height: var(--row-height);
+	line-height: var(--row-height);
+	*/
+	float: right;
+	position: relative;
+	width: var(--link-col-w);
+	height: 10px;
+	margin-top: 2px;
+}
+#tables > .teams > .assign {
+	min-height: 1px; /* It needs an height */
+	width: calc(var(--link-col-w) + (2 * var(--border-width)) + (2 * var(--submit-padding)));
+}
+#tables .assign.submit::before {
+	content: '⇔';
+	position: absolute;
+	left: 2px;
+	top: -10px;
+	left: 3px;
+	font-size: 2em;
+}

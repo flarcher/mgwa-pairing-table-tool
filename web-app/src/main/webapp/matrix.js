@@ -176,10 +176,14 @@ const initTeamNameEditForm = function() {
             form,
             newMatch => {
                 getData().match = newMatch;
+
+                // Update team names
                 const newName = isRow ? newMatch.row_team : newMatch.column_team;
                 findTeamNameElement(isRow).textContent = newName;
                 _getScoreEditFormElement().querySelector(isRow ? '#row_team' : '#col_team').textContent = newName;
+                updateTablesTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
                 // TODO: update other places
+
                 endLoading('matrix');
             },
             json => errorHandler(json),

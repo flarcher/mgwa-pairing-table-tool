@@ -18,7 +18,7 @@ var getRemainingArmies = function(isRowArmy) {
         ? data.tables.map(t => isRowArmy ? t.row_army : t.col_army)
         : undefined;
     return assignedList
-        ? allArmies.filter(armyName => ! assignedList.find(assigned => assigned === armyName))
+        ? allArmies.filter(armyIndex => ! assignedList.find(assigned => assigned == armyIndex))
         : [];
 };
 
@@ -32,7 +32,9 @@ var triggerAnalysis = function(isRowArmy, armyName) {
 var refreshArmyList = function(isRowArmy, parentDiv) {
     var filteredList = getRemainingArmies(isRowArmy);
     emptyElement(parentDiv);
-    filteredList.forEach(armyName => {
+    var armyList = isRow ? getData().row_armies : getData().col_armies;
+    filteredList.forEach(armyIndex => {
+        var armyName = armyList[armyIndex];
         var candidateElement = document.createElement('span');
         candidateElement.classList.add('army');
         candidateElement.textContent = armyName;
