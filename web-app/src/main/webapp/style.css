@@ -154,14 +154,12 @@ button, input[type = "submit"], .submit, .download {
 	padding: var(--submit-padding);
 	color: var(--main-color);
 	font-size: 1em;
+	transition: all 250ms linear;
 }
 button:hover, input[type = "submit"]:hover, .submit:hover, .download:hover {
 	color: var(--main-em-color);
-	border-color: var(--link-color);
+	border-color: var(--border-color);
 	background-color: var(--link-color);
-	box-shadow: 2px var(--border-width) 2px var(--border-color);
-	padding-bottom: 4px; /* 6px - 2px of the shadow */
-	margin-bottom: calc(var(--form-spacing) + 2px); /* So that the boundary do not change */
 	cursor: pointer;
 }
 /*=== Loading ===*/
@@ -208,6 +206,9 @@ form {
 form > fieldset {
 	margin: var(--form-spacing) auto;
 	border-radius: var(--border-radius);
+}
+form select {
+	min-width: 50px;
 }
 form input[type = "submit"] {
 	width: 100%;
