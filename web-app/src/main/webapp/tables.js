@@ -71,12 +71,14 @@ const updateTableAssignmentOptions = (rowArmySelect, colArmySelect, scoreElement
 const _assignTable = (tableIndex, rowArmyIndex, colArmyIndex) => {
     // Update data
     let table = _getTableOf(getData().tables, parseInt(tableIndex));
+    let oldTable = structuredClone(table);
     table.row_army = parseInt(rowArmyIndex);
     table.col_army = parseInt(colArmyIndex);
+    let newTable = structuredClone(table);
     // Update badges
     refreshBadges();
     // Updates corresponding elements in <div id="matrix">
-    assignMatrixScore(rowArmyIndex, colArmyIndex);
+    assignMatrixScore(_isAssigned(oldTable) ? oldTable : null, newTable);
     // Updates corresponding elements in <div id="tables">
     let armyNames = _getArmyNames(table);
     Array.from(document.getElementById('tables').querySelectorAll('.table'))

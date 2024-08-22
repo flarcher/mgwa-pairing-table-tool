@@ -293,7 +293,8 @@ tr > td.name.light {
 	background-color: var(--main-color);
 	border-color: var(--main-color);
 }
-tr > td.score.assign {
+tr > td.score.assign,
+tr > td.name.assign {
 	background-color: lightgrey;
 	color: var(--main-color);
 	text-decoration: line-through;

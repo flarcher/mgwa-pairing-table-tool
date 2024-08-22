@@ -19,7 +19,7 @@ var getRemainingArmies = function(isRow) {
         ? data.tables.map(t => isRow ? t.row_army : t.col_army)
         : undefined;
     return assignedList
-        ? allArmies.filter(armyIndex => ! assignedList.find(assigned => assigned == armyIndex))
+        ? allArmies.filter(armyIndex => assignedList.find(assigned => assigned == armyIndex) == undefined)
         : [];
 };
 

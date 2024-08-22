@@ -43,7 +43,7 @@ var refreshBadges = function() {
 
 var isBrowserSupported = function() {
     // Checking the presence of recent Javascript functions that are used
-    return window.fetch && Promise.all;
+    return window.fetch && Promise.all && window.structuredClone;
 };
 
 var initBadges = function() {
