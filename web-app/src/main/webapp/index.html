@@ -50,7 +50,7 @@
             <legend>Team names</legend>
             <div>
               <label for="team_row_name">Rows</label>
-              <input id="team_row_name" name="rows_team" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" value="Rows-Team" required/>
+              <input id="team_row_name" name="rows_team" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" value="Rows-Team" required autofocus/>
             </div>
             <div>
               <label for="team_col_name">Columns</label>
@@ -209,7 +209,7 @@
           <legend>New score values</legend>
           <div>
             <label for="new_score_min">Minimum</label>
-            <input id="new_score_min" name="minimum" type="number" step="1" min="0" max="20" value="0" />
+            <input id="new_score_min" name="minimum" type="number" step="1" min="0" max="20" value="0" autofocus/>
           </div>
           <div>
             <label for="new_score_max">Maximum</label>
@@ -228,7 +228,7 @@
         </div>
         <div>
           <label for="new_team_name">New army name</label>
-          <input id="new_team_name" name="name" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" required/>
+          <input id="new_team_name" name="name" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" required autofocus/>
         </div>
         <input type="submit" value="Update team name"/>
       </form>
@@ -246,7 +246,7 @@
         </div>
         <div>
           <label for="new_army_name">New army name</label>
-          <input id="new_army_name" name="name" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" required/>
+          <input id="new_army_name" name="name" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" required autofocus/>
         </div>
         <input type="submit" value="Update army name"/>
       </form>
@@ -274,7 +274,7 @@
                 <span class="name" id="row_team"></span>
               </span>
             </span>
-            <select id="row_select" class="right"></select>
+            <select id="row_select" class="right" autofocus></select>
           </div>
           <div>
             <span class="left">
