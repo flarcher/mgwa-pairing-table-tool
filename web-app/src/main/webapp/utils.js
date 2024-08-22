@@ -4,6 +4,25 @@ var getData = function() {
     return window.app_data;
 }
 
+var isDefined = (number) => !Number.isNaN(number) && number != null && number != undefined;
+
+var getScoreDefault = () => getData()['default_score'] || { min: 0, max: 20};
+
+// Retrieves a score reliably
+var getScoreData = (row, col) => {
+    let scores  = getData()['scores'];
+    if (!isDefined(row) || !isDefined(col) || !scores || scores.length <= row || scores[row] <= col) {
+        console.warn("Impossible to get score [" + row + ", " + col + "]");
+        return getScoreDefault();
+    }
+    else {
+        return scores[row][col];
+    }
+};
+
+// Provides an integer range
+const integerRange = (startIncluded = 0, endExcluded) => Array.from(new Array(endExcluded), (x, i) => startIncluded + i);
+
 /*
  * Switch from a step to another
  * using <section> elements.
@@ -37,7 +56,7 @@ var _switchNavTab = function(section, tabId, sourceAnchors) {
 var switchNavTab = function(section, tabId) {
 	var sourceAnchors = Array.from(document.querySelectorAll('nav > a'))
 		.filter(a => { return a.dataset.target === tabId });
-	_switchNavTab(section, tabId, sourceAnchors);
+	_switchNavTab(section || document.getElementById('ready'), tabId, sourceAnchors);
 };
 
 /*

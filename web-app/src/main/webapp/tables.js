@@ -5,6 +5,8 @@ const getPairCount = (tables) => (tables || getData().tables).filter(_isAssigned
 
 const _isAssigned = (t) => t.row_army >= 0 && t.col_army >= 0;
 
+const _getTableOf = (tables, index) => (tables || getData().tables).find(t => t.index == index);
+
 const _getArmyNames = (t) => [
         t.row_army >= 0 ? getData().row_armies[t.row_army] : '',
         t.col_army >= 0 ? getData().col_armies[t.col_army] : '',
@@ -20,9 +22,111 @@ var updateTablesTeamNames = function(tablesElement, rowTeamName, colTeamName) {
     teamNamesRow[1].textContent = colTeamName || getData().match.column_team;
 };
 
+const updateTableAssignmentTeamNames = (parentSection, rowTeamName, colTeamName) => {
+    let section = parentSection || document.getElementById('assign_table');
+    section.querySelector('#row_team').textContent = rowTeamName || getData().match.row_team;
+    section.querySelector('#col_team').textContent = colTeamName || getData().match.column_team;
+};
+
+const updateTableAssignmentArmyName = (parentSection, isRow, index, newName) => {
+    let section     = parentSection || document.getElementById('assign_table');
+    let armySelect  = section.querySelector(isRow ? '#row_select' : '#col_select');
+    Array.from(armySelect.querySelectorAll('option'))
+        .filter(option => option.value == index)
+        .forEach(matchOption => { matchOption.textContent = newName; });
+};
+
+const _updateTableAssignmentOptions = (selectElement, isRow) => {
+    emptyElement(selectElement);
+    let remainingIndexes = getRemainingArmies(isRow);
+    let armyNames = isRow ? getData().row_armies : getData().col_armies;
+    remainingIndexes.forEach(index => {
+        let option = document.createElement('option');
+        option.value = index;
+        option.textContent = armyNames[index];
+        selectElement.appendChild(option);
+    });
+};
+
+const _displayAssignmentScore = (rowArmySelect, colArmySelect, scoreElement = null) => {
+    let row = parseInt(rowArmySelect.value);
+    let col = parseInt(colArmySelect.value);
+    let tableScoreSpan = scoreElement || document.getElementById('score_table');
+    if (row == NaN || col == NaN) {
+        console.warn('No row/col for assignment');
+        tableScoreSpan.textContent = '?';
+    } else {
+        let score = getScoreData(row, col);
+        setupScoreElement(tableScoreSpan, score);
+    }
+};
+
+const updateTableAssignmentOptions = (rowArmySelect, colArmySelect, scoreElement = null) => {
+    _updateTableAssignmentOptions(rowArmySelect, true);
+    _updateTableAssignmentOptions(colArmySelect, false);
+    _displayAssignmentScore(rowArmySelect, colArmySelect, scoreElement);
+};
+
+// Assignment logic (All arguments are strings)
+const _assignTable = (tableIndex, rowArmyIndex, colArmyIndex) => {
+    // Update data
+    let table = _getTableOf(getData().tables, parseInt(tableIndex));
+    table.row_army = parseInt(rowArmyIndex);
+    table.col_army = parseInt(colArmyIndex);
+    // Update badges
+    refreshBadges();
+    // Updates corresponding elements in <div id="matrix">
+    assignMatrixScore(rowArmyIndex, colArmyIndex);
+    // Updates corresponding elements in <div id="tables">
+    let armyNames = _getArmyNames(table);
+    Array.from(document.getElementById('tables').querySelectorAll('.table'))
+        .filter(div => div.parentElement.dataset.index === tableIndex)
+        .forEach(div => {
+            div.classList.remove('unassigned');
+            div.querySelector('.left').textContent  = armyNames[0]; // Row
+            div.querySelector('.right').textContent = armyNames[1]; // Column
+        });
+};
+
+const initTableAssignmentForm = () => {
+    let section        = document.getElementById('assign_table');
+    let sectionForm    = section.querySelector('form');
+    let tableScoreSpan = section.querySelector('#score_table');
+    let rowArmySelect  = section.querySelector('#row_select');
+    let colArmySelect  = section.querySelector('#col_select');
+
+    updateTableAssignmentTeamNames(sectionForm);
+    updateTableAssignmentOptions(rowArmySelect, colArmySelect);
+
+    // Update the score display after each 
+    [ rowArmySelect, colArmySelect ].forEach(select => {
+        select.addEventListener("change", (e) => {
+            _displayAssignmentScore(rowArmySelect, colArmySelect, tableScoreSpan);
+        });
+    });
+
+    sectionForm.addEventListener("submit", event => {
+        if (!sectionForm.checkValidity()) {
+            return;
+        }
+        event.preventDefault();
+        _assignTable(sectionForm.dataset.table, rowArmySelect.value, colArmySelect.value);
+        switchNavTab(null, 'tables');
+    });
+};
+
 const _assignTableClickListener = (e) => {
+    let section        = switchSection('assign_table');
+    let sectionForm    = section.querySelector('form');
+    let tableIndexSpan = section.querySelector('#table_index');
+    let tableScoreSpan = section.querySelector('#score_table');
+    let rowArmySelect  = section.querySelector('#row_select');
+    let colArmySelect  = section.querySelector('#col_select');
+
     let tableIndex = e.target.parentElement.dataset.index;
-    console.log("Assigning table " + tableIndex);
+    sectionForm.dataset.table  = tableIndex;
+    tableIndexSpan.textContent = (parseInt(tableIndex) + 1).toFixed();
+    updateTableAssignmentOptions(rowArmySelect, colArmySelect, tableScoreSpan);
 };
 
 var refreshTables = function() {

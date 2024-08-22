@@ -62,13 +62,13 @@ header > .badge {
 	border-style: solid;
 	border-width: 0 var(--border-width) var(--border-width) var(--border-width);
 	border-color: var(--border-color);
-    background-color: var(--bg-color);
-    color: var(--main-em-color);
-    font-size: 1em;
-    font-family: monospace;
-    padding: 0.25em;
-    line-height: 1em;
-    margin-top: calc(var(--frame-padding) * -1);
+	background-color: var(--bg-color);
+	color: var(--main-em-color);
+	font-size: 1em;
+	font-family: monospace;
+	padding: 0.25em;
+	line-height: 1em;
+	margin-top: calc(var(--frame-padding) * -1);
 }
 header > .badge.left {
 	margin-left: calc(var(--frame-padding) * -1);
@@ -117,16 +117,20 @@ em, .name {
 	border: 1px solid grey;
 	border-radius: calc( var(--border-radius) / 2 );
 	font-size: 10px;
-    position: relative;
-    font-variant: normal;
-    color: grey;
+	position: relative;
+	font-variant: normal;
+	color: grey;
 	padding: 3px 0;
+	margin: 15px 0;
 }
 .hint:before {
 	content: "🛈";
 	position: absolute;
 	left: 5px;
 	top: 1px;
+}
+form > .hint, fieldset > .hint {
+	margin: 0;
 }
 a.download {
 	display: inline-block;
@@ -157,6 +161,7 @@ button:hover, input[type = "submit"]:hover, .submit:hover, .download:hover {
 	background-color: var(--link-color);
 	box-shadow: 2px var(--border-width) 2px var(--border-color);
 	padding-bottom: 4px; /* 6px - 2px of the shadow */
+	margin-bottom: calc(var(--form-spacing) + 2px); /* So that the boundary do not change */
 	cursor: pointer;
 }
 /*=== Loading ===*/
@@ -176,10 +181,10 @@ button:hover, input[type = "submit"]:hover, .submit:hover, .download:hover {
 .loader > span {
 	position: absolute;
 	top: calc(50% - (var(--spinner-size) / 2) - var(--spinner-padding) - var(--spinner-width));
-    left: calc(50% - (var(--spinner-size) / 2) - var(--spinner-padding) - var(--spinner-width));
-    width: var(--spinner-size);
+	left: calc(50% - (var(--spinner-size) / 2) - var(--spinner-padding) - var(--spinner-width));
+	width: var(--spinner-size);
 	line-height: var(--spinner-size);
-    margin: calc(-(var(--spinner-size) / 2)) 0 0 calc(-(var(--spinner-size) / 2));
+	margin: calc(-(var(--spinner-size) / 2)) 0 0 calc(-(var(--spinner-size) / 2));
 	border-width: var(--spinner-width);
 	border-style: solid;
 	border-radius: 50%;
@@ -231,7 +236,7 @@ form div {
 form hr {
 	position: relative;
 	clear: both;
-    margin-top: 30px;
+	margin-top: 30px;
 	overflow: visible;
 }
 form hr.or:after {
@@ -287,6 +292,11 @@ tr > td.name.light {
 	color: var(--revert-em-color);
 	background-color: var(--main-color);
 	border-color: var(--main-color);
+}
+tr > td.score.assign {
+	background-color: lightgrey;
+	color: var(--main-color);
+	text-decoration: line-through;
 }
 tr > td.name:hover,
 tr > td.score:hover {
@@ -464,6 +474,7 @@ nav > a:hover {
 	width: 50%;
 	height: 100%;
 	border: var(--table-bw) dashed transparent;
+	padding-top: 2px;
 }
 #tables .table > span.left {
 	border-right-color: var(--border-color);

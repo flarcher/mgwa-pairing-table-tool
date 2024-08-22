@@ -11,15 +11,22 @@ var refreshAssignmentForm = function() {
     // TODO
 };
 
-var getRemainingArmies = function(isRowArmy) {
-    const data = getData();
-    const allArmies = isRowArmy ? data.row_armies : data.col_armies;
+// Returns indexes of armies that were not assigned to a table
+var getRemainingArmies = function(isRow) {
+    let   data         = getData();
+    const allArmies    = integerRange(0, data.match.team_member_count);
     const assignedList = data.tables
-        ? data.tables.map(t => isRowArmy ? t.row_army : t.col_army)
+        ? data.tables.map(t => isRow ? t.row_army : t.col_army)
         : undefined;
     return assignedList
         ? allArmies.filter(armyIndex => ! assignedList.find(assigned => assigned == armyIndex))
         : [];
+};
+
+var getRemainingArmyNames = function(isRow) {
+    const allArmyNames = isRow ? data.row_armies : data.col_armies;
+    const remainingIndexes = getRemainingArmies(isRow);
+    return remainingIndexes.map(index => allArmyNames[index]);
 };
 
 var triggerAnalysis = function(isRowArmy, armyName) {
