@@ -388,14 +388,39 @@ var refreshMatrix = function() {
 
 };
 
-var assignMatrixScore = (rowIndex, colIndex) => {
-    var matrixTableBody = _getScoreTableElement();
-    Array.from(matrixTableBody.querySelectorAll('tr'))
+const _assignMatrixScore = (matrixBody, table, enable) => {
+    if (! table) {
+        return; // Robustness
+    }
+    let rowIndex = table.row_army.toFixed();
+    let colIndex = table.col_army.toFixed();
+    Array.from(matrixBody.querySelectorAll('tr'))
         .flatMap(tr => {
-            var match = Array.from(tr.querySelectorAll('td'))
-                .filter(td => !td.classList.contains('corner') && !td.classList.contains('name'))
-                .filter(td => td.dataset.col === colIndex || td.dataset.row === rowIndex );
-            return match || [];
+            let match = [];
+            let allRowCells = Array.from(tr.querySelectorAll('td'));
+            // Score cells
+            match = match.concat(allRowCells.filter(td =>
+                td.classList.contains('score') &&
+                    (td.dataset.col === colIndex || td.dataset.row === rowIndex)
+                )
+            );
+            // Name cells
+            match = match.concat(allRowCells.filter(td => {
+                    if (!td.classList.contains('name')) { return false; }
+                    let isRow = td.dataset['is_row'] === 'true';
+                    return (isRow && td.dataset.index === rowIndex) ||
+                        (!isRow && td.dataset.index === colIndex);
+                })
+            );
+            return match;
         })
-        .forEach(td => td.classList.add('assign'));
+        .forEach(td => enable ? td.classList.add('assign') : td.classList.remove('assign'));
+};
+
+var assignMatrixScore = (oldTable, newTable) => {
+    var matrixBody = _getScoreTableElement();
+    // Remove the class on old table assignment
+    _assignMatrixScore(matrixBody, oldTable, false);
+    // Add the class on new table assignment
+    _assignMatrixScore(matrixBody, newTable, true);
 };
