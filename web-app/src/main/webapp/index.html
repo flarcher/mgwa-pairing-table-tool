@@ -167,9 +167,11 @@
       </div>
 
       <div id="export">
-        <div class="hint">The downloaded files can be used in order to reset the data later on. See <a href="#" onclick="toInitSection();">the reset form</a>.</div>
-        <a class="download type-json" onclick="downloadJsonState();" download="data.json">Download JSON state</a>
-        <a class="download type-xlsx" onclick="downloadXlsxState();" download="matrix.xlsx">Download Excel file</a>
+        <div class="hint">These files can be used in order to reset the data later on. See <a href="#" onclick="toInitSection();">the reset form</a>.</div>
+        <a class="download type-json" onclick="downloadJsonState();" download="data.json">Download matrix as JSON</a>
+        <a class="download type-xlsx" onclick="downloadXlsxState();" download="matrix.xlsx">Download matrix in Excel format</a>
+        <div class="hint">The JSON Web-app data (below) can not be used for import. This is provided for information only.</div>
+        <a class="download type-js" onclick="downloadWebState();" download="webapp-data.json">Download JSON web-app state</a>
       </div>
 
     </section>

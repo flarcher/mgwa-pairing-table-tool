@@ -11,6 +11,11 @@ const downloadXlsxState = function() {
     const link = document.getElementById('export').querySelector('.download.type-xlsx');
     downloadURL(getData().api_url + 'download/xlsx', link.download);
 };
+// Download link: JSON of Web-App state
+const downloadWebState = function() {
+    const link = document.getElementById('export').querySelector('.download.type-js');
+    downloadJSON(getData(), link.download);
+}
 
 const toExportSection = function() {
     var section = document.getElementById('ready');
