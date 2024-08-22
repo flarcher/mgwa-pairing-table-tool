@@ -83,7 +83,7 @@ const watchForStatus = function(onStart, onExit) {
                     }
                 }
             },
-            (response) => { exiting(); })
+            (error) => { exiting(); })
         }, 2500); // Delay in milliseconds
 };
 

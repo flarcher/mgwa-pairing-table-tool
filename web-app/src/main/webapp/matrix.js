@@ -38,11 +38,15 @@ const _getScoreEditFormElement = function() {
     return document.getElementById("edit_score").querySelector('form');
 };
 
-const setupScoreBasedOnInputs = function(scoreMinInput, scoreMaxInput, scoreElement) {
-    var nextScore = {
+const getScoreFromInputs = function(scoreMinInput, scoreMaxInput) {
+    return {
         min: parseInt(scoreMinInput.value),
         max: parseInt(scoreMaxInput.value)
     };
+};
+
+const setupScoreBasedOnInputs = function(scoreMinInput, scoreMaxInput, scoreElement) {
+    var nextScore = getScoreFromInputs(scoreMinInput, scoreMaxInput);
     if ((nextScore.min != NaN) && (nextScore.max != NaN)) {
         setupScoreElement(scoreElement, nextScore);
     }
@@ -182,6 +186,7 @@ const initTeamNameEditForm = function() {
                 findTeamNameElement(isRow).textContent = newName;
                 _getScoreEditFormElement().querySelector(isRow ? '#row_team' : '#col_team').textContent = newName;
                 updateTablesTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
+                updateTableAssignmentTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
                 // TODO: update other places
 
                 endLoading('matrix');
@@ -232,6 +237,7 @@ const initArmyNameEditForm = function() {
                     getData().col_armies[newArmy.index] = newArmy.name;
                 }
                 findArmyNameCell(newArmy.row, newArmy.index).textContent = newArmy.name;
+                updateTableAssignmentArmyName(null /* default */, newArmy.row, newArmy.index, newArmy.name);
                 // TODO: update other places
                 endLoading('matrix');
             },
@@ -380,4 +386,16 @@ var refreshMatrix = function() {
         }
     }
 
+};
+
+var assignMatrixScore = (rowIndex, colIndex) => {
+    var matrixTableBody = _getScoreTableElement();
+    Array.from(matrixTableBody.querySelectorAll('tr'))
+        .flatMap(tr => {
+            var match = Array.from(tr.querySelectorAll('td'))
+                .filter(td => !td.classList.contains('corner') && !td.classList.contains('name'))
+                .filter(td => td.dataset.col === colIndex || td.dataset.row === rowIndex );
+            return match || [];
+        })
+        .forEach(td => td.classList.add('assign'));
 };

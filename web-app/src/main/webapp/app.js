@@ -110,6 +110,7 @@ var onNewState = function(json) {
     initScoreEditForm();
     initTeamNameEditForm();
     initArmyNameEditForm();
+    initTableAssignmentForm();
     // Refresh the DOM
     refreshMatchForm();
     refreshMatrix();
@@ -155,6 +156,7 @@ var initMatchForm = function() {
         }
         event.preventDefault();
         startLoading();
+        getData().default_score = getScoreFromInputs(scoreMinInput, scoreMaxInput);
         postFormCall(
             getData().api_url + 'reset',
             form,

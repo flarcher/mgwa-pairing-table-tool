@@ -36,3 +36,8 @@ Here is a description of attributes of the result of the `getData()` function, t
 
     - `rows`: is a list of 2 _row_ army indexes.
     - `columns`: is a list of 2 _column_ army indexes.
+
+* `default_score` stores the default score
+
+    - `min` : minimum estimated score (between 0 and 20)
+    - `max` : maximum estimated score (between 0 and 20)

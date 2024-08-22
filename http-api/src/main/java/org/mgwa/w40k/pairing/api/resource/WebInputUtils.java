@@ -6,7 +6,6 @@ import org.mgwa.w40k.pairing.matrix.Score;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 class WebInputUtils {
 

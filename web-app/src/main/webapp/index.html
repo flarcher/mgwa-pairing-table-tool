@@ -7,6 +7,7 @@
     <script src="./utils.js"></script>
     <script src="./status.js"></script>
     <script src="./matrix.js"></script>
+    <script src="./pairing.js"></script>
     <script src="./tables.js"></script>
     <script src="./app.js"></script>
   </head>
@@ -246,6 +247,44 @@
           <input id="new_army_name" name="name" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" required/>
         </div>
         <input type="submit" value="Update army name"/>
+      </form>
+    </section>
+
+    <section id="assign_table">
+      <form>
+        <fieldset>
+          <legend>Context</legend>
+          <div>
+            <span class="left">Table number</span>
+            <span class="right" id="table_index"></span>
+          </div>
+          <div>
+            <span class="left">Expected score</span>
+            <span class="right score" id="score_table"></span>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Armies selection</legend>
+          <div>
+            <span class="left">
+              <span>
+                <span>Team </span>
+                <span class="name" id="row_team"></span>
+              </span>
+            </span>
+            <select id="row_select" class="right"></select>
+          </div>
+          <div>
+            <span class="left">
+              <span>
+                <span>Team </span>
+                <span class="name" id="col_team"></span>
+              </span>
+            </span>
+            <select id="col_select" class="right"></select>
+          </div>
+        </fieldset>
+        <input type="submit" value="Assign table"/>
       </form>
     </section>
 
