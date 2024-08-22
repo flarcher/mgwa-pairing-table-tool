@@ -354,6 +354,7 @@ nav > a, nav > a:visited {
 	border-style: solid;
 	border-radius: var(--link-padding) var(--link-padding) 0 0;
 	border-color: transparent;
+	transition: all 500ms linear;
 }
 nav > a.selected, nav > a.selected:hover {
 	cursor: default;
