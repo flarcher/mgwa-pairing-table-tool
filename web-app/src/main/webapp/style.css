@@ -222,9 +222,6 @@ form > fieldset {
 	margin: var(--form-spacing) auto;
 	border-radius: var(--border-radius);
 }
-form select {
-	min-width: 50px;
-}
 form input[type = "submit"] {
 	width: 100%;
 	float: none;
@@ -390,36 +387,6 @@ nav > a:hover {
 #ready > div.current {
 	display: block;
 }
-/*=== Assignment screen ===*/
-#assign > div > .choice {
-	line-height: 1.5em;
-	min-width: 60%;
-	display: inline-block;
-}
-/*=== Analysis screen ===*/
-#analysis fieldset {
-	border-radius: var(--border-radius);
-}
-#analysis fieldset label:hover {
-	cursor: pointer;
-	font-weight: bold;
-	color: var(--main-em-color);
-}
-#analysis span.army {
-	display: inline-block;
-	padding: 5px;
-	margin: 5px;
-	border: 1px solid lightgray;
-	border-radius: var(--border-radius);
-	background-color: var(--army-color);
-}
-#analysis span.army:hover {
-	cursor: pointer;
-	color: white;
-	border-color: 	#431f81;
-	background-color: rgb(106, 106, 179);
-	box-shadow: 3px 2px 2px #b596f3;
-}
 /*=== Tables ===
  * 
  * <div id="tables>
@@ -531,4 +498,11 @@ nav > a:hover {
 	left: 8px;
 	top: 0;
 	content: '✗';
+}
+/*=== Assignent form ===*/
+#assign_table form select {
+	min-width: calc(50% - 10px);
+}
+#assign_table form label.left {
+	max-width: calc(50% - 10px);
 }
