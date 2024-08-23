@@ -1,13 +1,24 @@
 const NO_ARMY_INDEX = -1; // Must be below 0
 
-const newTablesList = (tableCount) => Array.from(new Array(tableCount),
-    (x, i) => {return { index: i, row_army: NO_ARMY_INDEX, col_army: NO_ARMY_INDEX };});
+const _defaultTable = (index) => { return { index: index, row_army: NO_ARMY_INDEX, col_army: NO_ARMY_INDEX }};
+
+const newTablesList = (tableCount) => Array.from(new Array(tableCount), (x, i) => _defaultTable(i));
 
 const getPairCount = (tables) => (tables || getData().tables).filter(_isAssigned).length;
 
-const _isAssigned = (t) => t.row_army > NO_ARMY_INDEX && t.col_army > NO_ARMY_INDEX;
+// Tells if an index is valid as a reference to an army
+const _isArmyIndex = (i) => i > NO_ARMY_INDEX;
+// Tells if a table object is considered 'assigned' to armies.
+const _isAssigned  = (t) => _isArmyIndex(t.row_army) && _isArmyIndex(t.col_army);
 
-const _getTableOf = (tables, index) => (tables || getData().tables).find(t => t.index == index);
+const _getTableOf = (tables, index) => {
+    if (!isDefined(index) || index < 0) {
+        return _defaultTable(index); // Robustness on purpose
+    }
+    let tablesData = tables || getData().tables;
+    let foundTable = tablesData.find(t => t.index == index);
+    return foundTable || _defaultTable(index);
+};
 
 const _getArmyNames = (t) => [
         t.row_army >= 0 ? getData().row_armies[t.row_army] : '',
@@ -38,11 +49,13 @@ const updateTableAssignmentArmyName = (parentSection, isRow, index, newName) => 
         .forEach(matchOption => { matchOption.textContent = newName; });
 };
 
-const _updateTableAssignmentOptions = (selectElement, isRow) => {
+const _updateTableAssignmentOptions = (selectElement, isRow, currentIndex = NO_ARMY_INDEX) => {
     emptyElement(selectElement);
+    let firstIndexes     = _isArmyIndex(currentIndex) ? [ currentIndex ] : [];
     let remainingIndexes = getRemainingArmies(isRow);
-    let armyNames = isRow ? getData().row_armies : getData().col_armies;
-    remainingIndexes.forEach(index => {
+    let optionsIndexes   = firstIndexes.concat(remainingIndexes);
+    let armyNames        = isRow ? getData().row_armies : getData().col_armies;
+    optionsIndexes.forEach(index => {
         let option = document.createElement('option');
         option.value = index;
         option.textContent = armyNames[index];
@@ -63,9 +76,15 @@ const _displayAssignmentScore = (rowArmySelect, colArmySelect, scoreElement = nu
     }
 };
 
-const updateTableAssignmentOptions = (rowArmySelect, colArmySelect, scoreElement = null, tableIndex = NO_ARMY_INDEX) => {
-    _updateTableAssignmentOptions(rowArmySelect, true);  // TODO: add its current selection
-    _updateTableAssignmentOptions(colArmySelect, false); // TODO: add its current selection
+const updateTableAssignmentOptions = (
+        rowArmySelect,       // Row army <select>
+        colArmySelect,       // Column army <select>
+        scoreElement = null, // Optional <span class="score"> element
+        tableIndex = null    // Optional index of the corresponding table
+    ) => {
+    let table = _getTableOf(getData().tables, tableIndex);
+    _updateTableAssignmentOptions(rowArmySelect, true , table.row_army);
+    _updateTableAssignmentOptions(colArmySelect, false, table.col_army);
     _displayAssignmentScore(rowArmySelect, colArmySelect, scoreElement);
 };
 
@@ -219,12 +238,14 @@ var refreshTables = function() {
         var assignLink = document.createElement("a");
         assignLink.classList.add('assign');
         assignLink.classList.add('submit');
+        assignLink.title = 'Assign';
         assignLink.href = "#";
         assignLink.addEventListener('click', _assignTableClickListener);
         actionsDiv.appendChild(assignLink);
         var unassignLink = document.createElement("a");
         unassignLink.classList.add('unassign');
         unassignLink.classList.add('submit');
+        unassignLink.title = 'Unassign';
         unassignLink.href = "#";
         unassignLink.addEventListener('click', _unassignTableClickListener);
         actionsDiv.appendChild(unassignLink);
