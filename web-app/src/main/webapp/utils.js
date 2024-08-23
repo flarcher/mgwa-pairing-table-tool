@@ -23,6 +23,27 @@ var getScoreData = (row, col) => {
 // Provides an integer range
 const integerRange = (startIncluded = 0, endExcluded) => Array.from(new Array(endExcluded), (x, i) => startIncluded + i);
 
+// Switch CSS class
+const switchClass = (element, styleClass, enabled = true) => {
+    if (enabled) {
+        element.classList.add(styleClass);
+    } else {
+        element.classList.remove(styleClass);
+    }
+};
+
+const getParentData = (startingElement, dataSetKey) => {
+    var element = startingElement;
+    while (element != null) {
+        let dataValue = element.dataset[dataSetKey];
+        if (dataValue != undefined) {
+            return dataValue;
+        } else {
+            element = element.parentElement;
+        }
+    }
+};
+
 /*
  * Switch from a step to another
  * using <section> elements.

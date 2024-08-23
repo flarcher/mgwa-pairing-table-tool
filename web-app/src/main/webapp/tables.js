@@ -1,9 +1,11 @@
+const NO_ARMY_INDEX = -1; // Must be below 0
+
 const newTablesList = (tableCount) => Array.from(new Array(tableCount),
-    (x, i) => {return { index: i, row_army: -1, col_army: -1 };});
+    (x, i) => {return { index: i, row_army: NO_ARMY_INDEX, col_army: NO_ARMY_INDEX };});
 
 const getPairCount = (tables) => (tables || getData().tables).filter(_isAssigned).length;
 
-const _isAssigned = (t) => t.row_army >= 0 && t.col_army >= 0;
+const _isAssigned = (t) => t.row_army > NO_ARMY_INDEX && t.col_army > NO_ARMY_INDEX;
 
 const _getTableOf = (tables, index) => (tables || getData().tables).find(t => t.index == index);
 
@@ -61,10 +63,23 @@ const _displayAssignmentScore = (rowArmySelect, colArmySelect, scoreElement = nu
     }
 };
 
-const updateTableAssignmentOptions = (rowArmySelect, colArmySelect, scoreElement = null) => {
-    _updateTableAssignmentOptions(rowArmySelect, true);
-    _updateTableAssignmentOptions(colArmySelect, false);
+const updateTableAssignmentOptions = (rowArmySelect, colArmySelect, scoreElement = null, tableIndex = NO_ARMY_INDEX) => {
+    _updateTableAssignmentOptions(rowArmySelect, true);  // TODO: add its current selection
+    _updateTableAssignmentOptions(colArmySelect, false); // TODO: add its current selection
     _displayAssignmentScore(rowArmySelect, colArmySelect, scoreElement);
+};
+
+const _refreshTableContent = (table) => {
+    let isAssigned = _isAssigned(table);
+    let armyNames  = isAssigned ? _getArmyNames(table) : [ '' , '' ];
+    let tableIndex = table.index.toFixed();
+    Array.from(document.getElementById('tables').querySelectorAll('.table'))
+        .filter(div => div.parentElement.dataset.index === tableIndex)
+        .forEach(div => {
+            switchClass(div, 'unassigned', !isAssigned);
+            div.querySelector('.left').textContent  = armyNames[0]; // Row
+            div.querySelector('.right').textContent = armyNames[1]; // Column
+        });
 };
 
 // Assignment logic (All arguments are strings)
@@ -80,14 +95,26 @@ const _assignTable = (tableIndex, rowArmyIndex, colArmyIndex) => {
     // Updates corresponding elements in <div id="matrix">
     assignMatrixScore(_isAssigned(oldTable) ? oldTable : null, newTable);
     // Updates corresponding elements in <div id="tables">
-    let armyNames = _getArmyNames(table);
-    Array.from(document.getElementById('tables').querySelectorAll('.table'))
-        .filter(div => div.parentElement.dataset.index === tableIndex)
-        .forEach(div => {
-            div.classList.remove('unassigned');
-            div.querySelector('.left').textContent  = armyNames[0]; // Row
-            div.querySelector('.right').textContent = armyNames[1]; // Column
-        });
+    _refreshTableContent(newTable);
+};
+
+// Unassignment logic (All arguments are strings)
+const _unassignTable = (tableIndex) => {
+    let table = _getTableOf(getData().tables, parseInt(tableIndex));
+    if (_isAssigned(table)) {
+        if (window.confirm("Are you sure you want to free the table "+ displayTableIndex(tableIndex) + "?")) {
+            table.row_army = NO_ARMY_INDEX;
+            table.col_army = NO_ARMY_INDEX;
+            // Update badges
+            refreshBadges();
+            // Updates corresponding elements in <div id="matrix">
+            assignMatrixScore(table, null);
+            // Updates corresponding elements in <div id="tables">
+            _refreshTableContent(table);
+        }
+    } else {
+        window.alert("The table " + displayTableIndex(tableIndex) + " is already free");
+    }
 };
 
 const initTableAssignmentForm = () => {
@@ -117,6 +144,8 @@ const initTableAssignmentForm = () => {
     });
 };
 
+const displayTableIndex = (indexAsStr) => (parseInt(indexAsStr) + 1).toFixed();
+
 const _assignTableClickListener = (e) => {
     let section        = switchSection('assign_table');
     let sectionForm    = section.querySelector('form');
@@ -125,10 +154,17 @@ const _assignTableClickListener = (e) => {
     let rowArmySelect  = section.querySelector('#row_select');
     let colArmySelect  = section.querySelector('#col_select');
 
-    let tableIndex = e.target.parentElement.dataset.index;
+    let tableIndex = getParentData(e.target.parentElement, 'index');
+    if (!tableIndex) { throw 'No table index found'; }
     sectionForm.dataset.table  = tableIndex;
-    tableIndexSpan.textContent = (parseInt(tableIndex) + 1).toFixed();
-    updateTableAssignmentOptions(rowArmySelect, colArmySelect, tableScoreSpan);
+    tableIndexSpan.textContent = displayTableIndex(tableIndex);
+    updateTableAssignmentOptions(rowArmySelect, colArmySelect, tableScoreSpan, parseInt(tableIndex));
+};
+
+const _unassignTableClickListener = (e) => {
+    let tableIndex = getParentData(e.target.parentElement, 'index');
+    if (!tableIndex) { throw 'No table index found'; }
+    _unassignTable(tableIndex);
 };
 
 var refreshTables = function() {
@@ -160,6 +196,7 @@ var refreshTables = function() {
         var tableName = document.createElement("label");
         tableName.textContent = "Table " + (table.index + 1).toFixed();
         tableRow.appendChild(tableName);
+
         // Table assignment
         var tableDiv = document.createElement("div");
         tableDiv.classList.add('table');
@@ -175,13 +212,23 @@ var refreshTables = function() {
         right.textContent = armies[1] || '';
         tableDiv.appendChild(right);
         tableRow.appendChild(tableDiv);
-        // Assignment button
+
+        // Actions button
+        var actionsDiv = document.createElement("div");
+        actionsDiv.classList.add('actions');
         var assignLink = document.createElement("a");
         assignLink.classList.add('assign');
         assignLink.classList.add('submit');
         assignLink.href = "#";
         assignLink.addEventListener('click', _assignTableClickListener);
-        tableRow.appendChild(assignLink);
+        actionsDiv.appendChild(assignLink);
+        var unassignLink = document.createElement("a");
+        unassignLink.classList.add('unassign');
+        unassignLink.classList.add('submit');
+        unassignLink.href = "#";
+        unassignLink.addEventListener('click', _unassignTableClickListener);
+        actionsDiv.appendChild(unassignLink);
+        tableRow.appendChild(actionsDiv);
 
         tablesDiv.appendChild(tableRow);
     });

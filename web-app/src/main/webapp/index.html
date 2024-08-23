@@ -19,11 +19,10 @@
     </header>
 
     <nav class="hidden">
-      <a data-target="init">New pairing</a>
+      <a data-target="init">Reset</a>
       <a data-target="matrix">Score matrix</a>
-      <!--a data-target="assign">Assignment</a>
-      <a data-target="analysis">Analysis</a-->
-      <a data-target="tables">Tables</a>
+      <!--a data-target="assign">Assign</a-->
+      <a data-target="tables">Tables dispatch</a>
       <a data-target="export">Downloads</a>
     </nav>
 
@@ -123,26 +122,6 @@
             <span class="right">TODO</span>
           </div>
         </div>
-      </div>
-
-      <div id="analysis">
-        <div class="waiting hidden"></div>
-        <fieldset class="teams">
-          <legend>Select your team:</legend>
-          <div>
-            <input type="radio" id="row" name="team" value="row" checked />
-            <label for="row"></label>
-          </div>        
-          <div>
-            <input type="radio" id="column" name="team" value="column" />
-            <label for="column"></label>
-          </div>
-        </fieldset>
-        <fieldset class="selector">
-          <legend>Select the army:</legend>
-          <div></div>
-        </fieldset>
-
       </div-->
 
       <div id="tables">
@@ -152,7 +131,7 @@
             <span class="left"></span>
             <span class="right"></span>
           </div>
-          <span class="assign">Assign</span>
+          <div class="actions"><label>Actions</label></div>
         </div>
         <!-- (see `refreshTables`)
         <div>
@@ -161,7 +140,10 @@
             <span class="left">Army on row</span>
             <span class="right">Army on column</span>
           </div>
-          <a class="assign submit"></a>
+          <div class="actions">
+            <a class="assign submit"></a>
+            <a class="unassign submit"></a>
+          </div>
         </div>
         -->
       </div>
