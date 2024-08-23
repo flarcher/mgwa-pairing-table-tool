@@ -132,11 +132,13 @@ em, .name {
 form > .hint, fieldset > .hint {
 	margin: 0;
 }
-a.download {
+a.download, a.submit {
 	display: inline-block;
-	padding-left: 30px;
-	position: relative;
 	text-decoration: none;
+	position: relative;
+}
+a.download {
+	padding-left: 30px;
 }
 a.download::before {
 	position: absolute;
@@ -161,6 +163,19 @@ button:hover, input[type = "submit"]:hover, .submit:hover, .download:hover {
 	border-color: var(--border-color);
 	background-color: var(--link-color);
 	cursor: pointer;
+}
+/* A div.action element can contain many .submit children */
+.actions > .submit {
+	border-radius: 0;
+	border-color: lightgreen darkolivegreen darkgreen yellow;
+}
+.actions > .submit:first-child {
+	border-radius: var(--border-radius) 0 0 var(--border-radius);
+	border-color: lightgreen darkolivegreen darkgreen lightgreen;
+}
+.actions > .submit:last-child {
+	border-radius: 0 var(--border-radius) var(--border-radius) 0;
+	border-color: lightgreen darkgreen darkgreen yellow;
 }
 /*=== Loading ===*/
 @keyframes spin {
@@ -419,11 +434,11 @@ nav > a:hover {
  * </div>
  */
 #tables {
-	--label-col-w: 72px; /* Fix width is needed for alignment */
+	--label-col-w: 70px; /* Fix width is needed for alignment */
 	--table-col-w: 360px;
-	--link-col-w:  24px; /* Fix width is needed for alignment */
-	min-width: 500px;
-	--row-height: 1.5em;
+	--link-col-w:  70px; /* Fix width is needed for alignment */
+	min-width: 600px;
+	--row-height: 20px;
 }
 #tables > div {
 	margin-bottom: 15px;
@@ -465,6 +480,12 @@ nav > a:hover {
 #tables > div > .table.unassigned {
 	background-color: lightgrey;
 }
+#tables > div > .table.unassigned ~ .actions > .unassign {
+	background-color: lightgrey;
+	border-color: lightgrey;
+	color: grey;
+	cursor: default;
+}
 #tables > div > .table.unassigned > span::before {
 	content: "?";
 	position: relative;
@@ -485,26 +506,29 @@ nav > a:hover {
 #tables .table > span.right {
 	border-left-color: var(--border-color);
 }
-#tables > div > .assign {
-	/*
-	height: var(--row-height);
-	line-height: var(--row-height);
-	*/
+#tables .actions {
 	float: right;
-	position: relative;
 	width: var(--link-col-w);
-	height: 10px;
-	margin-top: 2px;
 }
-#tables > .teams > .assign {
-	min-height: 1px; /* It needs an height */
-	width: calc(var(--link-col-w) + (2 * var(--border-width)) + (2 * var(--submit-padding)));
+#tables .actions > a.assign,
+#tables .actions > a.unassign {
+	position: relative;
+	height: var(--row-height);
+	padding: 0 0 0 calc((var(--link-col-w) / 2) - (2 * var(--border-width)));
+}
+#tables .actions > a.assign::before,
+#tables .actions > a.unassign::before {
+	position: absolute;
 }
 #tables .assign.submit::before {
-	content: '⇔';
-	position: absolute;
-	left: 2px;
-	top: -10px;
-	left: 3px;
 	font-size: 2em;
+	left: 0;
+	top: -11px;
+	content: '⇔';
+}
+#tables .unassign.submit::before {
+	font-size: 1.2em;
+	left: 8px;
+	top: 0;
+	content: '✗';
 }
