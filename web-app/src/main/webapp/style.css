@@ -357,6 +357,20 @@ table {
 }
 nav {
 	height: 20px;
+	position: relative;
+}
+nav::after, nav::before, .key {
+	color: var(--main-color);
+	border-width: 1px;
+	border-style: solid;
+	border-color: lightgrey darkgrey darkgrey lightgrey;
+	background-color: var(--bg-color);
+}
+nav::before {
+	content: '←';
+}
+nav::after {
+	content: '→';
 }
 nav > a, nav > a:visited {
 	cursor: pointer;

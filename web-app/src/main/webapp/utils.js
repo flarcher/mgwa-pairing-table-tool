@@ -80,6 +80,53 @@ var switchNavTab = function(section, tabId) {
 	_switchNavTab(section || document.getElementById('ready'), tabId, sourceAnchors);
 };
 
+//==--- Keyboard keys ---==//
+
+var _toOtherNavBar = function(toNext = true) {
+    let navElement = document.querySelector('body > nav');
+    let selectedLink = navElement.querySelector('a.selected');
+    var previousIndex = -1;
+    var nextToItIndex = -1;
+    var anchorsElements = Array.from(navElement.querySelectorAll('a'));
+    if (selectedLink) {
+        var iteratedIndex = -1;
+        var selectedIndex = -1;
+        anchorsElements.forEach((link, i) => {
+            if (selectedIndex >= 0 && nextToItIndex < 0) {
+                nextToItIndex = i;
+            }
+            if (link == selectedLink) {
+                selectedIndex = i;
+                previousIndex = iteratedIndex;
+            }
+            iteratedIndex = i;
+        });
+        nextToItIndex = nextToItIndex >= 0 ? nextToItIndex : 0;
+        previousIndex = previousIndex >= 0 ? previousIndex : iteratedIndex;
+    } else {
+        nextToItIndex = 0;
+        previousIndex = anchorsElements.length - 1;
+    }
+    let newIndex = toNext ? nextToItIndex : previousIndex;
+    let elementToSelect = anchorsElements[newIndex];
+    _switchNavTab(document.getElementById('ready'), elementToSelect.dataset.target, [ elementToSelect ]);
+};
+
+window.addEventListener("keyup", (event) => {
+    if (event.defaultPrevented) { return } // Do not override default behavior
+
+    //event.ctrlKey : true/false
+    //event.altKey  : true/false
+    if (event.key === "ArrowLeft" || event.key === "PageUp") {
+        _toOtherNavBar(false);
+    }
+    else if (event.key === "ArrowRight" || event.key === "PageDown") {
+        _toOtherNavBar(true);
+    }
+
+    event.preventDefault();
+  }, true);
+
 /*
  * Switch from a navigation tab to another
  * using `nav > a` anchors corresponding `div` elements.
