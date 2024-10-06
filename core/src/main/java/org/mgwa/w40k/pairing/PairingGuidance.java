@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * Contains the algorithm that suggest the best pairing.
@@ -153,14 +152,13 @@ public final class PairingGuidance {
 	}
 
 	private int getReducedScore(Collection<PairingPath> possiblePaths) {
-		int reducedScore = possiblePaths.stream()
+		return possiblePaths.stream()
 			.map(path -> {
 				int pathScore = getScore(path);
 				debug(() -> String.format("-- %s => %d", path, pathScore));
 				return pathScore;
 			})
 			.reduce(forecastMethod.getIdentityScore(), forecastMethod.getScoreReducer());
-		return reducedScore;
 	}
 
 	private int getScore(PairingPath path) {

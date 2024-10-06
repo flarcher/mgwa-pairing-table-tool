@@ -1,5 +1,6 @@
 package org.mgwa.w40k.pairing.api.resource;
 
+import jakarta.ws.rs.Produces;
 import org.mgwa.w40k.pairing.api.model.PairingResponseItem;
 import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.api.model.PairingRequest;
@@ -24,7 +25,8 @@ public class AnalysisResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    @Path("guide")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("")
     public Response guidePairing(@NotNull @Valid PairingRequest request) {
         List<PairingResponseItem> analysisResponse = service.estimatePairing(request);
         return Response.ok(analysisResponse, MediaType.APPLICATION_JSON_TYPE).build();
