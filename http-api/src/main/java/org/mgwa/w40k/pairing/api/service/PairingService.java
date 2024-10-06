@@ -1,10 +1,7 @@
 package org.mgwa.w40k.pairing.api.service;
 
 import org.mgwa.w40k.pairing.*;
-import org.mgwa.w40k.pairing.api.model.ArmyReference;
-import org.mgwa.w40k.pairing.api.model.AssignedPair;
-import org.mgwa.w40k.pairing.api.model.PairingRequest;
-import org.mgwa.w40k.pairing.api.model.PairingResponseItem;
+import org.mgwa.w40k.pairing.api.model.*;
 import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
@@ -94,7 +91,9 @@ public class PairingService {
     }
 
     private static PairingGuidance getGuidance(Matrix matrix, PairingRequest request) {
-        Predicate<Pair> nextAssignmentPredicate = nextAssignmentPredicate(matrix, request.getNextArmy());
+        Predicate<Pair> nextAssignmentPredicate = request.getNextArmy()
+                .map(nextArmy -> nextAssignmentPredicate(matrix, nextArmy))
+                .orElse(a -> true);
         return new PairingGuidance(matrix, LOGGER::fine)
                 .setForecastMethod(request.getMethod())
                 .setScoreReading(request.getReading())
