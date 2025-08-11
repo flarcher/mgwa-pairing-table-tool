@@ -4,7 +4,7 @@
     <groupId>org.mgwa.w40k.pairing</groupId>
     <artifactId>parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.2</version>
     <modules>
         <module>core</module>
         <module>matrix-xls</module>
@@ -88,7 +88,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
-                        <release>17</release>
+                        <source>17</source>
+                        <target>17</target>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -145,7 +146,7 @@
 
     <scm> <!-- For the maven release plugin, but actually not used yet -->
         <developerConnection>scm:git:ssh://github.com/mgwa-pairing-table-tool.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>0.2</tag>
   </scm>
 
     <contributors>

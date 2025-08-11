@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.mgwa.w40k.pairing</groupId>
         <artifactId>parent</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.2</version>
     </parent>
 
     <packaging>jar</packaging> <!-- Needs to be 'jar' for maven-shade-plugin -->
