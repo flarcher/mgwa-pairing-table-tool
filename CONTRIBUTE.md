@@ -63,11 +63,12 @@ mvn package -Dmake.installer -Djdk.home=__
 
 In the process below, we should write `__` instead of the tag name that is also the semantic version of the release (e.g. `0.2`).
 
+1. Remove previous temporary files if present: `rm pom.xml.releaseBackup release.properties`
 1. Prepare the release with `mvn release:prepare`
-2. Answer questions; provide the semantic version `__`
-3. Push the Git commits with `git push`
-4. Push the Git tag with `git push origin __`
-5. Checkout the code-base from the tag with `git checkout __`
-6. Generate the installers like explained in [the corresponding section above](#installer), for each OS
-7. Create a [new GitHub release](https://github.com/flarcher/mgwa-pairing-table-tool/releases/new) with a description, and artifacts. The artifacts are the _fat JAR file_ and the installers (packages) to be uploaded.
-8. Communicate about the new release in the chat channels
+1. Answer questions; provide the semantic version `__`
+1. Push the Git commits with `git push`
+1. Push the Git tag with `git push origin __`
+1. Checkout the code-base from the tag with `git checkout __`
+1. Generate the installers like explained in [the corresponding section above](#installer), for each OS
+1. Create a [new GitHub release](https://github.com/flarcher/mgwa-pairing-table-tool/releases/new) with a description, and artifacts. The artifacts are the _fat JAR file_ and the installers (packages) to be uploaded.
+1. Communicate about the new release in the chat channels
