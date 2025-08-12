@@ -12,7 +12,10 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.mgwa.w40k.pairing.matrix.Matrix;
+
 import java.util.List;
+import java.util.Objects;
 
 @Path("analysis")
 public class AnalysisResource {
@@ -28,7 +31,8 @@ public class AnalysisResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("")
     public Response guidePairing(@NotNull @Valid PairingRequest request) {
-        List<PairingResponseItem> analysisResponse = service.estimatePairing(request);
+        Matrix matrix = Objects.requireNonNull(null); // TODO
+        List<PairingResponseItem> analysisResponse = service.estimatePairing(matrix, request);
         return Response.ok(analysisResponse, MediaType.APPLICATION_JSON_TYPE).build();
     }
 }

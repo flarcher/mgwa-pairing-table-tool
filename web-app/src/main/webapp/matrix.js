@@ -100,20 +100,14 @@ const initScoreEditForm = function() {
             return;
         }
         event.preventDefault();
-        startLoading();
+        //startLoading();
         var row = formElement.dataset.row;
         var col = formElement.dataset.col;
         var tableCell = findScoreCell(row, col);
-        postFormCall(
-            getData().api_url + 'update/' + row + '/' + col,
-            formElement,
-            newScore => {
-                getData().scores[parseInt(row)][parseInt(col)] = newScore;
-                setupScoreElement(tableCell, newScore);
-                endLoading('matrix');
-            },
-            json => errorHandler(json),
-            false); // Not multi-part
+        var newScore = { min: scoreMinInput.value , max: scoreMaxInput.value };
+        getData().scores[parseInt(row)][parseInt(col)] = newScore;
+        setupScoreElement(tableCell, newScore);
+        //endLoading('matrix');
     });
 }
 
@@ -173,26 +167,19 @@ const initTeamNameEditForm = function() {
             return;
         }
         event.preventDefault();
-        startLoading();
+
         const isRow = _strToBool(form.dataset.is_row);
-        postFormCall(
-            getData().api_url + 'match/' + (isRow ? 'row' : 'col') + '/army',
-            form,
-            newMatch => {
-                getData().match = newMatch;
+        const newName = form.querySelector('#new_team_name').value;
+        const matchAttr = isRow ? 'row_team' : 'column_team';
+        getData().match[matchAttr] = newName;
 
-                // Update team names
-                const newName = isRow ? newMatch.row_team : newMatch.column_team;
-                findTeamNameElement(isRow).textContent = newName;
-                _getScoreEditFormElement().querySelector(isRow ? '#row_team' : '#col_team').textContent = newName;
-                updateTablesTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
-                updateTableAssignmentTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
-                // TODO: update other places
+        // Update team names
+        findTeamNameElement(isRow).textContent = newName;
+        _getScoreEditFormElement().querySelector(isRow ? '#row_team' : '#col_team').textContent = newName;
+        updateTablesTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
+        updateTableAssignmentTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
+        // TODO: update other places
 
-                endLoading('matrix');
-            },
-            json => errorHandler(json),
-            false); // Not multi-part
     });
 };
 
@@ -224,25 +211,19 @@ const initArmyNameEditForm = function() {
             return;
         }
         event.preventDefault();
-        startLoading();
+        //startLoading();
         const isRow = _strToBool(form.dataset.is_row);
-        const index = parseInt(form.dataset.index);
-        postFormCall(
-            getData().api_url + 'army/' + (isRow ? 'row' : 'col') + '/' + index.toFixed(),
-            form,
-            newArmy => {
-                if (newArmy.row) {
-                    getData().row_armies[newArmy.index] = newArmy.name;
-                } else {
-                    getData().col_armies[newArmy.index] = newArmy.name;
-                }
-                findArmyNameCell(newArmy.row, newArmy.index).textContent = newArmy.name;
-                updateTableAssignmentArmyName(null /* default */, newArmy.row, newArmy.index, newArmy.name);
-                // TODO: update other places
-                endLoading('matrix');
-            },
-            json => errorHandler(json),
-            false); // Not multi-part
+        const index = parseInt(form.dataset.index); // Army index
+        var newName = form.querySelector('#new_army_name').value;
+        if (isRow) {
+            getData().row_armies[index] = newName;
+        } else {
+            getData().col_armies[index] = newName;
+        }
+        findArmyNameCell(isRow, index).textContent = newName;
+        updateTableAssignmentArmyName(null /* default */, isRow, index, newName);
+        // TODO: update other places
+        //endLoading('matrix');
     });
 };
 

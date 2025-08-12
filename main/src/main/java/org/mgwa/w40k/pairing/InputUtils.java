@@ -1,6 +1,5 @@
 package org.mgwa.w40k.pairing;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -15,22 +14,6 @@ import java.util.zip.ZipInputStream;
 public class InputUtils {
 
     private InputUtils() {} // Utility class
-
-    static Path checkReadablePath(String argument) {
-        try {
-            Path filePath = Paths.get(argument);
-            File file = filePath.toFile();
-            if (file.isFile() && file.canRead()) {
-                return filePath;
-            }
-            else {
-                throw new IllegalArgumentException(String.format("The path %s is not a file or can not be read", filePath));
-            }
-        }
-        catch (InvalidPathException ipe) {
-            throw new IllegalArgumentException(String.format("The argument %s is an invalid path", argument));
-        }
-    }
 
     /**
      * @param args All arguments

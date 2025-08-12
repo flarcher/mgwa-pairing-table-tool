@@ -10,7 +10,6 @@ import org.mgwa.w40k.pairing.api.resource.MatrixResource;
 import org.mgwa.w40k.pairing.api.service.MatrixService;
 import org.mgwa.w40k.pairing.api.service.PairingService;
 import org.mgwa.w40k.pairing.api.service.StatusService;
-import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import java.util.Objects;
@@ -22,13 +21,11 @@ public class AppServer extends Application<AppConfiguration> {
 
     private static final Logger logger = LoggerSupplier.INSTANCE.getLogger();
 
-    private final AppState state;
     private final Runnable onExit;
     private Environment environment;
     private ConfigurationHealthCheck configurationHealthCheck;
 
-    public AppServer(AppState state, Runnable onExit) {
-        this.state = Objects.requireNonNull(state);
+    public AppServer(Runnable onExit) {
         this.onExit = Objects.requireNonNull(onExit);
     }
 
@@ -60,8 +57,8 @@ public class AppServer extends Application<AppConfiguration> {
         this.environment = environment;
 
         // Services
-        PairingService pairingService = new PairingService(state);
-        MatrixService matrixService = new MatrixService(state);
+        PairingService pairingService = new PairingService();
+        MatrixService matrixService = new MatrixService();
         StatusService statusService = new StatusService(() -> {
             logger.info("Scheduling stop");
             stopFromAnotherTread();
@@ -72,7 +69,7 @@ public class AppServer extends Application<AppConfiguration> {
         // ByPass CORS security filtering
         environment.jersey().register(new AllowAllOriginsResponseFilter());
         // Register API resources
-        environment.jersey().register(new MatrixResource(state, pairingService, matrixService));
+        environment.jersey().register(new MatrixResource(matrixService));
         environment.jersey().register(new AnalysisResource(pairingService));
         environment.jersey().register(new AppResource(statusService));
 

@@ -3,7 +3,6 @@ package org.mgwa.w40k.pairing.api.service;
 import org.mgwa.w40k.pairing.*;
 import org.mgwa.w40k.pairing.api.model.*;
 import org.mgwa.w40k.pairing.matrix.Matrix;
-import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import java.util.*;
@@ -18,11 +17,7 @@ import java.util.stream.Collectors;
 public class PairingService {
 
     private static final Logger LOGGER = LoggerSupplier.INSTANCE.getLogger();
-    public PairingService(AppState state) {
-        this.state = state;
-    }
-
-    private final AppState state;
+    public PairingService() { }
 
     private static Optional<Army> getArmy(Matrix matrix, ArmyReference ref) {
         if (!ref.isValid()) {
@@ -107,8 +102,7 @@ public class PairingService {
         return new PairingResponseItem(pair.getScore(), rowRef, columnRef);
     }
 
-    public List<PairingResponseItem> estimatePairing(PairingRequest request) {
-        Matrix matrix = getMatrix();
+    public List<PairingResponseItem> estimatePairing(Matrix matrix, PairingRequest request) {
         PairingGuidance guidance = getGuidance(matrix, request);
         Assignment assignment = getAssignment(matrix, request.getAssignedPairs());
         SortedSet<ScoredPair> result = guidance.suggestPairing(assignment);
@@ -117,8 +111,4 @@ public class PairingService {
             .collect(Collectors.toList());
     }
 
-    public Matrix getMatrix() {
-        return state.getMatrix()
-            .orElseThrow(() -> ServiceUtils.internalError("No matrix defined yet"));
-    }
 }

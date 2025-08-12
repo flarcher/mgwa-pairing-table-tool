@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.mgwa.w40k.pairing.api.AppServer;
-import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 import org.mgwa.w40k.pairing.web.WebAppUtils;
 
@@ -46,15 +45,6 @@ public final class Main {
         LOGGER.severe(message);
         System.exit(1); // This is the end!
         return new IllegalArgumentException(message); // We cheat with the java compiler ;)
-    }
-
-    private static Path getMatrixPath(String argument) {
-        try {
-            return InputUtils.checkReadablePath(argument);
-        }
-        catch (IllegalArgumentException iae) {
-            throw handleInputError(iae.getMessage());
-        }
     }
 
     // Check and auto-setup of server configuration file
@@ -208,12 +198,6 @@ public final class Main {
 
     public static void main(String[] args) {
 
-        // Initialize the application state
-        AppState state = new AppState();
-        InputUtils.getArgumentAt(args, 0)
-                .map(Main::getMatrixPath)
-                .ifPresent(state::setMatrixFilePath);
-
         // Prepare local cache directory
         Path appDir = prepareLocalDirectory();
 
@@ -239,7 +223,7 @@ public final class Main {
         });
 
         // Start the server API
-        AppServer server = new AppServer(state, () -> {
+        AppServer server = new AppServer(() -> {
             // Cleans the web-app files up
             cleanUpWebApp(webAppTargetFolder);
             // Logs cleaning

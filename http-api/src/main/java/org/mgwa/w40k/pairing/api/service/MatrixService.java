@@ -6,13 +6,9 @@ import org.mgwa.w40k.pairing.matrix.Matrix;
 import org.mgwa.w40k.pairing.matrix.MatrixReader;
 import org.mgwa.w40k.pairing.matrix.MatrixWriter;
 import org.mgwa.w40k.pairing.matrix.Score;
-import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixReader;
-import org.mgwa.w40k.pairing.matrix.xls.XlsMatrixWriter;
-import org.mgwa.w40k.pairing.state.AppState;
 import org.mgwa.w40k.pairing.util.LoggerSupplier;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,25 +28,9 @@ public class MatrixService {
     private static final int MAX_ARMY_COUNT = 10;
     private static final int MAX_ARMY_NAME_LENGTH = 25;
 
-    public MatrixService(AppState state) {
-        this.state = state;
-    }
+    public MatrixService() { }
 
-    private final AppState state;
-
-    private Optional<Matrix> loadMatrixFile(Path path) {
-        // Waiting loading the file
-        try (MatrixReader matrixReader = XlsMatrixReader.fromFile(path.toFile())) {
-            Matrix matrix = matrixReader.get();
-            LOGGER.info(String.format("Using matrix of size %s", matrix.getSize()));
-            return Optional.of(matrix);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Impossible to read file", e);
-            return Optional.empty();
-        }
-    }
-
-    public void setTeamNames(String rowsTeamName, String columnsTeamName) {
+    public void checkTeamNames(String rowsTeamName, String columnsTeamName) {
         String trimedRowsTeamName = ServiceUtils.trimName(rowsTeamName);
         String trimedColsTeamName = ServiceUtils.trimName(columnsTeamName);
         Stream.of(trimedRowsTeamName, trimedColsTeamName).forEach(name -> {
@@ -61,8 +41,6 @@ public class MatrixService {
         if (trimedRowsTeamName.equalsIgnoreCase(trimedColsTeamName)) {
             throw ServiceUtils.badRequest("Team names must be different");
         }
-        state.setRowTeamName(trimedRowsTeamName);
-        state.setColTeamName(trimedColsTeamName);
     }
 
     private Matrix resetMatrix(Integer armyCount, Score defaultScore) {
@@ -77,8 +55,6 @@ public class MatrixService {
         if (matrix.getSize() != armyCount) {
             throw ServiceUtils.internalError("Inconsistent army count");
         }
-        state.setArmyCount(armyCount);
-        state.setMatrix(matrix);
         return matrix;
     }
 
@@ -121,11 +97,7 @@ public class MatrixService {
             throw ServiceUtils.badRequest("File name is mandatory for upload");
         }
         LOGGER.info(String.format("Reading file %s", fileName));
-        Matrix newMatrix = readMatrix(fileStream, fileName);
-        state.setMatrix(newMatrix);
-        state.setArmyCount(newMatrix.getSize());
-        state.setMatrixFilePath(Path.of(fileName)); // Does not provide the folder :/
-        return newMatrix;
+        return readMatrix(fileStream, fileName);
     }
 
     public Matrix setupMatrix(
@@ -145,47 +117,29 @@ public class MatrixService {
         }
     }
 
-    public void updateScore(int row, int column, Score newScore) {
-        int armyCount = state.getArmyCount();
-        Stream.of( row, column ).forEach( index -> {
-            if (index < 0 || index >= armyCount) {
-                throw ServiceUtils.badRequest("Invalid index " + index);
-            }
-        });
-        state.getMatrix().ifPresent(m -> {
-            m.setScore(row, column, newScore);
-        });
-    }
-
-    public void updateTeamName(boolean isRow, String givenName) {
+    public Optional<Army> updateArmyName(Optional<Matrix> matrix, boolean isRow, int index, String givenName) {
         String newName = ServiceUtils.trimName(givenName);
-        Optional.of(newName).ifPresent(isRow ? state::setRowTeamName : state::setColTeamName);
-    }
-
-    public Optional<Army> updateArmyName(boolean isRow, int index, String givenName) {
-        String newName = ServiceUtils.trimName(givenName);
-        Optional<Army> newArmy = state.getMatrix()
+        Optional<Army> newArmy = matrix
                 .map(m -> m.getArmies(isRow))
                 .filter(list -> list.size() > index)
                 .map(list -> list.get(index))
                 .map(oldArmy -> Army.renamed(oldArmy, newName));
         newArmy.ifPresent(army -> {
-                List<Army> armies = state.getMatrix().get().getArmies(isRow);
+                Matrix m = matrix.get();
+                List<Army> armies = m.getArmies(isRow);
                 List<Army> collect = IntStream.range(0, armies.size())
                         .mapToObj(i -> i == index ? army : armies.get(i))
                         .collect(Collectors.toList());
-                state.getMatrix().get().setArmies(isRow, collect);
+                m.setArmies(isRow, collect);
             });
         return newArmy;
     }
 
-    public void writeExcelFile(OutputStream os, FileExtensionSupport support) throws IOException {
-        if (state.getMatrix().isPresent()) {
-            BufferedOutputStream bos = new BufferedOutputStream(os);
-            MatrixWriter xlsMatrixWriter = support.getFactory().getWriterBuilder().newWriter(bos);
-            xlsMatrixWriter.write(state.getMatrix().get());
-            bos.flush();
-            // No `bos.close()`
-        }
+    public void writeExcelFile(Matrix matrix, OutputStream os, FileExtensionSupport support) throws IOException {
+        BufferedOutputStream bos = new BufferedOutputStream(os);
+        MatrixWriter xlsMatrixWriter = support.getFactory().getWriterBuilder().newWriter(bos);
+        xlsMatrixWriter.write(matrix);
+        bos.flush();
+        // No `bos.close()`
     }
 }
