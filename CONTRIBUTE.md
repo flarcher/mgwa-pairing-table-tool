@@ -1,8 +1,21 @@
-# How to contribute
+# About contributing
 
-This article is about contributing to the project.
+- About the [offline mode](#offline)
+- About the [bundle mode](#bundle)
+- [The release process](#release)
+___
 
-## Design
+Here are details about different modes:
+
+## <a name="offline"></a> Offline mode
+
+This mode can be packaged as a ZIP archive.
+
+For any use, open the `index.html` of the archive using a web browser (having the other files in the same folder).
+
+Here is [the source folder](web-app/src/main/webapp/) and [the packaging script](./pack-web.sh).
+
+## <a name="bundle"></a> Bundled mode
 
 The entrypoint is located in [the Main class in the main module](main/src/main/java/org/mgwa/w40k/pairing/Main.java).
 
@@ -17,13 +30,13 @@ Here is a description of the Maven modules:
 | matrix-xls | It implements the reading of a score matrix from an Excel file.                            |
 | package    | Technical module that cares about the packaging of the project.                            |
 
-## Requirements
+### Requirements
 
 In order to build the project, you will need:
 * A [JDK](https://jdk.java.net/) version 17 or more
 * [Apache Maven](https://maven.apache.org/) version 3.8.6 or more
 
-## Fast run
+### Fast run
 
 In the development process, we can quickly run the application with the following steps:
 
@@ -34,15 +47,15 @@ The last step can be replaced with the launch of the `launch.sh` script from the
 
 If a code update is only related to [the web application files](web-app/src/main/webapp) then the script `update-web-app.sh` would update the web files in the local cache folder. A page reload would then show the result, as long as the API is still running.  
 
-## Fat JAR packaging 
+### Fat JAR packaging 
 
 In order to run the project using a _fat JAR file_:
 
-1. Run `mvn package -Ppack` in order to generate a _fat JAR file_ and run unit-tests.
+1. Run `mvn package -Ppack` in order to generate a _fat JAR file_ and run unit-tests (see [pack-bundle.sh](./pack-bundle.sh)).
 2. Go to the `target` folder
 3. Call either `start.sh` from Linux/Mac-OS, or `start.bat` from Windows.
 
-## <a name="installer"></a> Creating an installer
+### <a name="installer"></a> Creating an installer
 
 In order to generate an installer on Linux, you will also need:
 
@@ -59,7 +72,9 @@ mvn package -Dmake.installer -Djdk.home=__
 * The installer is only compatible with the current OS
 * It can take more than one minute for the processing
 
-## Release process
+___
+
+## <a name="release"></a> Release process
 
 In the process below, we should write `__` instead of the tag name that is also the semantic version of the release (e.g. `0.2`).
 

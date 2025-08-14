@@ -21,3 +21,5 @@ release.properties
 # Dumps and remaining logs when testing
 main/*.log
 
+# Packaging outputs
+*.zip
