@@ -3,11 +3,12 @@
 var intervalId = null; // Interval used for API presence checks
 
 // Statuses
+var offline = true;
 var started = false;
 var exited = false;
 
 // API call without payload
-const triggerApi = (method, path, thenFn, errorFn) => {
+const _triggerApi = (method, path, thenFn, errorFn) => {
     fetch(new Request(
         (getData().api_url || getApiUrl()) + path,
         { method: method })
@@ -19,20 +20,26 @@ const triggerApi = (method, path, thenFn, errorFn) => {
         }
     })
     .catch((error) => {
-        console.error("API call error");
+        console.warn("API call error: " + error);
         errorFn();
     });
 };
 
-const watchForStatus = function(onStart, onExit) {
-    // onExit wrapper
-    const exiting = () => {
+const _setServerMode = (is_offline) => {
+    offline = is_offline;
+    getData().offline = is_offline;
+}
+_setServerMode(true);
+
+const watchForStatus = function(onStart, onExit, onError) {
+
+    // clear of interval
+    const _clear = () => {
         if (!exited) {
             exited = true;
             if (intervalId) {
                 clearInterval(intervalId);
             }
-            onExit();
         }
     };
 
@@ -41,32 +48,41 @@ const watchForStatus = function(onStart, onExit) {
         e.preventDefault(); // Will prompt the confirmation window
         e.returnValue = false; // Legacy browser support
 
-        /*
-        var confirmed = confirm("Are you sure to stop the application?");
-        if (confirmed) {
-        */
+        if (!confirm("Are you sure to stop the application?")) {
+            return; // Nothing to do
+        }
+
+        _clear();
+
+        if (offline) {
+            console.info("Closing in offline mode");
+            return; // Nothing to do
+        } else {
+            _setServerMode(true);
+        }
+
         // Request to stop the API server
-        triggerApi('POST', 'app/exit',
+        _triggerApi('POST', 'app/exit',
             {}, // No request body
             () => { // Exit ok
-                exiting();
+                onExit();
                 console.log("Stopped the API");
             },
             () => { // Exit fails
-                exiting();
+                onExit();
                 console.warn("Failed to ask for API stop");
             });
-        /*}*/
     });
 
     // Checking for API presence on a regular basis
     intervalId = setInterval(() => {
-        triggerApi('GET', 'app/alive',
+        _triggerApi('GET', 'app/alive',
             (response) => {
                 var status = response.headers.get("X-Status");
                 if (!status) {
                     console.error("No status header found in response");
                 } else {
+                    _setServerMode(false);
                     switch (status) {
                         case "initializing":
                             console.log("Not ready yet ...")
@@ -78,12 +94,24 @@ const watchForStatus = function(onStart, onExit) {
                             }
                             break;
                         case "exiting":
-                            exiting();
+                            _clear();
+                            _setServerMode(true);
+                            onExit();
                             break;
                     }
                 }
             },
-            (error) => { exiting(); })
+            (error) => { 
+                _clear();
+                _setServerMode(true);
+                if (!offline) {
+                    // Here, the server was probably shut down: -> clean exit
+                    onExit();
+                } else {
+                    // Occurs when no server is available
+                    onError();
+                }
+            })
         }, 2500); // Delay in milliseconds
 };
 

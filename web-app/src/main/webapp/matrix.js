@@ -100,14 +100,17 @@ const initScoreEditForm = function() {
             return;
         }
         event.preventDefault();
-        //startLoading();
+        startLoading();
         var row = formElement.dataset.row;
         var col = formElement.dataset.col;
         var tableCell = findScoreCell(row, col);
-        var newScore = { min: scoreMinInput.value , max: scoreMaxInput.value };
+        var newScore = {
+            min: parseInt(scoreMinInput.value),
+            max: parseInt(scoreMaxInput.value)
+        };
         getData().scores[parseInt(row)][parseInt(col)] = newScore;
         setupScoreElement(tableCell, newScore);
-        //endLoading('matrix');
+        endLoading('matrix');
     });
 }
 
@@ -211,7 +214,7 @@ const initArmyNameEditForm = function() {
             return;
         }
         event.preventDefault();
-        //startLoading();
+        startLoading();
         const isRow = _strToBool(form.dataset.is_row);
         const index = parseInt(form.dataset.index); // Army index
         var newName = form.querySelector('#new_army_name').value;
@@ -223,7 +226,7 @@ const initArmyNameEditForm = function() {
         findArmyNameCell(isRow, index).textContent = newName;
         updateTableAssignmentArmyName(null /* default */, isRow, index, newName);
         // TODO: update other places
-        //endLoading('matrix');
+        endLoading('matrix');
     });
 };
 
