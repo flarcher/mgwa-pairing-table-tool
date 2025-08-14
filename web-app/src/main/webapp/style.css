@@ -388,6 +388,7 @@ nav > a.selected, nav > a.selected:hover {
 	background-color: var(--bg-color);
 	color: var(--main-em-color);
 	/*border-color: var(--border-color) var(--border-color) var(--bg-color) var(--border-color);*/
+	padding-bottom: calc(var(--border-width) * 2);
 }
 nav > a:hover {
 	text-decoration: none;
