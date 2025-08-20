@@ -181,6 +181,7 @@ const initTeamNameEditForm = function() {
         _getScoreEditFormElement().querySelector(isRow ? '#row_team' : '#col_team').textContent = newName;
         updateTablesTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
         updateTableAssignmentTeamNames(null /* Use default */, newMatch.row_team, newMatch.column_team);
+        refreshTeamChoiceNames();
         // TODO: update other places
 
     });

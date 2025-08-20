@@ -21,7 +21,7 @@
     <nav class="hidden">
       <a data-target="init">Reset</a>
       <a data-target="matrix">Score matrix</a>
-      <!--a data-target="assign">Assign</a-->
+      <a data-target="assign">Matchup assignment</a>
       <a data-target="tables">Tables dispatch</a>
       <a data-target="export">Downloads</a>
     </nav>
@@ -93,36 +93,97 @@
           </table>
       </div>
 
-      <!--div id="assign">
-        <div class="teams">
-          <label>Teams:</label>
-          <div class="name">
-            <span class="left"></span>
-            <span class="right"></span>
-          </div>
-        </div>
-        <div class="defender">
-          <label>Defender:</label>
-          <div class="choice">
-            <span class="left">TODO</span>
-            <span class="right">TODO</span>
-          </div>
-        </div>
-        <div class="attacker">
-          <label>Attacker n°1:</label>
-          <div class="choice">
-            <span class="left">TODO</span>
-            <span class="right">TODO</span>
-          </div>
-        </div>
-        <div class="attacker">
-          <label>Attacker n°2:</label>
-          <div class="choice">
-            <span class="left">TODO</span>
-            <span class="right">TODO</span>
-          </div>
-        </div>
-      </div-->
+      <div id="assign">
+        <form class="subform" id="assign_context">
+          <fieldset>
+            <legend>Team side</legend>
+            <div>
+              <label for="team_choice">Your team:</label>
+              <select id="team_choice" autofocus></select>
+            </div>
+          </fieldset>
+        </form>
+        <form class="subform" id="assign_defense">
+          <fieldset>
+            <legend>Defensive matchup</legend>
+            <div>
+              <label for="your_defender">Your defender:</label>
+              <select id="your_defender" class="right"></select>
+            </div>
+            <div>
+              <label for="your_table">Your table choice:</label>
+              <select id="your_table" class="right"></select>
+            </div>
+            <div>
+              <label for="their_attacker_1">Opponent attacker 1:</label>
+              <select id="their_attacker_1" class="right"></select>
+            </div>
+            <div>
+              <label for="their_attacker_2">Opponent attacker 2:</label>
+              <select id="their_attacker_2" class="right"></select>
+            </div>
+            <div><fieldset>
+              <legend>Your attacker choice:</legend>
+              <div>
+                <input type="radio" id="your_attacker_choice_1" name="attacker_one" value="one" checked />
+                <label for="your_attacker_choice_1"></label>
+              </div>
+              <div>
+                <input type="radio" id="your_attacker_choice_2" name="attacker_two" value="two" />
+                <label for="your_attacker_choice_2"></label>
+              </div>
+            </fieldset></div>
+            <input type="submit" value="Assign table"/>
+          </fieldset>
+        </form>
+        <form class="subform" id="assign_attack">
+          <fieldset>
+            <legend>Attack matchup</legend>
+            <div>
+              <label for="their_defender">Opponent defender:</label>
+              <select id="their_defender" class="right"></select>
+            </div>
+            <div>
+              <label for="their_table">Opponent table choice:</label>
+              <select id="their_table" class="right"></select>
+            </div>
+            <div>
+              <label for="your_attacker_1">Your attacker 1:</label>
+              <select id="your_attacker_1" class="right"></select>
+            </div>
+            <div>
+              <label for="your_attacker_2">Your attacker 2:</label>
+              <select id="your_attacker_2" class="right"></select>
+            </div>
+            <div><fieldset>
+              <legend>Their attacker choice:</legend>
+              <div>
+                <input type="radio" id="their_attacker_choice_1" name="attacker_one" value="one" checked />
+                <label for="their_attacker_choice_1"></label>
+              </div>
+              <div>
+                <input type="radio" id="their_attacker_choice_2" name="attacker_two" value="two" />
+                <label for="their_attacker_choice_2"></label>
+              </div>
+            </fieldset></div>
+            <input type="submit" value="Assign table"/>
+          </fieldset>
+        </form>
+        <form class="subform" id="assign_remaining">
+          <fieldset>
+            <legend>Remaining tables</legend>
+            <div>
+              <label for="rejected_attackers_table">Rejected attackers table:</label>
+              <select id="rejected_attackers_table" class="right"></select>
+            </div>
+            <div>
+              <label for="last_table">Last matchup table:</label>
+              <span id="last_table" class="right"></span>
+            </div>
+            <input type="submit" value="Assign tables"/>
+          </fieldset>
+        </form>
+      </div>
 
       <div id="tables">
         <div class="teams">

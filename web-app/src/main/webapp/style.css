@@ -218,7 +218,7 @@ form {
 	--score-input-width: 50px;
 	--score-input-height: 20px;
 }
-form > fieldset {
+fieldset {
 	margin: var(--form-spacing) auto;
 	border-radius: var(--border-radius);
 }
@@ -274,9 +274,10 @@ form div > input[type = "number"],
 form span.score {
 	width: var(--score-input-width);
 	height: var(--score-input-height);
+	line-height: var(--score-input-height);
 }
 form span.score {
-	font-family: auto; /* For consistency with inputs */
+	font-family: monospace;
 }
 /*=== Score matrix ===*/
 tr > td.name {
@@ -520,4 +521,17 @@ nav > a:hover {
 }
 #assign_table form label.left {
 	max-width: calc(50% - 10px);
+}
+/*=== Matchup assignment ===*/
+fieldset > div > fieldset {
+	margin: 0;
+	text-align: left;
+}
+#assign {
+	margin: -10px;
+	contain: layout;
+}
+#assign > form.subform {
+	margin: 10px;
+	float: left;
 }

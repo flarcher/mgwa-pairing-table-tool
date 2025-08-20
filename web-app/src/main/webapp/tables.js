@@ -11,6 +11,9 @@ const _isArmyIndex = (i) => i > NO_ARMY_INDEX;
 // Tells if a table object is considered 'assigned' to armies.
 const _isAssigned  = (t) => _isArmyIndex(t.row_army) && _isArmyIndex(t.col_army);
 
+const isTableAssigned = (table) => _isAssigned(table);
+const getRemainingTables = (tables) => (tables || getData().tables).filter((t) => !_isAssigned(t));
+
 const _getTableOf = (tables, index) => {
     if (!isDefined(index) || index < 0) {
         return _defaultTable(index); // Robustness on purpose
@@ -101,13 +104,13 @@ const _refreshTableContent = (table) => {
         });
 };
 
-// Assignment logic (All arguments are strings)
-const _assignTable = (tableIndex, rowArmyIndex, colArmyIndex) => {
+// Assignment logic (All arguments are numbers)
+const assignTable = (tableIndex, rowArmyIndex, colArmyIndex) => {
     // Update data
-    let table = _getTableOf(getData().tables, parseInt(tableIndex));
+    let table = _getTableOf(getData().tables, tableIndex);
     let oldTable = structuredClone(table);
-    table.row_army = parseInt(rowArmyIndex);
-    table.col_army = parseInt(colArmyIndex);
+    table.row_army = rowArmyIndex;
+    table.col_army = colArmyIndex;
     let newTable = structuredClone(table);
     // Update badges
     refreshBadges();
@@ -115,6 +118,11 @@ const _assignTable = (tableIndex, rowArmyIndex, colArmyIndex) => {
     assignMatrixScore(_isAssigned(oldTable) ? oldTable : null, newTable);
     // Updates corresponding elements in <div id="tables">
     _refreshTableContent(newTable);
+};
+
+// Assignment logic (All arguments are strings)
+const _assignTable = (tableIndex, rowArmyIndex, colArmyIndex) => {
+    assignTable(parseInt(tableIndex), parseInt(rowArmyIndex), parseInt(colArmyIndex));
 };
 
 // Unassignment logic (All arguments are strings)

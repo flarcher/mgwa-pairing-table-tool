@@ -31,7 +31,7 @@ const toInitSection = function () {
 var refreshBadges = function () {
     const memberCount = getData().match.team_member_count;
     const pairCount = getPairCount(getData().tables);
-    const stepCounts = getStepCounts(memberCount, pairCount)
+    const stepCounts = getStepCounts(memberCount, pairCount);
 
     const stepsLabel = stepCounts[0].toFixed() + "/" + stepCounts[1].toFixed();
     const pairsLabel = pairCount.toFixed() + "/" + memberCount.toFixed();
@@ -116,6 +116,7 @@ var onNewState = function (json) {
     initTeamNameEditForm();
     initArmyNameEditForm();
     initTableAssignmentForm();
+    initMatchupForms();
     // Refresh the DOM
     refreshMatchForm();
     refreshMatrix();
