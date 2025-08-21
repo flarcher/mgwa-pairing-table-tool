@@ -79,7 +79,6 @@ var refreshAssignmentArmyName = (isRow, index, newName) => {
     var youAreRows = _isRow();
     var isYou = (youAreRows && isRow) || (!youAreRows && !isRow);
     const indexAsStr = index.toString();
-    const _getLabel = (radio) => radio.parentElement.querySelector('label');
     const _updateSelect = (select) => {
         Array.from(select.querySelectorAll('option'))
             .filter(option => option.value == indexAsStr)
@@ -89,9 +88,11 @@ var refreshAssignmentArmyName = (isRow, index, newName) => {
     };
     const _updateChoice = (radioInput, selectInput) => {
         if (selectInput.value == indexAsStr) {
-            _updateAttackerChoiceLabel(_getLabel(radioInput), selectInput, isRow);
+            const radioLabel = radioInput.parentElement.querySelector('label');
+            radioLabel.textContent = newName;
         }
     };
+    let container = _getMatchupFormContainer();
     if (isYou) {
         const yourDefenderSelect = container.querySelector("#your_defender");
         const yourAttackSelect1 = container.querySelector("#your_attacker_1");
@@ -162,14 +163,6 @@ var _getArmyName = (isRow, index) => {
     return army_names[index];
 };
 
-var _updateAttackerChoiceLabel = (radioLabel, armyIndexValue, isRow) => {
-    if (armyIndexValue != UNDEFINED_OPTION_VALUE) {
-        radioLabel.textContent = _getArmyName(isRow, parseInt(armyIndexValue));
-    } else {
-        radioLabel.textContent = UNDEFINED_OPTION_NAME;
-    }
-};
-
 var _initAttackerChoice = (isYours, selects, radioInputs, hintElement) => {
     if (selects.length != radioInputs.length) {
         throw "Same length required";
@@ -187,7 +180,11 @@ var _initAttackerChoice = (isYours, selects, radioInputs, hintElement) => {
             }
             var yourAreRows = scope._isRow();
             var _isRow = isYours ? yourAreRows : !yourAreRows;
-            _updateAttackerChoiceLabel(radioLabel, selectValue, _isRow);
+            if (selectValue != UNDEFINED_OPTION_VALUE) {
+                radioLabel.textContent = _getArmyName(_isRow, parseInt(selectValue));
+            } else {
+                radioLabel.textContent = UNDEFINED_OPTION_NAME;
+            }
             switchHidden(radioDiv, selectValue == UNDEFINED_OPTION_VALUE);
             switchHidden(hintElement, !all.every(s => s.value == UNDEFINED_OPTION_VALUE));
         };
