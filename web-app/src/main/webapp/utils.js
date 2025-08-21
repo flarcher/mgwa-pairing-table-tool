@@ -32,6 +32,10 @@ const switchClass = (element, styleClass, enabled = true) => {
     }
 };
 
+const switchHidden = (element, isHidden) => {
+    switchClass(element, 'hidden', isHidden);
+};
+
 const getParentData = (startingElement, dataSetKey) => {
     var element = startingElement;
     while (element != null) {
@@ -42,6 +46,17 @@ const getParentData = (startingElement, dataSetKey) => {
             element = element.parentElement;
         }
     }
+};
+
+// For a full JS handling of a form
+const addSubmitListener = (formElement, listener) => {
+    formElement.addEventListener("submit", event => {
+        if (!event.target.checkValidity()) {
+            return;
+        }
+        event.preventDefault();
+        listener();
+    });
 };
 
 /*

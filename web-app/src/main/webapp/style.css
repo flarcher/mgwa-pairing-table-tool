@@ -120,17 +120,14 @@ em, .name {
 	position: relative;
 	font-variant: normal;
 	color: grey;
-	padding: 3px 0;
-	margin: 15px 0;
+	padding: 4px 0 3px 18px;
+	width: auto;
 }
 .hint:before {
 	content: "🛈";
 	position: absolute;
 	left: 5px;
 	top: 1px;
-}
-form > .hint, fieldset > .hint {
-	margin: 0;
 }
 a.download, a.submit {
 	display: inline-block;
@@ -524,7 +521,7 @@ nav > a:hover {
 }
 /*=== Matchup assignment ===*/
 fieldset > div > fieldset {
-	margin: 0;
+	margin: 0 -1px;
 	text-align: left;
 }
 #assign {
@@ -534,4 +531,12 @@ fieldset > div > fieldset {
 #assign > form.subform {
 	margin: 10px;
 	float: left;
+}
+#assign > form.subform label {
+	margin-right: 5px;
+}
+fieldset input[type="radio"] + label {
+	font-variant: none;
+	font-style: italic;
+	text-transform: capitalize;
 }

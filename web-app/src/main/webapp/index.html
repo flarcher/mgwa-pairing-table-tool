@@ -125,13 +125,14 @@
             <div><fieldset>
               <legend>Your attacker choice:</legend>
               <div>
-                <input type="radio" id="your_attacker_choice_1" name="attacker_one" value="one" checked />
+                <input type="radio" id="your_attacker_choice_1" name="their_attacker" value="one" checked required/>
                 <label for="your_attacker_choice_1"></label>
               </div>
               <div>
-                <input type="radio" id="your_attacker_choice_2" name="attacker_two" value="two" />
+                <input type="radio" id="your_attacker_choice_2" name="their_attacker" value="two" />
                 <label for="your_attacker_choice_2"></label>
               </div>
+              <div class="hint">Please select an attacker</div>
             </fieldset></div>
             <input type="submit" value="Assign table"/>
           </fieldset>
@@ -158,13 +159,14 @@
             <div><fieldset>
               <legend>Their attacker choice:</legend>
               <div>
-                <input type="radio" id="their_attacker_choice_1" name="attacker_one" value="one" checked />
+                <input type="radio" id="their_attacker_choice_1" name="your_attacker" value="one" checked required/>
                 <label for="their_attacker_choice_1"></label>
               </div>
               <div>
-                <input type="radio" id="their_attacker_choice_2" name="attacker_two" value="two" />
+                <input type="radio" id="their_attacker_choice_2" name="your_attacker" value="two" />
                 <label for="their_attacker_choice_2"></label>
               </div>
+              <div class="hint">Please select an attacker</div>
             </fieldset></div>
             <input type="submit" value="Assign table"/>
           </fieldset>

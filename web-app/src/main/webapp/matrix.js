@@ -229,7 +229,9 @@ const initArmyNameEditForm = function() {
         }
         findArmyNameCell(isRow, index).textContent = newName;
         updateTableAssignmentArmyName(null /* default */, isRow, index, newName);
+        refreshAssignmentArmyName(isRow, index, newName);
         // TODO: update other places
+
         endLoading('matrix');
     });
 };

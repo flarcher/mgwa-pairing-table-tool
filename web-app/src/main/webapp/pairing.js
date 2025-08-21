@@ -74,8 +74,48 @@ var refreshTeamChoiceNames = function () {
     return teamChoice;
 };
 
+// Updates an army name
+var refreshAssignmentArmyName = (isRow, index, newName) => {
+    var youAreRows = _isRow();
+    var isYou = (youAreRows && isRow) || (!youAreRows && !isRow);
+    const indexAsStr = index.toString();
+    const _getLabel = (radio) => radio.parentElement.querySelector('label');
+    const _updateSelect = (select) => {
+        Array.from(select.querySelectorAll('option'))
+            .filter(option => option.value == indexAsStr)
+            .forEach(option => {
+                option.textContent = newName;
+            });
+    };
+    const _updateChoice = (radioInput, selectInput) => {
+        if (selectInput.value == indexAsStr) {
+            _updateAttackerChoiceLabel(_getLabel(radioInput), selectInput, isRow);
+        }
+    };
+    if (isYou) {
+        const yourDefenderSelect = container.querySelector("#your_defender");
+        const yourAttackSelect1 = container.querySelector("#your_attacker_1");
+        const yourAttackSelect2 = container.querySelector("#your_attacker_2");
+        [yourDefenderSelect, yourAttackSelect1, yourAttackSelect2].forEach(_updateSelect);
+        const radioTheirChoice1 = container.querySelector('#their_attacker_choice_1');
+        const radioTheirChoice2 = container.querySelector('#their_attacker_choice_2');
+        _updateChoice(radioTheirChoice1, yourAttackSelect1, isRow);
+        _updateChoice(radioTheirChoice2, yourAttackSelect2, isRow);
+    } else {
+        const theirDefenderSelect = container.querySelector("#their_defender");
+        const theirAttackSelect1 = container.querySelector("#their_attacker_1");
+        const theirAttackSelect2 = container.querySelector("#their_attacker_2");
+        [theirDefenderSelect, theirAttackSelect1, theirAttackSelect2].forEach(_updateSelect);
+        const radioYourChoice1 = container.querySelector('#your_attacker_choice_1');
+        const radioYourChoice2 = container.querySelector('#your_attacker_choice_2');
+        _updateChoice(radioYourChoice1, theirAttackSelect1, isRow);
+        _updateChoice(radioYourChoice2, theirAttackSelect2, isRow);
+    }
+};
+
 const UNDEFINED_OPTION_VALUE = '=';
 const UNDEFINED_OPTION_NAME = '- Select -';
+const UNDEFINED_VALIDITY_MESSAGE = "Please choose";
 
 var _defaultSelectOption = (select) => {
     let option = document.createElement('option');
@@ -101,9 +141,12 @@ var _initSelect = (thisSelect, othersSelect) => {
                 event.target.setCustomValidity(""); // Reset custom error
             }
         } else {
-            event.target.setCustomValidity("Please choose");
+            event.target.setCustomValidity(UNDEFINED_VALIDITY_MESSAGE);
         }
     });
+    if (thisSelect.value == UNDEFINED_OPTION_VALUE) {
+        thisSelect.setCustomValidity(UNDEFINED_VALIDITY_MESSAGE);
+    }
 };
 
 var _initSelects = (selects) => {
@@ -119,23 +162,34 @@ var _getArmyName = (isRow, index) => {
     return army_names[index];
 };
 
-var _initAttackerChoice = (isYours, selects, radioInputs) => {
+var _updateAttackerChoiceLabel = (radioLabel, armyIndexValue, isRow) => {
+    if (armyIndexValue != UNDEFINED_OPTION_VALUE) {
+        radioLabel.textContent = _getArmyName(isRow, parseInt(armyIndexValue));
+    } else {
+        radioLabel.textContent = UNDEFINED_OPTION_NAME;
+    }
+};
+
+var _initAttackerChoice = (isYours, selects, radioInputs, hintElement) => {
     if (selects.length != radioInputs.length) {
         throw "Same length required";
     }
-    selects.forEach((select, index) => {
+    const scope = this;
+    selects.forEach((select, index, all) => {
         const radioInput = radioInputs[index];
         const radioDiv = radioInput.parentElement;
         const radioLabel = radioDiv.querySelector('label');
-        const _isRow = isYours ? _isRow() : !_isRow();
         const updateRadioLabel = (selectValue) => {
             if (selectValue != UNDEFINED_OPTION_VALUE) {
-                radioDiv.classList.remove('hidden');
-                const armyIndex = parseInt(selectValue);
-                radioLabel.textContent = _getArmyName(_isRow, armyIndex);
-            } else {
-                radioDiv.classList.add('hidden');
+                if (radioInputs.filter((e, i) => i != index).every(e => !e.checked)) {
+                    radioInput.checked = true;
+                }
             }
+            var yourAreRows = scope._isRow();
+            var _isRow = isYours ? yourAreRows : !yourAreRows;
+            _updateAttackerChoiceLabel(radioLabel, selectValue, _isRow);
+            switchHidden(radioDiv, selectValue == UNDEFINED_OPTION_VALUE);
+            switchHidden(hintElement, !all.every(s => s.value == UNDEFINED_OPTION_VALUE));
         };
         select.addEventListener("change", event => {
             updateRadioLabel(event.target.value);
@@ -144,9 +198,21 @@ var _initAttackerChoice = (isYours, selects, radioInputs) => {
     });
 };
 
+var _emptyAttackerChoice = (radioInput) => {
+    const fieldset = radioInput.parentElement.parentElement;
+    Array.from(fieldset.querySelectorAll('label'))
+        .forEach(label => {
+            label.textContent = UNDEFINED_OPTION_NAME;
+            switchHidden(label.parentElement, true);
+            label.parentElement.querySelector('input').checked = false;
+        });
+    switchHidden(fieldset.querySelector("div.hint"), false);
+};
+
 var _assignMatchup = (tableIndex, rowIndex, colIndex) => {
     assignTable(tableIndex, rowIndex, colIndex); // Updates data and matrix
     refreshMatchupForms(); // Refresh the forms
+    alert("Table " + tableIndex + " has been assigned to " + _getArmyName(true, rowIndex) + " and " + _getArmyName(false, colIndex));
 };
 
 var _isFirstAttackerSelected = (radioInputs) => {
@@ -157,16 +223,21 @@ var _initMatchupSubmit = (formElement, isYourDefender, tableSelect, defenderSele
     if (attackersSelects.length != 2) {
         throw "Must have 2 attackers select";
     }
-    formElement.addEventListener("submit", event => {
-        if (!form.checkValidity()) {
-            return;
-        }
-        event.preventDefault();
-
-        const _isRowDefender = isYourDefender ? _isRow() : !_isRow();
-        const _isFirst = _isFirstAttackerSelected(radioInputs);
+    const scope = this;
+    addSubmitListener(formElement, () => {
+        const _yourAreRows = scope._isRow();
+        const _isRowDefender = isYourDefender ? _yourAreRows : !_yourAreRows;
+        const _isFirst = scope._isFirstAttackerSelected(radioInputs);
         const attackerSelect = attackersSelects[_isFirst ? 0 : 1];
-        _assignMatchup(
+        if ([attackerSelect, defenderSelect, tableSelect].filter(select => {
+            if (select.value == UNDEFINED_OPTION_VALUE) {
+                select.setCustomValidity(UNDEFINED_VALIDITY_MESSAGE);
+                return true;
+            } else { return false; }
+        }).length > 0) {
+            return; // Invalid form
+        };
+        scope._assignMatchup(
             parseInt(tableSelect.value),
             parseInt(_isRowDefender ? defenderSelect.value : attackerSelect.value),
             parseInt(_isRowDefender ? attackerSelect.value : defenderSelect.value)
@@ -177,8 +248,9 @@ var _initMatchupSubmit = (formElement, isYourDefender, tableSelect, defenderSele
 var initMatchupForms = () => {
     // Team side
     let teamChoice = refreshTeamChoiceNames();
+    const scope = this;
     teamChoice.addEventListener("change", event => {
-        let _isRow = _isRow(event.target);
+        let _isRow = scope._isRow(event.target);
         refreshMatchupForms(_isRow);
     });
     const initialIsRow = true;
@@ -209,51 +281,53 @@ var initMatchupForms = () => {
     const radioYourChoice1 = container.querySelector('#your_attacker_choice_1');
     const radioYourChoice2 = container.querySelector('#your_attacker_choice_2');
     const radioYourChoices = [radioYourChoice1, radioYourChoice2];
-    _initAttackerChoice(false, theirAttackSelects, radioYourChoices)
+    const defenseForm = _getSubForm('defense');
+    const defenseRadioHintElement = defenseForm.querySelector("div.hint");
+    _initAttackerChoice(false, theirAttackSelects, radioYourChoices, defenseRadioHintElement);
     const yourAttackSelects = [yourAttackSelect1, yourAttackSelect2];
-    const radioTheirChoice1 = container.querySelector('#your_attacker_choice_1');
-    const radioTheirChoice2 = container.querySelector('#your_attacker_choice_2');
+    const radioTheirChoice1 = container.querySelector('#their_attacker_choice_1');
+    const radioTheirChoice2 = container.querySelector('#their_attacker_choice_2');
     const radioTheirChoices = [radioTheirChoice1, radioTheirChoice2];
-    _initAttackerChoice(true, yourAttackSelects, radioTheirChoices)
+    const attackForm = _getSubForm('attack');
+    const attackRadioHintElement = attackForm.querySelector("div.hint");
+    _initAttackerChoice(true, yourAttackSelects, radioTheirChoices, attackRadioHintElement);
 
     // Submits
-    const defenseForm = _getSubForm('defense');
-    _initMatchupSubmit(defenseForm, true, yourTable, theirAttackSelects, radioYourChoices);
-    const attackForm = _getSubForm('attack');
-    _initMatchupSubmit(attackForm, false, theirTable, yourAttackSelects, radioTheirChoices);
+    _initMatchupSubmit(defenseForm, true, yourTable, yourDefenderSelect, theirAttackSelects, radioYourChoices);
+    _initMatchupSubmit(attackForm, false, theirTable, theirDefenderSelect, yourAttackSelects, radioTheirChoices);
     const remainForm = _getSubForm('remaining');
-    remainForm.addEventListener("submit", event => {
-        if (!form.checkValidity()) {
-            return;
-        }
-        event.preventDefault();
-
+    addSubmitListener(remainForm, () => {
         const remainingRowArmies = getRemainingArmies(true);
         const remainingColArmies = getRemainingArmies(false);
-        var remainingTables = getRemainingTables();
+        var remainingTables = scope.getRemainingTables();
         if (remainingTables.length == 1) {
             // Obvious case: we take the last possibility only
-            _assignMatchup(remainingTables[0].index, remainingRowArmies[0], remainingColArmies[0]);
+            scope._assignMatchup(remainingTables[0].index, remainingRowArmies[0], remainingColArmies[0]);
         } else if (remainingTables.length > 1) {
             // Assign the rejected attacker
-            const _yourAreRows = _isRow();
-            const isTheirFirstAttacker = _isFirstAttackerSelected(radioYourChoices);
-            const theirAttackerIndex = theirAttackSelects[isTheirFirstAttacker ? 1 : 0].value;
-            const isYourFirstAttacker = _isFirstAttackerSelected(radioTheirChoices);
-            const yourAttackerIndex = yourAttackSelects[isYourFirstAttacker ? 1 : 0].value;
-            if (rejectedTable.value == UNDEFINED_OPTION_VALUE) {
-                throw "Undefined table index but valid form?"
-            }
+            const _yourAreRows = scope._isRow();
+            const isTheirFirstAttacker = scope._isFirstAttackerSelected(radioYourChoices);
+            const theirAttackerSelect = theirAttackSelects[isTheirFirstAttacker ? 1 : 0];
+            const isYourFirstAttacker = scope._isFirstAttackerSelected(radioTheirChoices);
+            const yourAttackerSelect = yourAttackSelects[isYourFirstAttacker ? 1 : 0];
+            if ([rejectedTable, theirAttackerSelect, yourAttackerSelect].filter(select => {
+                if (select.value == UNDEFINED_OPTION_VALUE) {
+                    select.setCustomValidity(UNDEFINED_VALIDITY_MESSAGE);
+                    return true;
+                } else { return false; }
+            }).length > 0) {
+                return; // Invalid form
+            };
             const tableIndex = parseInt(rejectedTable.value);
-            const rowArmyIndex = _yourAreRows ? yourAttackerIndex : theirAttackerIndex;
-            const colArmyIndex = _yourAreRows ? theirAttackerIndex : yourAttackerIndex;
-            _assignMatchup(tableIndex, rowArmyIndex, colArmyIndex);
+            const rowArmyIndex = parseInt(_yourAreRows ? yourAttackerSelect.value : theirAttackerSelect.value);
+            const colArmyIndex = parseInt(_yourAreRows ? theirAttackerSelect.value : yourAttackerSelect.value);
+            scope._assignMatchup(tableIndex, rowArmyIndex, colArmyIndex);
             remainingTables = remainingTables.filter(t => t.index != tableIndex);
             if (remainingTables.length == 1) {
                 // Also assign the last table automatically
                 let remainingRowArmyIndex = remainingRowArmies.find(a => a != rowArmyIndex);
                 let remainingColArmyIndex = remainingColArmies.find(a => a != colArmyIndex);
-                _assignMatchup(remainingTables[0].index, remainingRowArmyIndex, remainingColArmyIndex);
+                scope._assignMatchup(remainingTables[0].index, remainingRowArmyIndex, remainingColArmyIndex);
             }
         } else {
             console.error("No remaining table?");
@@ -263,12 +337,12 @@ var initMatchupForms = () => {
     // last table label
     const lastTableLabel = remainForm.querySelector("#last_table");
     const tableSelects = [yourTable, theirTable, rejectedTable];
-    tableSelects.forEach( (select) => {
+    tableSelects.forEach((select) => {
         select.addEventListener("change", () => {
             const allTables = getRemainingTables().map(t => t.index);
-            if (allTables.length  == 4 && tableSelects.every(select => select.value != UNDEFINED_OPTION_VALUE)) {
+            if (allTables.length == 4 && tableSelects.every(select => select.value != UNDEFINED_OPTION_VALUE)) {
                 const selectedTables = tableSelects.map(select => parseInt(select.value));
-                const remainingTableIndex = allTables.find(t => ! selectedTables.includes(t));
+                const remainingTableIndex = allTables.find(t => !selectedTables.includes(t));
                 lastTableLabel.textContent = "Table " + remainingTableIndex.toString();
             } else {
                 lastTableLabel.textContent = UNDEFINED_OPTION_NAME;
@@ -278,8 +352,7 @@ var initMatchupForms = () => {
 };
 
 var _refreshArmiesSelect = (select, isRow, indexes) => {
-    let _isRow = isRow || _isRow();
-    let remainingIndexes = indexes || getRemainingArmies(_isRow);
+    let remainingIndexes = indexes || getRemainingArmies(isRow);
     let armyNames = isRow ? getData().row_armies : getData().col_armies;
     emptyElement(select);
     remainingIndexes.forEach((index) => {
@@ -304,21 +377,16 @@ var _refreshTableSelect = (select, tables) => {
 };
 
 var _switchSubForm = (container, subId, isHidden) => {
-    let _element = container.querySelector("#assign_" + subId);
-    if (isHidden) {
-        _element.classList.add('hidden');
-    } else {
-        _element.classList.remove('hidden');
-    }
+    switchHidden(container.querySelector("#assign_" + subId), isHidden);
 };
 
 var refreshMatchupForms = function (isRow) {
-    const _isRow = isRow || _isRow();
+    var _isRowInternal = isRow == undefined ? _isRow() : isRow;
 
     const container = _getMatchupFormContainer();
 
-    const yourArmies = getRemainingArmies(_isRow);
-    const theirArmies = getRemainingArmies(!_isRow);
+    const yourArmies = getRemainingArmies(_isRowInternal);
+    const theirArmies = getRemainingArmies(!_isRowInternal);
     const remainingTables = getRemainingTables();
     if (yourArmies.length != theirArmies.length) {
         throw "Different army counts";
@@ -333,14 +401,16 @@ var refreshMatchupForms = function (isRow) {
     const showRemaining = remainingTables.length <= 4;
 
     if (showPairing) {
-        _refreshArmiesSelect(container.querySelector("#your_defender"), _isRow, yourArmies);
-        _refreshArmiesSelect(container.querySelector("#their_attacker_1"), !_isRow, theirArmies);
-        _refreshArmiesSelect(container.querySelector("#their_attacker_2"), !_isRow, theirArmies);
-        _refreshArmiesSelect(container.querySelector("#their_defender"), !_isRow, theirArmies);
-        _refreshArmiesSelect(container.querySelector("#your_attacker_1"), _isRow, yourArmies);
-        _refreshArmiesSelect(container.querySelector("#your_attacker_2"), _isRow, yourArmies);
+        _refreshArmiesSelect(container.querySelector("#your_defender"), _isRowInternal, yourArmies);
+        _refreshArmiesSelect(container.querySelector("#their_attacker_1"), !_isRowInternal, theirArmies);
+        _refreshArmiesSelect(container.querySelector("#their_attacker_2"), !_isRowInternal, theirArmies);
+        _refreshArmiesSelect(container.querySelector("#their_defender"), !_isRowInternal, theirArmies);
+        _refreshArmiesSelect(container.querySelector("#your_attacker_1"), _isRowInternal, yourArmies);
+        _refreshArmiesSelect(container.querySelector("#your_attacker_2"), _isRowInternal, yourArmies);
         _refreshTableSelect(container.querySelector("#your_table"), remainingTables);
         _refreshTableSelect(container.querySelector("#their_table"), remainingTables);
+        _emptyAttackerChoice(container.querySelector("#your_attacker_choice_1"));
+        _emptyAttackerChoice(container.querySelector("#their_attacker_choice_1"));
     }
     if (showRemaining) {
         _refreshTableSelect(container.querySelector("#rejected_attackers_table"), remainingTables);
