@@ -171,10 +171,12 @@ const initTeamNameEditForm = function() {
         }
         event.preventDefault();
 
+        startLoading();
         const isRow = _strToBool(form.dataset.is_row);
         const newName = form.querySelector('#new_team_name').value;
         const matchAttr = isRow ? 'row_team' : 'column_team';
         getData().match[matchAttr] = newName;
+        const newMatch = getData().match;
 
         // Update team names
         findTeamNameElement(isRow).textContent = newName;
@@ -184,6 +186,7 @@ const initTeamNameEditForm = function() {
         refreshTeamChoiceNames();
         // TODO: update other places
 
+        endLoading('matrix');
     });
 };
 
