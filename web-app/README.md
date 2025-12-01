@@ -28,16 +28,6 @@ Here is a description of attributes of the result of the `getData()` function, t
     - `row_army`: Index of the army on the _row_ side, if known
     - `col_army`: Index of the army on the _column_ side, if known
 
-* `defenders` stores the defender army attributes:
-
-    - `row`: the _row_ army index
-    - `column` : the _column_ army index
-
-* `attackers` stores the attacker candidates about the current assignment step. It contains:
-
-    - `rows`: is a list of 2 _row_ army indexes.
-    - `columns`: is a list of 2 _column_ army indexes.
-
 * `default_score` stores the default score
 
     - `min` : minimum estimated score (between 0 and 20)

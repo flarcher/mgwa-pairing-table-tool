@@ -4,6 +4,13 @@ const _defaultTable = (index) => { return { index: index, row_army: NO_ARMY_INDE
 
 const newTablesList = (tableCount) => Array.from(new Array(tableCount), (x, i) => _defaultTable(i));
 
+const fixTablesList = (tables, tableCount) => {
+    return Array.from(new Array(tableCount), (_, i) => {
+        var from = tables.length > i ? tables[i] : {};
+        return Object.assign(from, _defaultTable(i));
+    });
+};
+
 const getPairCount = (tables) => (tables || getData().tables).filter(_isAssigned).length;
 
 // Tells if an index is valid as a reference to an army

@@ -52,34 +52,6 @@ var initBadges = function () {
     });
 };
 
-// Triggered as soon as the teams changed
-/*var onNewTeams = function() {
-    allGetCalls([
-        apiUrl + 'match',
-        apiUrl + 'match/rows',
-        apiUrl + 'match/cols',
-        apiUrl + 'scores'
-    ],
-    jsonResults => {
-
-        // Assign data
-        getData().match      = jsonResults[0];
-        getData().row_armies = jsonResults[1];
-        getData().col_armies = jsonResults[2];
-        getData().scores     = jsonResults[3];
-        getData().tables     = newTablesList(jsonResults[0].team_member_count); // No table assigned yet
-        getData().attackers  = {
-                "rows"   : [],
-                "columns": []
-            }; // Not assigning yet
-        // ...
-    },
-    errors => {
-        errors.forEach(error => console.error("API call error: " + error));
-        errorHandler(errors[0]); // We only display the first error for simplicity
-    });
-};*/
-
 var teamNameInputValidation = function (thisInput, otherInput) {
     thisInput.addEventListener("change", event => {
         var validityState = event.target.validity;
@@ -101,14 +73,29 @@ var teamNameInputValidation = function (thisInput, otherInput) {
 var onNewState = function (json) {
     // Refresh the state
     getData().match = json.match;
-    getData().row_armies = json.row_armies.map(a => a.name);
-    getData().col_armies = json.col_armies.map(a => a.name);
+    const _readArmyName = (item, index) => {
+        var value;
+        if (typeof item === 'string') {
+            value = item;
+        }
+        else if (item.hasOwnProperty('name')) {
+            value = item.name;
+        } else {
+            return index.toString();
+        }
+        return value || index.toString();
+    };
+    getData().row_armies = json.row_armies.map(_readArmyName);
+    getData().col_armies = json.col_armies.map(_readArmyName);
     getData().scores = json.scores;
-    getData().tables = newTablesList(json.match.team_member_count); // No table assigned yet
-    getData().attackers = {
-        "rows": [],
-        "columns": []
-    }; // Not assignment yet
+    const tableCount = json.match.team_member_count;
+    var newTables = json.hasOwnProperty('tables') ? json.tables : [];
+    if (newTables.length > 0) {
+        newTables = fixTablesList(newTables, tableCount);
+    } else {
+        newTables = newTablesList(tableCount); // No table assigned yet
+    }
+    getData().tables = newTables;
 
     // Initialize the DOM
     initBadges();
@@ -158,6 +145,11 @@ var initMatchForm = function () {
     // Others inputs
     var teamSizeInput = form.querySelector("#team_size");
     var fileInput = form.querySelector("#matrix_file");
+    fileInput.addEventListener("change", (event) => {
+        newData = null;
+        const selectedFiles = event.target.files;
+        // TODO
+    }, false);
 
     // Submit listener
     form.addEventListener("submit", event => {
@@ -168,8 +160,9 @@ var initMatchForm = function () {
 
         const defaultScore = getScoreFromInputs(scoreMinInput, scoreMaxInput);
         getData().default_score = defaultScore;
-        const hasFile = fileInput.value.length > 0;
-        if (getData().offline || (!hasFile)) {
+
+        const selectedFiles = event.target.querySelector('input[type="file"]').files;
+        if (selectedFiles.length <= 0) {
             const armyCount = parseInt(teamSizeInput.value);
             const _getDefaultArmies = (isRow) => Array.from({ length: armyCount }, (x, i) => {
                 return { name: (i + 1).toString(), is_row: isRow, index: i };
@@ -184,18 +177,41 @@ var initMatchForm = function () {
                 col_armies: _getDefaultArmies(false),
                 scores: Array.from({ length: armyCount }, () => Array.from({ length: armyCount }, () => defaultScore))
             });
-        } else if (getData().offline && hasFile) {
-            alert("The reading of a file is not supported in offline mode");
-        } else if (! getData().offline) {
-            // In order to support Excel file reading
-            startLoading();
-            postFormCall(
-                getData().api_url + 'reset',
-                form,
-                json => onNewState(json),
-                json => errorHandler(json));
         } else {
-            console.error("Unsupported");
+            const file = selectedFiles[0];
+            const isFileJson = isFileJson(file);
+            if (isFileJson) {
+                // Reading of the local file in offline mode
+                startLoading();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const newData = JSON.parse(e.target.result);
+                    if (!newData) {
+                        errorHandler({ cause: "Parsing", message: "Unable to parse JSON file"})
+                    } else {
+                        onNewState(newData);
+                    }
+                };
+                reader.onerror = (e) => {
+                    errorHandler({ cause: "Read", message: "Failed to read JSON file"})
+                };
+                reader.readAsText(file);
+            } else if ((! getData().offline) && !isFileJson) {
+                // In order to support Excel file reading
+                startLoading();
+                postFormCall(
+                    getData().api_url + 'reset',
+                    form,
+                    json => onNewState(json),
+                    json => errorHandler(json));
+            } else if (getData().offline && !isFileJson) {
+                alert("Only JSON files are supported in offline mode");
+                return;
+            } else {
+                alert("Unexpected error");
+                console.error("Unsupported");
+                return;
+            }
         }
     });
 };

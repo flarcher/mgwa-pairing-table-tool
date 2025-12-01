@@ -336,3 +336,7 @@ const downloadJSON = function(jsonData, fileName = 'data.json') {
     element.click();
     document.body.removeChild(element);
 };
+
+var isFileJson = function(file) {
+    return (file.type == "application/json") || (file.name.toLowerCase().endsWith(".json"));
+}
