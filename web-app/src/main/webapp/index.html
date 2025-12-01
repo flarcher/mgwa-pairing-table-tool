@@ -46,23 +46,32 @@
       <div id="init">
         <form>
           <fieldset>
-            <legend>Team names</legend>
+            <legend>Upload your scores</legend>
+            <div class="hint">You can provide either an Excel file or a JSON file. See <a href="#" onclick="toExportSection();">the download section</a>.</div>
             <div>
-              <label for="team_row_name">Rows</label>
+              <label for="matrix_file" class="file-label">Matrix file</label>
+              <input type="file" id="matrix_file" name="file" accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json" />
+            </div>
+            <div>
+              <a href="#" id="unselect_file" class="hidden">Unselect</a>
+            </div>
+          </fieldset>
+          <hr class="or">
+          <fieldset>
+            <legend>Create a new score matrix</legend>
+            <div>
+              <label for="team_row_name">Team on rows</label>
               <input id="team_row_name" name="rows_team" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" value="Rows-Team" required autofocus/>
             </div>
             <div>
-              <label for="team_col_name">Columns</label>
+              <label for="team_col_name">Team on columns</label>
               <input id="team_col_name" name="cols_team" type="text" minlength="1" maxlength="25" pattern="^[0-9a-zA-Z \-_]+$" value="Columns-Team" required/>
             </div>
-          </fieldset>
-          <fieldset>
-            <legend>Scores</legend>
-            <div class="hint">Without a file, all scores will have a default value</div>
             <div>
               <label for="team_size">Team size</label>
               <input id="team_size" name="size" type="number" step="1" min="3" max="10" value="8" />
             </div>
+            <div class="hint">Without a file, all scores will have a default value</div>
             <div>
               <span class="left">Default score</span>
               <span class="right score" id="score_def"></span>
@@ -74,12 +83,6 @@
             <div>
               <label for="def_score_max">Maximum</label>
               <input id="def_score_max" name="maximum" type="number" step="1" min="0" max="20" value="20" />
-            </div>
-            <hr class="or">
-            <div class="hint">You can provide either an Excel file or a JSON file. See <a href="#" onclick="toExportSection();">the download section</a>.</div>
-            <div>
-              <label for="matrix_file" class="file-label">Matrix file</label>
-              <input type="file" id="matrix_file" name="file" accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json" />
             </div>
           </fieldset>
           <input type="submit" value="Reset pairing system"/>
@@ -215,7 +218,6 @@
         <div class="hint">These files can be used in order to reset the data later on. See <a href="#" onclick="toInitSection();">the reset form</a>.</div>
         <!--a class="download type-json" onclick="downloadJsonState();" download="data.json">Download matrix as JSON</a>
         <a class="download type-xlsx" onclick="downloadXlsxState();" download="matrix.xlsx">Download matrix in Excel format</a-->
-        <div class="hint">The JSON Web-app data (below) can not be used for import. This is provided for information only.</div>
         <a class="download type-js" onclick="downloadWebState();" download="webapp-data.json">Download JSON web-app state</a>
       </div>
 

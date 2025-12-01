@@ -122,6 +122,7 @@ em, .name {
 	color: grey;
 	padding: 4px 0 3px 18px;
 	width: auto;
+	margin: 20px 0 5px 0;
 }
 .hint:before {
 	content: "🛈";
@@ -246,7 +247,7 @@ form div {
 form hr {
 	position: relative;
 	clear: both;
-	margin-top: 30px;
+	margin-top: 20px;
 	overflow: visible;
 }
 form hr.or:after {
@@ -263,6 +264,11 @@ form div > label {
 }
 form div > input {
 	float: right;
+}
+form div > a {
+	font-size: 10px;
+	font-variant: normal;
+	text-transform: none;
 }
 form input[type = "number"] {
 	text-align: right;

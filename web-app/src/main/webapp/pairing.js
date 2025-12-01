@@ -63,14 +63,16 @@ var _isRow = (teamChoice) => {
 
 var refreshTeamChoiceNames = function () {
     var teamChoice = _getTeamChoice();
-    var data = getData();
     emptyElement(teamChoice);
-    [data.match.row_team, data.match.column_team].forEach((name, index) => {
-        let option = document.createElement('option');
-        option.value = index == 0 ? "row" : "col";
-        option.textContent = name;
-        teamChoice.appendChild(option);
-    });
+    var data = getData();
+    if (data.match) { // Can be null during init
+        [data.match.row_team, data.match.column_team].forEach((name, index) => {
+            let option = document.createElement('option');
+            option.value = index == 0 ? "row" : "col";
+            option.textContent = name;
+            teamChoice.appendChild(option);
+        });
+    }
     return teamChoice;
 };
 
@@ -145,6 +147,9 @@ var _initSelect = (thisSelect, othersSelect) => {
             event.target.setCustomValidity(UNDEFINED_VALIDITY_MESSAGE);
         }
     });
+};
+
+var _updateSelect = (thisSelect) => {
     if (thisSelect.value == UNDEFINED_OPTION_VALUE) {
         thisSelect.setCustomValidity(UNDEFINED_VALIDITY_MESSAGE);
     }
@@ -157,10 +162,33 @@ var _initSelects = (selects) => {
     });
 };
 
+var _updateSelects = (selects) => {
+    selects.forEach((select) => _updateSelect(select));
+};
+
 var _getArmyName = (isRow, index) => {
     const data = getData();
     const army_names = isRow ? data.row_armies : data.col_armies;
     return army_names[index];
+};
+
+const _updateRadioLabel = (isYours, yourAreRows, select, input, allSelects, allInputs, hintElement) => {
+    const radioDiv = input.parentElement;
+    const radioLabel = radioDiv.querySelector('label');
+    const selectValue = select.value
+    if (selectValue != UNDEFINED_OPTION_VALUE) {
+        if (allInputs.filter((e, i) => i != index).every(e => !e.checked)) {
+            input.checked = true;
+        }
+    }
+    var _isRow = isYours ? yourAreRows : !yourAreRows;
+    if (selectValue != UNDEFINED_OPTION_VALUE) {
+        radioLabel.textContent = _getArmyName(_isRow, parseInt(selectValue));
+    } else {
+        radioLabel.textContent = UNDEFINED_OPTION_NAME;
+    }
+    switchHidden(radioDiv, selectValue == UNDEFINED_OPTION_VALUE);
+    switchHidden(hintElement, !allSelects.every(s => s.value == UNDEFINED_OPTION_VALUE));
 };
 
 var _initAttackerChoice = (isYours, selects, radioInputs, hintElement) => {
@@ -170,30 +198,22 @@ var _initAttackerChoice = (isYours, selects, radioInputs, hintElement) => {
     const scope = this;
     selects.forEach((select, index, all) => {
         const radioInput = radioInputs[index];
-        const radioDiv = radioInput.parentElement;
-        const radioLabel = radioDiv.querySelector('label');
-        const updateRadioLabel = (selectValue) => {
-            if (selectValue != UNDEFINED_OPTION_VALUE) {
-                if (radioInputs.filter((e, i) => i != index).every(e => !e.checked)) {
-                    radioInput.checked = true;
-                }
-            }
-            var yourAreRows = scope._isRow();
-            var _isRow = isYours ? yourAreRows : !yourAreRows;
-            if (selectValue != UNDEFINED_OPTION_VALUE) {
-                radioLabel.textContent = _getArmyName(_isRow, parseInt(selectValue));
-            } else {
-                radioLabel.textContent = UNDEFINED_OPTION_NAME;
-            }
-            switchHidden(radioDiv, selectValue == UNDEFINED_OPTION_VALUE);
-            switchHidden(hintElement, !all.every(s => s.value == UNDEFINED_OPTION_VALUE));
-        };
         select.addEventListener("change", event => {
-            updateRadioLabel(event.target.value);
+            _updateRadioLabel(isYours, scope._isRow(), event.target, radioInput, all, radioInputs, hintElement);
         });
-        updateRadioLabel(select.value);
     });
 };
+
+var _updateAttackerChoice = (isYours, selects, radioInputs, hintElement) => {
+    if (selects.length != radioInputs.length) {
+        throw "Same length required";
+    }
+    selects.forEach((select, index, all) => {
+        _updateRadioLabel(isYours, _isRow(), select, radioInputs[index], all, radioInputs, hintElement);
+    });
+}
+
+var _update
 
 var _emptyAttackerChoice = (radioInput) => {
     const fieldset = radioInput.parentElement.parentElement;
@@ -250,8 +270,6 @@ var initMatchupForms = () => {
         let _isRow = scope._isRow(event.target);
         refreshMatchupForms(_isRow);
     });
-    const initialIsRow = true;
-    refreshMatchupForms(initialIsRow);
 
     let container = _getMatchupFormContainer();
 
@@ -346,6 +364,45 @@ var initMatchupForms = () => {
             }
         });
     });
+};
+
+var updateMatchupForms = () => {
+
+    let container = _getMatchupFormContainer();
+
+    // Your armies
+    const yourDefenderSelect = container.querySelector("#your_defender");
+    const yourAttackSelect1 = container.querySelector("#your_attacker_1");
+    const yourAttackSelect2 = container.querySelector("#your_attacker_2");
+    _updateSelects([yourDefenderSelect, yourAttackSelect1, yourAttackSelect2]);
+
+    // Theirs armies
+    const theirDefenderSelect = container.querySelector("#their_defender");
+    const theirAttackSelect1 = container.querySelector("#their_attacker_1");
+    const theirAttackSelect2 = container.querySelector("#their_attacker_2");
+    _updateSelects([theirDefenderSelect, theirAttackSelect1, theirAttackSelect2]);
+
+    // Tables
+    const yourTable = container.querySelector("#your_table");
+    const theirTable = container.querySelector("#their_table");
+    const rejectedTable = container.querySelector("#rejected_attackers_table");
+    _updateSelects([yourTable, theirTable, rejectedTable])
+
+    // Radio buttons
+    const theirAttackSelects = [theirAttackSelect1, theirAttackSelect2];
+    const radioYourChoice1 = container.querySelector('#your_attacker_choice_1');
+    const radioYourChoice2 = container.querySelector('#your_attacker_choice_2');
+    const radioYourChoices = [radioYourChoice1, radioYourChoice2];
+    const defenseForm = _getSubForm('defense');
+    const defenseRadioHintElement = defenseForm.querySelector("div.hint");
+    _updateAttackerChoice(false, theirAttackSelects, radioYourChoices, defenseRadioHintElement);
+    const yourAttackSelects = [yourAttackSelect1, yourAttackSelect2];
+    const radioTheirChoice1 = container.querySelector('#their_attacker_choice_1');
+    const radioTheirChoice2 = container.querySelector('#their_attacker_choice_2');
+    const radioTheirChoices = [radioTheirChoice1, radioTheirChoice2];
+    const attackForm = _getSubForm('attack');
+    const attackRadioHintElement = attackForm.querySelector("div.hint");
+    _updateAttackerChoice(true, yourAttackSelects, radioTheirChoices, attackRadioHintElement);
 };
 
 var _refreshArmiesSelect = (select, isRow, indexes) => {

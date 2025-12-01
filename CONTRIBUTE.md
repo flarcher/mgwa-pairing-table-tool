@@ -11,6 +11,16 @@ Here are details about different modes:
 
 This mode can be packaged as a ZIP archive.
 
+The source code is restricted to [the web-app-src folder](./web-app-src).
+
+It does not require any external service/resource (neither on the machine nor on the internet).
+
+### Fast run
+
+Open the file [index.html](./web-app-src/index.html) with your browser.
+
+### From the archive
+
 For any use, open the `index.html` of the archive using a web browser (having the other files in the same folder).
 
 Here is [the source folder](web-app/src/main/webapp/) and [the packaging script](./pack-web.sh).

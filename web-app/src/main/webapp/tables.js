@@ -158,8 +158,8 @@ const initTableAssignmentForm = () => {
     let rowArmySelect  = section.querySelector('#row_select');
     let colArmySelect  = section.querySelector('#col_select');
 
-    updateTableAssignmentTeamNames(sectionForm);
-    updateTableAssignmentOptions(rowArmySelect, colArmySelect);
+    // updateTableAssignmentTeamNames(sectionForm);
+    // updateTableAssignmentOptions(rowArmySelect, colArmySelect);
 
     // Update the score display after each 
     [ rowArmySelect, colArmySelect ].forEach(select => {
@@ -176,6 +176,16 @@ const initTableAssignmentForm = () => {
         _assignTable(sectionForm.dataset.table, rowArmySelect.value, colArmySelect.value);
         switchNavTab(null, 'tables');
     });
+};
+
+const updateTableAssignment = () => {
+    let section        = document.getElementById('assign_table');
+    let sectionForm    = section.querySelector('form');
+    let rowArmySelect  = section.querySelector('#row_select');
+    let colArmySelect  = section.querySelector('#col_select');
+
+    updateTableAssignmentTeamNames(sectionForm);
+    updateTableAssignmentOptions(rowArmySelect, colArmySelect);
 };
 
 const displayTableIndex = (indexAsStr) => (parseInt(indexAsStr) + 1).toFixed();

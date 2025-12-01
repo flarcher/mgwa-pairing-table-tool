@@ -36,6 +36,14 @@ const switchHidden = (element, isHidden) => {
     switchClass(element, 'hidden', isHidden);
 };
 
+const switchDisabled = (element, isDisabled) => {
+    if (isDisabled) {
+        element.setAttribute('disabled', '');
+    } else {
+        element.removeAttribute('disabled');
+    }
+}
+
 const getParentData = (startingElement, dataSetKey) => {
     var element = startingElement;
     while (element != null) {

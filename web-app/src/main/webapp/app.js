@@ -46,7 +46,7 @@ var isBrowserSupported = function () {
     return window.fetch && Promise.all && window.structuredClone;
 };
 
-var initBadges = function () {
+var resetBadges = function () {
     document.querySelectorAll('header .badge').forEach(b => {
         b.classList.remove('hidden');
     });
@@ -97,18 +97,17 @@ var onNewState = function (json) {
     }
     getData().tables = newTables;
 
-    // Initialize the DOM
-    initBadges();
-    initScoreEditForm();
-    initTeamNameEditForm();
-    initArmyNameEditForm();
-    initTableAssignmentForm();
-    initMatchupForms();
     // Refresh the DOM
+    updateTableAssignment();
+    refreshTeamChoiceNames();
+    refreshMatchupForms(true);
+    updateMatchupForms();
+    resetBadges();
     refreshMatchForm();
     refreshMatrix();
     refreshTables();
     refreshBadges();
+
     // Display relevant DOM elements
     var shownSection = switchSection("ready");
     setupNavBar(shownSection);
@@ -145,13 +144,31 @@ var initMatchForm = function () {
     // Others inputs
     var teamSizeInput = form.querySelector("#team_size");
     var fileInput = form.querySelector("#matrix_file");
+    var fileRemove = form.querySelector("#unselect_file");
+
+    // Handle the states "reset with default scores" or "uploads a file"
+    const resetInputs = [ rowTeamNameInput, colTeamNameInput, scoreMinInput, scoreMaxInput, teamSizeInput ];
+    const _switchHidden = switchHidden;
+    const _switchDisabled = switchDisabled;
+    const switchFormPart = (isFromFile) => {
+        _switchHidden(fileRemove, !isFromFile);
+        resetInputs.forEach((input) => { _switchDisabled(input, isFromFile); });
+    };
     fileInput.addEventListener("change", (event) => {
-        newData = null;
         const selectedFiles = event.target.files;
-        // TODO
+        if (selectedFiles.length > 0) {
+            switchFormPart(true);
+            _switchHidden(fileRemove, false);
+        }
     }, false);
+    fileRemove.addEventListener("click", (event) => {
+        switchFormPart(false);
+        _switchHidden(event.target, true);
+        fileInput.value = null;
+    });
 
     // Submit listener
+    const _isFileJson = isFileJson;
     form.addEventListener("submit", event => {
         if (!form.checkValidity()) {
             return;
@@ -179,7 +196,7 @@ var initMatchForm = function () {
             });
         } else {
             const file = selectedFiles[0];
-            const isFileJson = isFileJson(file);
+            const isFileJson = _isFileJson(file);
             if (isFileJson) {
                 // Reading of the local file in offline mode
                 startLoading();
@@ -234,8 +251,14 @@ window.addEventListener("load", function () {
 
     // Checking API status
     const _start = () => {
-        // Towards the init screen
+        // Define event listeners
+        initScoreEditForm();
+        initTeamNameEditForm();
+        initArmyNameEditForm();
+        initTableAssignmentForm();
+        initMatchupForms();
         initMatchForm();
+        // Towards the init screen
         var shownSection = switchSection("ready");
         switchNavTab(shownSection, 'init');
     };
